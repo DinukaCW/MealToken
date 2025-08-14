@@ -65,8 +65,7 @@
               "RelativeToolTip": "src\\MealToken.API\\Program.cs",
               "ViewState": "AgIAABUAAAAAAAAAAAAAABIAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-14T07:13:22.182Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-14T07:13:22.182Z"
             },
             {
               "$type": "Document",
@@ -78,13 +77,12 @@
               "RelativeToolTip": "..\\..\\..\\Program Files\\dotnet\\sdk\\9.0.300\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
               "ViewState": "AgIAAPsAAAAAAAAAAAAUwAkBAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2025-08-14T07:10:58.329Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-14T07:10:58.329Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "MealToken.Infrastructure",
+              "Title": "MealToken.Infrastructure.csproj",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj",
               "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj",
@@ -123,7 +121,7 @@
             {
               "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "MealToken.Domain",
+              "Title": "MealToken.Domain.csproj",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\MealToken.Domain.csproj",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\MealToken.Domain.csproj",
               "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\MealToken.Domain.csproj",
