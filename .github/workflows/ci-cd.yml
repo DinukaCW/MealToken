@@ -1,0 +1,77 @@
+name: .NET CI/CD
+
+on:
+  push:
+    branches: 
+      - main
+      - development
+  pull_request:
+    branches: 
+      - main
+      - development
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        cache: true
+
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    # Check for package vulnerabilities
+    - name: Security scan dependencies
+      run: |
+        dotnet list package --vulnerable --include-transitive
+
+  # Development branch specific checks
+  development-checks:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/development'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Code formatting check
+      run: |
+        dotnet tool install -g dotnet-format
+        dotnet format --verify-no-changes --verbosity diagnostic
+
+  # Main branch specific checks
+  main-checks:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    # Add additional production checks here
+    - name: Production readiness check
+      run: |
+        echo "Running production readiness checks..."
+        # Add your production deployment checks here
