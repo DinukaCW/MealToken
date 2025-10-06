@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MealToken.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,8 @@ namespace MealToken.Domain.Entities
 		public bool IsActive { get; set; }
 		public int ReceiptHeightPixels { get; set; }
 		public int ReceiptWidthPixels { get; set; }
+		public DeviceShift DeviceShift {  get; set; }
 
 	}
+	
 }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MealToken.Infrastructure.Repositories.BusinessRepository;
 
 namespace MealToken.Infrastructure.Repositories
 {
@@ -279,18 +280,22 @@ namespace MealToken.Infrastructure.Repositories
 				.Select(s => s.ClientDeviceId)
 				.FirstOrDefaultAsync();
         }
-		public async Task<MealConsumption?> GetMealCosumptionAsync(int mealTypeId, int personId, DateOnly date, TimeOnly time)
-		{
-			var timeWindowStart = time.AddHours(-1.5);
-			var timeWindowEnd = time.AddHours(1.5);
+        public async Task<DeviceShift?> GetDeviceShiftBySerialNoAsync(string serialNo)
+        {
+            return await _tenantContext.ClientDevice
+                .Where(s => s.SerialNo == serialNo)
+                .Select(s => s.DeviceShift)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<MealConsumption?> GetMealConsumptionAsync(int mealTypeId, int personId, DateOnly date)
+        {
 
-			// 2. Query the MealConsumption table
-			return await _tenantContext.MealConsumption
-				.Where(s => s.MealTypeId == mealTypeId && s.PersonId == personId)
-				.Where(s => s.Date == date)
-				.Where(s => s.Time >= timeWindowStart && s.Time <= timeWindowEnd)
-				.FirstAsync();
-		}
+            return await _tenantContext.MealConsumption
+                .Where(s => s.MealTypeId == mealTypeId && s.PersonId == personId)
+                .Where(s => s.Date == date)
+                .FirstOrDefaultAsync();
+        }
+
 
 
         public async Task<MealConsumption?> GetMealConsumptionInLast13HoursAsync(int personId)
@@ -336,5 +341,37 @@ namespace MealToken.Infrastructure.Repositories
                 .Where(p => p.MealConsumptionId == consumptionId)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task DeleteSchedulePersonsByIdsAsync(List<int> assignmentIds)
+        {
+            if (assignmentIds == null || !assignmentIds.Any())
+                throw new ArgumentException("No assignment IDs provided", nameof(assignmentIds));
+
+            var schedulePersons = await _tenantContext.SchedulePerson
+                .Where(p => assignmentIds.Contains(p.ShedulePersonId))
+                .ToListAsync();
+
+            if (schedulePersons.Any())
+            {
+                _tenantContext.SchedulePerson.RemoveRange(schedulePersons);
+                await _tenantContext.SaveChangesAsync();
+            }
+        }
+        public async Task DeleteScheduleDatesByIdsAsync(List<int> dateIds)
+        {
+            if (dateIds == null || !dateIds.Any())
+                throw new ArgumentException("No date IDs provided", nameof(dateIds));
+
+            var scheduleDates = await _tenantContext.ScheduleDate
+                .Where(d => dateIds.Contains(d.SheduleDateId))
+                .ToListAsync();
+
+            if (scheduleDates.Any())
+            {
+                _tenantContext.ScheduleDate.RemoveRange(scheduleDates);
+                await _tenantContext.SaveChangesAsync();
+            }
+        }
+
     }
 }

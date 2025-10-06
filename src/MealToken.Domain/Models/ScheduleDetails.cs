@@ -23,13 +23,15 @@ namespace MealToken.Domain.Models
 		public SupplierD? Supplier { get; set; }
 
 	}
-	public class SubMealTypeD
-	{
-		public int MealSubTypeId { get; set; }
-		public string MealSubTypeName { get; set; }
-		public SupplierD Supplier { get; set; }
-	}
-	public class  PeopleD
+    public class SubMealTypeD
+    {
+        public int MealSubTypeId { get; set; }
+        public string MealSubTypeName { get; set; }
+		public int MealTypeId { get; set; }
+        public SupplierD? Supplier { get; set; }
+    }
+
+    public class  PeopleD
 	{
 		public int PersonId { get; set; }
 		public string FullName { get; set; }

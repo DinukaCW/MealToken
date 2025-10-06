@@ -49,13 +49,16 @@ namespace MealToken.Application.Interfaces
 		Task<List<ScheduleDate>> GetListofShedulesforDateAsync(DateOnly date);
 		Task<List<ScheduleMeal>> GetListofShedulesforTimeAsync(TimeOnly time);
         Task<int> GetDeviceBySerialNoAsync(string serialNo);
-		Task<MealConsumption?> GetMealCosumptionAsync(int mealTypeId, int personId, DateOnly date, TimeOnly time);
+		Task<MealConsumption?> GetMealConsumptionAsync(int mealTypeId, int personId, DateOnly date);
         Task<MealConsumption> GetMealConsumptionInLast13HoursAsync(int personId);
 		Task<List<MealConsumption>> GetMealConsumptionByDateAsync(int personId, DateOnly date);
 		Task CreateMealConsumptionAsync(MealConsumption mealConsumption);
 		Task UpdateMealConsumptionAsync(MealConsumption mealConsumption);
 		Task<PayStatusByShift> GetPayPolicyAsync(Shift shift, int mealtypeId);
 		Task<MealConsumption> GetMealConsumptionByIdAsync(int consumptionId);
+		Task<DeviceShift?> GetDeviceShiftBySerialNoAsync(string serialNo);
+		Task DeleteSchedulePersonsByIdsAsync(List<int> assignmentIds);
+		Task DeleteScheduleDatesByIdsAsync(List<int> dateIds);
 
     }
 }

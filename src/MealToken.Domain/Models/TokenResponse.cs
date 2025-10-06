@@ -10,10 +10,14 @@ namespace MealToken.Domain.Models
     {
         public DateOnly Date {  get; set; }
         public TimeOnly Time { get; set; }
+        public string MealType { get; set; }
         public string Shift { get; set; }
         public string EmpNo { get; set; }
+        public string EmpName { get; set; }
+        public string Gender { get; set; }
         public string Department { get; set; }
         public string TokenType { get; set; }
+        public decimal Contribution { get; set; }
         public int MealConsumptionId { get; set; }
     }
 }

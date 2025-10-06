@@ -251,7 +251,7 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpPost("AddMealType")]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> AddMealType(string mealTypeName, string description)
 		{
 			try
@@ -273,7 +273,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdateMealType")]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> UpdateMealType(int mealTypeId, [FromBody] MealTypeUpdateDto mealTypeUpdateDto)
 		{
 			try
@@ -295,7 +295,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpDelete("DeleteMealType")]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> DeleteMealType(int mealTypeId)
 		{
 			try
@@ -315,7 +315,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpGet("GetAddOns")]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> GetMealAddOns()
 		{
 			try
@@ -345,7 +345,7 @@ namespace MealToken.API.Controllers
 
 
 		[HttpGet("GetMealTypes")]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> GetMealTypeList()
 		{
 			try

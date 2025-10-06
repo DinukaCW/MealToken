@@ -54,7 +54,6 @@ namespace MealToken.Infrastructure.Repositories
 		{
 			return await _tenantContext.Person
 				.Where(e => e.IsActive)
-				.OrderBy(e => e.PersonNumber)
 				.ToListAsync();
 		}
 

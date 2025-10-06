@@ -10,34 +10,33 @@ namespace MealToken.Domain.Models
 {
 	public class MealTypeUpdateDto
 	{
-		[Required(ErrorMessage = "Type name is required.")]
-		[StringLength(100, ErrorMessage = "Type name cannot exceed 100 characters.")]
-		public string TypeName { get; set; } // e.g., Breakfast, Lunch, Dinner
+        // The service layer handles name conflict/change. Remove [Required] for partial updates.
+        [StringLength(100, ErrorMessage = "Type name cannot exceed 100 characters.")]
+        public string? TypeName { get; set; } // CHANGED to nullable string
 
-		[StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
-		public string Description { get; set; }
+        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
+        public string? Description { get; set; } // CHANGED to nullable string
 
-		// Accept only "yesterday", "today", or "tomorrow"
-		public string? TokenIssueStartDate { get; set; }
-		public string? TokenIssueEndDate { get; set; }
+        // Time/Date fields remain nullable for optional updates
+        public string? TokenIssueStartDate { get; set; }
+        public string? TokenIssueEndDate { get; set; }
+        public TimeOnly? TokenIssueStartTime { get; set; }
+        public TimeOnly? TokenIssueEndTime { get; set; }
+        public string? MealTimeStartDate { get; set; }
+        public string? MealTimeEndDate { get; set; }
+        public TimeOnly? MealTimeStartTime { get; set; }
+        public TimeOnly? MealTimeEndTime { get; set; }
 
-		public TimeOnly? TokenIssueStartTime { get; set; }
-		public TimeOnly? TokenIssueEndTime { get; set; }
+        public bool IsFunctionKeysEnable { get; set; } = false;
+        public bool IsAddOnsEnable { get; set; }
 
-		public string? MealTimeStartDate { get; set; } // yesterday, today, tomorrow
-		public string? MealTimeEndDate { get; set; }
+        // CRITICAL CHANGE: Must be nullable to support partial updates (send null to skip list change)
+        public List<MealSubTypeDto>? SubTypes { get; set; } 
 
-		public TimeOnly? MealTimeStartTime { get; set; }
-		public TimeOnly? MealTimeEndTime { get; set; }
+        public List<MealAddOns>? AddOns { get; set; } 
 
-		public bool IsFunctionKeysEnable { get; set; } = false;
-
-		public bool IsAddOnsEnable { get; set; }
-		public List<MealSubTypeDto> SubTypes { get; set; }
-		public List<MealAddOns>? AddOns { get; set; }
-
-		// Custom validation for "esterday", "today", "tomorrow"
-		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        // Custom validation for "esterday", "today", "tomorrow"
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
 		{
 			// Time validation
 			if (TokenIssueStartTime.HasValue && TokenIssueEndTime.HasValue &&
@@ -56,7 +55,7 @@ namespace MealToken.Domain.Models
 			}
 
 			// SubTypes duplicate validation
-			if (IsFunctionKeysEnable && SubTypes.Any())
+			if (IsFunctionKeysEnable && SubTypes != null && SubTypes.Any())
 			{
 				var duplicateKeys = SubTypes
 					.Where(st => !string.IsNullOrWhiteSpace(st.Functionkey))
@@ -84,7 +83,7 @@ namespace MealToken.Domain.Models
 			}
 
 			// AddOns duplicate validation
-			if (IsAddOnsEnable && AddOns.Any())
+			if (IsAddOnsEnable && AddOns != null && AddOns.Any())
 			{
 				var duplicateKeys = AddOns
 					.Where(a => !string.IsNullOrWhiteSpace(a.Functionkey))

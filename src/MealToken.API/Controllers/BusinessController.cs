@@ -575,8 +575,8 @@ namespace MealToken.API.Controllers
                 return StatusCode(500, new { message = "An unexpected server error occurred." });
             }
         }
-        [HttpPatch("TokenPrinted")]
-        public async Task<IActionResult> UpdateMealConsumptionStatus(int mealConsumptionId, bool status)
+        [HttpPost("TokenPrinted")]
+        public async Task<IActionResult> UpdateMealConsumptionStatus([FromBody] TokenPrintRequest tokenPrintRequest)
         {
             // Note: Using [HttpPatch] is slightly more accurate than [HttpPut] for updating a single field (status).
 
@@ -587,9 +587,15 @@ namespace MealToken.API.Controllers
 
             try
             {
+                if (!Request.Headers.TryGetValue("ClientID", out var clientIdHeader) ||
+                    !int.TryParse(clientIdHeader.FirstOrDefault(), out int clientId))
+                {
+                    return BadRequest(new { message = "ClientID header is required and must be a valid integer." });
+                }
+                
                 // Call the service layer method to update the record
                 var serviceResult = await _businessService.UpdateMealConsumption(
-                    mealConsumptionId,status);
+                   tokenPrintRequest.MealConsumptionId,tokenPrintRequest.Status,tokenPrintRequest.JobStatus);
 
                 if (serviceResult.Success)
                 {
@@ -604,7 +610,7 @@ namespace MealToken.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating meal consumption ID: {Id}", mealConsumptionId);
+                _logger.LogError(ex, "Error updating meal consumption ID: {Id}", tokenPrintRequest.MealConsumptionId);
                 return StatusCode(500, new { message = "An unexpected error occurred during consumption update." });
             }
         }
@@ -616,5 +622,12 @@ namespace MealToken.API.Controllers
 
             return int.Parse(userIdClaim);
         }
+        
+    }
+    public class TokenPrintRequest
+    {
+        public int MealConsumptionId { get; set; }
+        public bool Status { get; set; }
+        public string JobStatus { get; set; }
     }
 }

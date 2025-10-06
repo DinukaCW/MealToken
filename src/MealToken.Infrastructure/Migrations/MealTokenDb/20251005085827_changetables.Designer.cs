@@ -4,6 +4,7 @@ using MealToken.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealToken.Infrastructure.Migrations.MealTokenDb
 {
     [DbContext(typeof(MealTokenDbContext))]
-    partial class MealTokenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251005085827_changetables")]
+    partial class changetables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -426,11 +429,6 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("DeviceShift")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("IpAddress")
                         .IsRequired()
                         .HasMaxLength(45)
@@ -569,38 +567,17 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MealConsumptionId"));
 
-                    b.Property<decimal>("CompanyCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
                     b.Property<int>("DeviceId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DeviceSerialNo")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("EmployeeCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("JobStatus")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("MealCostId")
                         .HasColumnType("int");
 
                     b.Property<int>("MealTypeId")
                         .HasColumnType("int");
-
-                    b.Property<string>("MealTypeName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PayStatus")
                         .IsRequired()
@@ -610,22 +587,8 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                     b.Property<int>("PersonId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PersonName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<int>("SchduleId")
                         .HasColumnType("int");
-
-                    b.Property<string>("SchduleName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("SellingPrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("ShiftName")
                         .IsRequired()
@@ -634,14 +597,6 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
 
                     b.Property<int?>("SubTypeId")
                         .HasColumnType("int");
-
-                    b.Property<string>("SubTypeName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("SupplierCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int");

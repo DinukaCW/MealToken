@@ -703,8 +703,12 @@ namespace MealToken.Infrastructure.Persistence
 
 				entity.Property(e => e.ReceiptWidthPixels)
 					.HasDefaultValue(0);
+				entity.Property(e => e.DeviceShift)
+					.HasConversion<string>()
+					.HasMaxLength(50);
 
-				entity.HasOne<TenantInfo>()
+
+                entity.HasOne<TenantInfo>()
 				  .WithMany()
 				  .HasForeignKey(e => e.TenantId)
 				  .OnDelete(DeleteBehavior.NoAction);
@@ -938,74 +942,119 @@ namespace MealToken.Infrastructure.Persistence
                 entity.ToTable("MealConsumption");
                 entity.HasKey(e => e.MealConsumptionId);
 
+                // Basic required properties
                 entity.Property(e => e.TenantId)
-                    .IsRequired();
+                      .IsRequired();
 
                 entity.Property(e => e.PersonId)
-                    .IsRequired();
+                      .IsRequired();
+
+                entity.Property(e => e.PersonName)
+                      .HasMaxLength(200)
+                      .IsRequired();
 
                 entity.Property(e => e.Date)
-                    .IsRequired();
+                      .IsRequired();
 
                 entity.Property(e => e.Time)
-                    .IsRequired();
+                      .IsRequired();
+
+                entity.Property(e => e.SchduleId)
+                      .IsRequired();
+
+                entity.Property(e => e.SchduleName)
+                      .HasMaxLength(200)
+                      .IsRequired();
 
                 entity.Property(e => e.MealTypeId)
-                    .IsRequired();
+                      .IsRequired();
+
+                entity.Property(e => e.MealTypeName)
+                      .HasMaxLength(100)
+                      .IsRequired();
 
                 entity.Property(e => e.SubTypeId)
-                    .IsRequired(false);
+                      .IsRequired(false);
+
+                entity.Property(e => e.SubTypeName)
+                      .HasMaxLength(100)
+                      .IsRequired(false);
 
                 entity.Property(e => e.MealCostId)
-                    .IsRequired();
+                      .IsRequired();
 
+                // Cost properties
+                entity.Property(e => e.SupplierCost)
+                      .HasPrecision(10, 2)
+                      .IsRequired();
+
+                entity.Property(e => e.SellingPrice)
+                      .HasPrecision(10, 2)
+                      .IsRequired();
+
+                entity.Property(e => e.CompanyCost)
+                      .HasPrecision(10, 2)
+                      .IsRequired();
+
+                entity.Property(e => e.EmployeeCost)
+                      .HasPrecision(10, 2)
+                      .IsRequired();
+
+                // Device info
                 entity.Property(e => e.DeviceId)
-                    .IsRequired();
+                      .IsRequired();
 
+                entity.Property(e => e.DeviceSerialNo)
+                      .HasMaxLength(100)
+                      .IsRequired();
+
+                // Enums
                 entity.Property(e => e.ShiftName)
-                    .HasConversion<string>()
-                    .HasMaxLength(50) 
-                    .IsRequired();
+                      .HasConversion<string>()
+                      .HasMaxLength(50)
+                      .IsRequired();
 
                 entity.Property(e => e.PayStatus)
-                    .HasConversion<string>()
-                    .HasMaxLength(10) // e.g., 'free' or 'paid'
-                    .IsRequired();
+                      .HasConversion<string>()
+                      .HasMaxLength(10)
+                      .IsRequired();
 
                 entity.Property(e => e.TockenIssued)
-                    .IsRequired();
+                      .IsRequired();
 
+				entity.Property(e => e.JobStatus);
+
+                // Relationships (optional — if navigations exist)
                 entity.HasOne<TenantInfo>()
-                    .WithMany()
-                    .HasForeignKey(e => e.TenantId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                      .WithMany()
+                      .HasForeignKey(e => e.TenantId)
+                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne<Person>()
-                    .WithMany()
-                    .HasForeignKey(e => e.PersonId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                      .WithMany()
+                      .HasForeignKey(e => e.PersonId)
+                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne<MealType>()
-                    .WithMany()
-                    .HasForeignKey(e => e.MealTypeId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                      .WithMany()
+                      .HasForeignKey(e => e.MealTypeId)
+                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne<MealSubType>()
-                    .WithMany()
-                    .HasForeignKey(e => e.SubTypeId)
-                    .IsRequired(false) 
-                    .OnDelete(DeleteBehavior.NoAction);
+                      .WithMany()
+                      .HasForeignKey(e => e.SubTypeId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne<MealCost>()
-                    .WithMany()
-                    .HasForeignKey(e => e.MealCostId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                      .WithMany()
+                      .HasForeignKey(e => e.MealCostId)
+                      .OnDelete(DeleteBehavior.NoAction);
 
                 entity.HasOne<ClientDevice>()
-                    .WithMany()
-                    .HasForeignKey(e => e.DeviceId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
+                      .WithMany()
+                      .HasForeignKey(e => e.DeviceId)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
             modelBuilder.Entity<PayStatusByShift>(entity =>
             {

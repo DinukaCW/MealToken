@@ -24,8 +24,8 @@ namespace MealToken.Domain.Entities
 		public string? MealTimeEndDate { get; set; } // e.g., "14:00"
 		public TimeOnly? MealTimeStartTime { get; set; }
 		public TimeOnly? MealTimeEndTime { get; set; }
-		public bool? IsFunctionKeysEnable { get; set; }
-		public bool? IsAddOnsEnable { get; set; }
+		public bool IsFunctionKeysEnable { get; set; }
+		public bool IsAddOnsEnable { get; set; }
 		public DateTime? CreatedAt { get; set; }
 		public DateTime? UpdatedAt { get; set; }
 	}

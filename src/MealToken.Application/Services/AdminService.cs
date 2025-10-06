@@ -344,7 +344,7 @@ namespace MealToken.Application.Services
 					{
 						VisitorId = person.PersonId,
 						CardNumber = person.PersonNumber,
-						CardName = person.Name,
+						CardName = _encryption.DecryptData(person.Name),
 						VisitorType = person.PersonSubType,
 						DepartmentId = person.DepartmentId,
 						DepartmentName = await _adminData.GetDepartmentByIdAsync(person.DepartmentId),
@@ -720,136 +720,151 @@ namespace MealToken.Application.Services
 			}
 		}
 
-		public async Task<ServiceResult> UpdateMealTypeAsync(int mealTypeId, MealTypeUpdateDto mealTypeDto)
-		{
-			try
-			{
-				_logger.LogInformation("Updating meal type with ID: {MealTypeId}", mealTypeId);
+        public async Task<ServiceResult> UpdateMealTypeAsync(int mealTypeId, MealTypeUpdateDto mealTypeDto)
+        {
+            try
+            {
+                _logger.LogInformation("Updating meal type with ID: {MealTypeId}", mealTypeId);
 
-				var existingMealType = await _adminData.GetMealTypeByIdAsync(mealTypeId);
-				if (existingMealType == null)
-				{
-					return new ServiceResult
-					{
-						Success = false,
-						Message = "Meal type not found."
-					};
-				}
+                var existingMealType = await _adminData.GetMealTypeByIdAsync(mealTypeId);
+                if (existingMealType == null)
+                {
+                    return new ServiceResult { Success = false, Message = "Meal type not found." };
+                }
 
-				// Check if meal type name is being changed and if new name already exists
-				if (!string.Equals(existingMealType.TypeName, mealTypeDto.TypeName, StringComparison.OrdinalIgnoreCase))
-				{
-					var mealTypeWithName = await _adminData.GetMealTypeByNameAsync(mealTypeDto.TypeName);
-					if (mealTypeWithName != null && mealTypeWithName.MealTypeId != mealTypeId)
-					{
-						return new ServiceResult
-						{
-							Success = false,
-							Message = "Meal type name is already in use."
-						};
-					}
-				}
-				existingMealType.TokenIssueStartDate = mealTypeDto.TokenIssueStartDate;
-				existingMealType.TokenIssueEndDate = mealTypeDto.TokenIssueEndDate;
-				existingMealType.TokenIssueStartTime = mealTypeDto.TokenIssueStartTime;
-				existingMealType.TokenIssueEndTime = mealTypeDto.TokenIssueEndTime;
-				existingMealType.MealTimeStartDate = mealTypeDto.MealTimeStartDate;
-				existingMealType.MealTimeEndDate = mealTypeDto.MealTimeEndDate;
-				existingMealType.MealTimeStartTime = mealTypeDto.MealTimeStartTime;
-				existingMealType.MealTimeEndTime = mealTypeDto.MealTimeEndTime;
-				existingMealType.IsFunctionKeysEnable = mealTypeDto.IsFunctionKeysEnable;
-				existingMealType.IsAddOnsEnable = mealTypeDto.IsAddOnsEnable;
-				existingMealType.UpdatedAt = DateTime.UtcNow;
+                // 1. Validation for Name Change
+                // Check if meal type name is being changed and if new name already exists
+                if (!string.IsNullOrWhiteSpace(mealTypeDto.TypeName) &&
+                    !string.Equals(existingMealType.TypeName, mealTypeDto.TypeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    var mealTypeWithName = await _adminData.GetMealTypeByNameAsync(mealTypeDto.TypeName);
+                    if (mealTypeWithName != null && mealTypeWithName.MealTypeId != mealTypeId)
+                    {
+                        return new ServiceResult { Success = false, Message = "Meal type name is already in use." };
+                    }
+                    existingMealType.TypeName = mealTypeDto.TypeName;
+                }
 
-				await _adminData.UpdateMealTypeAsync(existingMealType);
+                // 2. Update Basic Properties (Fixed to include TypeName and Description)
+                // Only update if not null or whitespace (for TypeName and Description)
+                if (!string.IsNullOrWhiteSpace(mealTypeDto.TypeName))
+                {
+                    existingMealType.TypeName = mealTypeDto.TypeName;
+                }
+                // Allow null to clear description
+                if (mealTypeDto.Description != null)
+                {
+                    existingMealType.Description = mealTypeDto.Description;
+                }
 
-				// Handle SubTypes if function keys are enabled
-				if (mealTypeDto.IsFunctionKeysEnable)
-				{
-					await _adminData.DeleteMealSubTypesAsync(mealTypeId);
+                // Update all other scalar properties
+                existingMealType.TokenIssueStartDate = mealTypeDto.TokenIssueStartDate;
+                existingMealType.TokenIssueEndDate = mealTypeDto.TokenIssueEndDate;
+                existingMealType.TokenIssueStartTime = mealTypeDto.TokenIssueStartTime;
+                existingMealType.TokenIssueEndTime = mealTypeDto.TokenIssueEndTime;
+                existingMealType.MealTimeStartDate = mealTypeDto.MealTimeStartDate;
+                existingMealType.MealTimeEndDate = mealTypeDto.MealTimeEndDate;
+                existingMealType.MealTimeStartTime = mealTypeDto.MealTimeStartTime;
+                existingMealType.MealTimeEndTime = mealTypeDto.MealTimeEndTime;
 
-					// Add new sub types if any provided
-					if (mealTypeDto.SubTypes.Any())
-					{
-						var mealSubTypes = new List<MealSubType>();
+                // Update boolean flags
+                existingMealType.IsFunctionKeysEnable = mealTypeDto.IsFunctionKeysEnable;
+                existingMealType.IsAddOnsEnable = mealTypeDto.IsAddOnsEnable;
 
-						foreach (var subType in mealTypeDto.SubTypes)
-						{
-							mealSubTypes.Add(new MealSubType
-							{
-								TenantId = _tenantContext.TenantId.Value,
-								MealTypeId = mealTypeId,
-								SubTypeName = subType.SubTypeName,
-								Description = subType.Description,
-								Functionkey = subType.Functionkey.ToUpper(),
-								CreatedAt = DateTime.UtcNow,
-							});
-						}
+                existingMealType.UpdatedAt = DateTime.UtcNow;
 
-						await _adminData.CreateMealSubTypesAsync(mealSubTypes);
-						_logger.LogInformation("Created {SubTypeCount} meal sub types for meal type {MealTypeId}",
-											 mealSubTypes.Count, mealTypeId);
-					}
-				}
-				else
-				{
-					await _adminData.DeleteMealSubTypesAsync(mealTypeId);
-					_logger.LogInformation("Removed all sub types for meal type {MealTypeId} as function keys are disabled", mealTypeId);
-				}
+                await _adminData.UpdateMealTypeAsync(existingMealType);
 
-				// Handle AddOns if enabled
-				if (mealTypeDto.IsAddOnsEnable)
-				{
-					await _adminData.DeleteMealAddOnAsync(mealTypeId);
+           
+                if (mealTypeDto.SubTypes != null)
+                {
+                    // Delete all existing SubTypes first
+                    await _adminData.DeleteMealSubTypesAsync(mealTypeId);
 
-					// Add new add-ons if any provided
-					if (mealTypeDto.AddOns.Any())
-					{
-						var mealAddOns = new List<MealAddOn>();
+                    // Add new sub types if the provided list is NOT empty
+                    if (mealTypeDto.SubTypes.Any())
+                    {
+                        var mealSubTypes = new List<MealSubType>();
 
-						foreach (var addOn in mealTypeDto.AddOns)
-						{
-							mealAddOns.Add(new MealAddOn
-							{
-								TenantId = _tenantContext.TenantId.Value,
-								MealTypeId = mealTypeId,
-								AddOnName = addOn.AddonName,
-								AddOnType =addOn.AddonType,
-								Description = addOn.Description
-							});
-						}
+                        foreach (var subType in mealTypeDto.SubTypes)
+                        {
+                            mealSubTypes.Add(new MealSubType
+                            {
+                                TenantId = _tenantContext.TenantId.Value,
+                                MealTypeId = mealTypeId,
+                                SubTypeName = subType.SubTypeName,
+                                Description = subType.Description,
+                                Functionkey = subType.Functionkey.ToUpper(),
+                                CreatedAt = DateTime.UtcNow,
+                            });
+                        }
 
-						await _adminData.CreateMealAddOnAsync(mealAddOns);
-						_logger.LogInformation("Created {AddOnCount} meal add-ons for meal type {MealTypeId}",
-											 mealAddOns.Count, mealTypeId);
-					}
-				}
-				else
-				{
-					await _adminData.DeleteMealAddOnAsync(mealTypeId);
-					_logger.LogInformation("Removed all add-ons for meal type {MealTypeId} as add-ons are disabled", mealTypeId);
-				}
+                        await _adminData.CreateMealSubTypesAsync(mealSubTypes);
+                        _logger.LogInformation("Created {SubTypeCount} meal sub types for meal type {MealTypeId}",
+                                             mealSubTypes.Count, mealTypeId);
+                    }
+                    _logger.LogInformation("Meal sub-types updated successfully for meal type {MealTypeId}", mealTypeId);
+                }
 
-				_logger.LogInformation("Meal type updated successfully: {MealTypeId}", mealTypeId);
+                else if (!existingMealType.IsFunctionKeysEnable)
+                {
+                    await _adminData.DeleteMealSubTypesAsync(mealTypeId);
+                    _logger.LogInformation("Removed all sub types for meal type {MealTypeId} as function keys are disabled", mealTypeId);
+                }
+                if (mealTypeDto.AddOns != null)
+                {
+                    await _adminData.DeleteMealAddOnAsync(mealTypeId);
 
-				return new ServiceResult
-				{
-					Success = true,
-					Message = "Meal type updated successfully.",
-					ObjectId = mealTypeId
-				};
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error updating meal type with ID: {MealTypeId}", mealTypeId);
-				return new ServiceResult
-				{
-					Success = false,
-					Message = "Error updating meal type. Please try again."
-				};
-			}
-		}
-		public async Task<ServiceResult> GetMealTypeByIdAsync(int mealTypeId)
+                    // Add new add-ons if the provided list is NOT empty
+                    if (mealTypeDto.AddOns.Any())
+                    {
+                        var mealAddOns = new List<MealAddOn>();
+
+                        foreach (var addOn in mealTypeDto.AddOns)
+                        {
+                            mealAddOns.Add(new MealAddOn
+                            {
+                                TenantId = _tenantContext.TenantId.Value,
+                                MealTypeId = mealTypeId,
+                                AddOnName = addOn.AddonName,
+                                AddOnType = addOn.AddonType,
+                                Description = addOn.Description
+                            });
+                        }
+
+                        await _adminData.CreateMealAddOnAsync(mealAddOns);
+                        _logger.LogInformation("Created {AddOnCount} meal add-ons for meal type {MealTypeId}",
+                                             mealAddOns.Count, mealTypeId);
+                    }
+                    _logger.LogInformation("Meal add-ons updated successfully for meal type {MealTypeId}", mealTypeId);
+                }
+                // If IsAddOnsEnable is FALSE, delete all existing add-ons.
+                else if (!existingMealType.IsAddOnsEnable)
+                {
+                    await _adminData.DeleteMealAddOnAsync(mealTypeId);
+                    _logger.LogInformation("Removed all add-ons for meal type {MealTypeId} as add-ons are disabled", mealTypeId);
+                }
+
+                _logger.LogInformation("Meal type updated successfully: {MealTypeId}", mealTypeId);
+
+                return new ServiceResult
+                {
+                    Success = true,
+                    Message = "Meal type updated successfully.",
+                    ObjectId = mealTypeId
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating meal type with ID: {MealTypeId}", mealTypeId);
+                return new ServiceResult
+                {
+                    Success = false,
+                    Message = "Error updating meal type. Please try again."
+                };
+            }
+        }
+        public async Task<ServiceResult> GetMealTypeByIdAsync(int mealTypeId)
 		{
 			try
 			{
@@ -888,8 +903,8 @@ namespace MealToken.Application.Services
 					MealTimeStartTime = mealType.MealTimeStartTime,
 					MealTimeEndTime = mealType.MealTimeEndTime,
 
-					IsFunctionKeysEnable = mealType.IsFunctionKeysEnable ?? false,
-					IsAddOnsEnable = mealType.IsAddOnsEnable ?? false,
+					IsFunctionKeysEnable = mealType.IsFunctionKeysEnable,
+					IsAddOnsEnable = mealType.IsAddOnsEnable,
 
 					SubTypes = subTypes.Select(st => new MealSubTypeDto
 					{

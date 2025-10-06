@@ -318,8 +318,23 @@ namespace MealToken.Application.Services
 					{
 						continue;
 					}
+                    var mealCost = await _adminData.GetMealCostByDetailAsync(
+						   subMeal.SupplierId,
+						   mealType.MealTypeId,
+						   subType.MealSubTypeId
+					 );
 
-					if (!string.IsNullOrEmpty(subType.Functionkey))
+                    if (mealCost == null)
+                    {
+                        return new ServiceResult
+                        {
+                            Success = false,
+                            Message = $"Meal cost not configured for supplier ID {subMeal.SupplierId}, " +
+                                      $"meal type '{mealType.TypeName}', and sub type '{subType.SubTypeName}'. " +
+                                      $"Please configure the meal cost before creating this schedule."
+                        };
+                    }
+                    if (!string.IsNullOrEmpty(subType.Functionkey))
 					{
 						if (functionKeysUsed.Contains(subType.Functionkey))
 						{
@@ -575,132 +590,130 @@ namespace MealToken.Application.Services
 				   "Persons cannot have overlapping token issuing times on the same date.";
 		}
 
-		public async Task<ServiceResult> UpdateScheduleAsync(int scheduleId, SheduleDTO updateDto)
-		{
-			using var scope = _logger.BeginScope("Schedule Update - {CorrelationId}", Guid.NewGuid());
-			_logger.LogInformation("Starting schedule update. ScheduleId: {ScheduleId}, ScheduleName: {ScheduleName}",
-				scheduleId, updateDto?.ScheduleName);
+        public async Task<ServiceResult> UpdateScheduleAsync(int scheduleId, SheduleDTO updateDto)
+        {
+            using var scope = _logger.BeginScope("Schedule Update - {CorrelationId}", Guid.NewGuid());
+            _logger.LogInformation("Starting schedule update. ScheduleId: {ScheduleId}, ScheduleName: {ScheduleName}",
+                scheduleId, updateDto?.ScheduleName);
 
-			try
-			{
-				// Validate input
-				if (updateDto == null)
-				{
-					return new ServiceResult
-					{
-						Success = false,
-						Message = "Update data cannot be null"
-					};
-				}
+            try
+            {
+                // 1. Validate input and get existing schedule
+                if (updateDto == null)
+                {
+                    return new ServiceResult { Success = false, Message = "Update data cannot be null" };
+                }
 
-				// Get existing schedule
-				var existingSchedule = await _businessData.GetScheduleByIdAsync(scheduleId);
-				if (existingSchedule == null)
-				{
-					return new ServiceResult
-					{
-						Success = false,
-						Message = $"Schedule with ID {scheduleId} not found"
-					};
-				}
+                var existingSchedule = await _businessData.GetScheduleByIdAsync(scheduleId);
+                if (existingSchedule == null)
+                {
+                    return new ServiceResult { Success = false, Message = $"Schedule with ID {scheduleId} not found" };
+                }
 
-				// Validate name change if applicable
-				if (!string.IsNullOrWhiteSpace(updateDto.ScheduleName) &&
-					updateDto.ScheduleName != existingSchedule.SheduleName)
-				{
-					var nameConflict = await _businessData.GetSheduleByNameAsync(updateDto.ScheduleName);
-					if (nameConflict != null && nameConflict.SheduleId != scheduleId)
-					{
-						return new ServiceResult
-						{
-							Success = false,
-							Message = $"Schedule with name '{updateDto.ScheduleName}' already exists"
-						};
-					}
-				}
+                // 2. Validate name change if applicable
+                if (!string.IsNullOrWhiteSpace(updateDto.ScheduleName) &&
+                    updateDto.ScheduleName != existingSchedule.SheduleName)
+                {
+                    var nameConflict = await _businessData.GetSheduleByNameAsync(updateDto.ScheduleName);
+                    if (nameConflict != null && nameConflict.SheduleId != scheduleId)
+                    {
+                        return new ServiceResult { Success = false, Message = $"Schedule with name '{updateDto.ScheduleName}' already exists" };
+                    }
+                }
 
-				// Update basic schedule properties
-				await UpdateScheduleProperties(existingSchedule, updateDto);
+                // 3. Update basic schedule properties
+                await UpdateScheduleProperties(existingSchedule, updateDto);
 
-				// Update dates if provided
-				if (updateDto.ScheduleDates?.Any() == true)
-				{
-					var dateResult = await UpdateScheduleDates(existingSchedule, updateDto.ScheduleDates);
-					if (!dateResult.Success)
-					{
-						return dateResult;
-					}
-				}
+                if (updateDto.ScheduleDates != null)
+                {
+                    var dateResult = await UpdateScheduleDates(existingSchedule, updateDto.ScheduleDates);
+                    if (!dateResult.Success) return dateResult;
+                }
 
-				// Update meal types if provided
-				if (updateDto.MealTypes?.Any() == true)
-				{
-					var mealResult = await UpdateScheduleMeals(existingSchedule, updateDto.MealTypes);
-					if (!mealResult.Success)
-					{
-						return mealResult;
-					}
-				}
+                // Update meal types if provided (including an empty list to clear all meals)
+                if (updateDto.MealTypes != null)
+                {
+                    var mealResult = await UpdateScheduleMeals(existingSchedule, updateDto.MealTypes);
+                    if (!mealResult.Success) return mealResult;
+                }
 
-				// Update person assignments and validate conflicts
-				if (updateDto.AssignedPersonIds?.Any() == true)
-				{
-					// Validate token time conflicts for new assignments
-					var conflictResult = await ValidateTokenTimeConflictsForUpdate(
-						scheduleId,
-						updateDto.AssignedPersonIds,
-						updateDto.ScheduleDates ?? (await _businessData.GetScheduleDatesAsync(scheduleId)).Select(d => d.Date).ToList(),
-						updateDto.MealTypes ?? (await _businessData.GetScheduleMealsAsync(scheduleId))
-							.Select(m => new SheduleMealDto { MealTypeId = m.MealTypeId }).ToList()
-					);
+                // --- Core Fix: Centralized Conflict Validation and Assignment Update ---
 
-					if (!conflictResult.Success)
-					{
-						return conflictResult;
-					}
+                // Determine the FINAL state of the schedule for validation/saving.
+                // If DTO provides a value, use it; otherwise, fetch the existing value from DB.
+                var finalDates = updateDto.ScheduleDates ??
+                                 (await _businessData.GetScheduleDatesAsync(scheduleId)).Select(d => d.Date).ToList();
 
-					var assignmentResult = await UpdatePersonAssignments(existingSchedule, updateDto.AssignedPersonIds);
-					if (!assignmentResult.Success)
-					{
-						return assignmentResult;
-					}
-				}
+                var finalMeals = updateDto.MealTypes ??
+                                 (await _businessData.GetScheduleMealsAsync(scheduleId))
+                                    .Select(m => new SheduleMealDto { MealTypeId = m.MealTypeId }).ToList();
 
-				await _businessData.SaveChangesAsync();
+                var finalAssignedPersons = updateDto.AssignedPersonIds ??
+                                           (await _businessData.GetSchedulePeopleAsync(scheduleId)).Select(p => p.PersonId).ToList();
 
-				_logger.LogInformation(
-					"Schedule updated successfully. ScheduleId: {ScheduleId}, Name: {Name}",
-					existingSchedule.SheduleId,
-					existingSchedule.SheduleName
-				);
+                // 4. Validate conflicts against the FINAL state
+                if (finalAssignedPersons.Any() && finalDates.Any() && finalMeals.Any())
+                {
+                    // Validate against the determined final lists
+                    var conflictResult = await ValidateTokenTimeConflictsForUpdate(
+                        scheduleId,
+                        finalAssignedPersons,
+                        finalDates,
+                        finalMeals
+                    );
 
-				return new ServiceResult
-				{
-					Success = true,
-					Message = "Schedule updated successfully",
-					ObjectId = existingSchedule.SheduleId,
-					Data = new
-					{
-						ScheduleId = existingSchedule.SheduleId,
-						ScheduleName = existingSchedule.SheduleName,
-						DatesCount = updateDto.ScheduleDates?.Count ?? 0,
-						MealTypesCount = updateDto.MealTypes?.Count ?? 0,
-						AssignedPersonsCount = updateDto.AssignedPersonIds?.Count ?? 0
-					}
-				};
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error updating schedule. ScheduleId: {ScheduleId}", scheduleId);
-				return new ServiceResult
-				{
-					Success = false,
-					Message = "An unexpected error occurred while updating the schedule."
-				};
-			}
-		}
+                    if (!conflictResult.Success)
+                    {
+                        return conflictResult;
+                    }
+                }
 
-		private async Task<ServiceResult> ValidateTokenTimeConflictsForUpdate(
+                // 5. Update person assignments (only if the list was provided in the DTO)
+                if (updateDto.AssignedPersonIds != null) // Check for '!= null' to allow clearing the list
+                {
+                    var assignmentResult = await UpdatePersonAssignments(existingSchedule, updateDto.AssignedPersonIds);
+                    if (!assignmentResult.Success)
+                    {
+                        return assignmentResult;
+                    }
+                }
+
+                // 6. Save changes and return success
+                await _businessData.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Schedule updated successfully. ScheduleId: {ScheduleId}, Name: {Name}",
+                    existingSchedule.SheduleId,
+                    existingSchedule.SheduleName
+                );
+
+                return new ServiceResult
+                {
+                    Success = true,
+                    Message = "Schedule updated successfully",
+                    ObjectId = existingSchedule.SheduleId,
+                    Data = new
+                    {
+                        ScheduleId = existingSchedule.SheduleId,
+                        ScheduleName = existingSchedule.SheduleName,
+                        DatesCount = finalDates.Count,
+                        MealTypesCount = finalMeals.Count,
+                        AssignedPersonsCount = finalAssignedPersons.Count
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating schedule. ScheduleId: {ScheduleId}", scheduleId);
+                return new ServiceResult
+                {
+                    Success = false,
+                    Message = "An unexpected error occurred while updating the schedule."
+                };
+            }
+        }
+
+        private async Task<ServiceResult> ValidateTokenTimeConflictsForUpdate(
 			int currentScheduleId,
 			List<int> assignedPersonIds,
 			List<DateOnly> scheduleDates,
@@ -773,20 +786,24 @@ namespace MealToken.Application.Services
 				};
 			}
 
-			// Remove existing dates
-			await _businessData.DeleteScheduleDatesAsync(schedule.SheduleId);
+            await _businessData.DeleteScheduleDatesAsync(schedule.SheduleId);
 
-			// Add new dates
-			var scheduleDates = newDates.Select(date => new ScheduleDate
-			{
-				TenantId = _tenantContext.TenantId.Value,
-				SheduleId = schedule.SheduleId,
-				Date = date
-			}).ToList();
+            // 2. Add new dates (only if the list is NOT empty)
+            if (newDates.Any())
+            {
+                var scheduleDates = newDates.Select(date => new ScheduleDate
+                {
+                    TenantId = _tenantContext.TenantId.Value,
+                    SheduleId = schedule.SheduleId,
+                    Date = date
+                }).ToList();
 
-			await _businessData.CreateSheduleDateAsync(scheduleDates);
-			return new ServiceResult { Success = true };
-		}
+                await _businessData.CreateSheduleDateAsync(scheduleDates);
+            }
+
+            // We return success because the operation (delete/replace) completed successfully.
+            return new ServiceResult { Success = true };
+        }
 
 		private async Task<ServiceResult> UpdateScheduleMeals(Schedule schedule, List<SheduleMealDto> newMealTypes)
 		{
@@ -799,12 +816,19 @@ namespace MealToken.Application.Services
 				};
 			}
 
-			// Remove existing meals
-			await _businessData.DeleteScheduleMealsAsync(schedule.SheduleId);
+            // Remove existing meals
+            await _businessData.DeleteScheduleMealsAsync(schedule.SheduleId);
 
-			// Create new meals
-			return await CreateScheduleMeals(schedule, newMealTypes);
-		}
+            // Create new meals (only if the list is NOT empty)
+            if (newMealTypes.Any())
+            {
+                // Assuming CreateScheduleMeals handles the insertion logic based on the list
+                return await CreateScheduleMeals(schedule, newMealTypes);
+            }
+
+            // If newMealTypes is empty, we only did the delete, which is success.
+            return new ServiceResult { Success = true };
+        }
 
 		private async Task<ServiceResult> UpdatePersonAssignments(Schedule schedule, List<int> newPersonIds)
 		{
@@ -961,42 +985,64 @@ namespace MealToken.Application.Services
 
 			foreach (var meal in meals)
 			{
-				var mealType = await _adminData.GetMealTypeByIdAsync(meal.MealTypeId);
 				var supplier = await _adminData.GetSupplierByIdAsync(meal.SupplierId);
 
-				if (meal.MealSubTypeId.HasValue)
-				{
-					var subType = await _adminData.GetMealSubTypesByIdAsync(meal.MealSubTypeId.Value);
-					if (subType != null)
-					{
-						subTypes.Add(new SubMealTypeD
-						{
-							MealSubTypeId = subType.MealSubTypeId,
-							MealSubTypeName = subType.SubTypeName,
-							Supplier = new SupplierD
-							{
-								SupplierId = supplier.SupplierId,
-								SupplierName = supplier.SupplierName
-							}
-						});
-					}
-				}
-				else if (mealType != null)
-				{
-					mealTypes.Add(new MealTypeD
-					{
-						MealTypeId = mealType.MealTypeId,
-						MealTypeName = mealType.TypeName,
-						Supplier = supplier != null ? new SupplierD
-						{
-							SupplierId = supplier.SupplierId,
-							SupplierName = supplier.SupplierName
-						} : null
-					});
-				}
-			}
+                if (meal.MealSubTypeId.HasValue)
+                {
+                    var subType = await _adminData.GetMealSubTypesByIdAsync(meal.MealSubTypeId.Value);
+                    if (subType != null)
+                    {
+                        // Fetch meal type for subtype
+                        var mealType = await _adminData.GetMealTypeByIdAsync(meal.MealTypeId);
 
-			var assignedPersons = new List<PeopleD>();
+                        // Add meal type to list if it exists
+                        if (mealType != null)
+                        {
+                            mealTypes.Add(new MealTypeD
+                            {
+                                MealTypeId = mealType.MealTypeId,
+                                MealTypeName = mealType.TypeName,
+                                Supplier = supplier != null ? new SupplierD
+                                {
+                                    SupplierId = supplier.SupplierId,
+                                    SupplierName = supplier.SupplierName
+                                } : null
+                            });
+                        }
+
+                        subTypes.Add(new SubMealTypeD
+                        {
+                            MealSubTypeId = subType.MealSubTypeId,
+                            MealSubTypeName = subType.SubTypeName,
+                            MealTypeId = meal.MealTypeId,
+                            Supplier = supplier != null ? new SupplierD
+                            {
+                                SupplierId = supplier.SupplierId,
+                                SupplierName = supplier.SupplierName
+                            } : null
+                        });
+                    }
+                }
+                else
+                {
+                    var mealType = await _adminData.GetMealTypeByIdAsync(meal.MealTypeId);
+                    if (mealType != null)
+                    {
+                        mealTypes.Add(new MealTypeD
+                        {
+                            MealTypeId = mealType.MealTypeId,
+                            MealTypeName = mealType.TypeName,
+                            Supplier = supplier != null ? new SupplierD
+                            {
+                                SupplierId = supplier.SupplierId,
+                                SupplierName = supplier.SupplierName
+                            } : null
+                        });
+                    }
+                }
+            }
+
+            var assignedPersons = new List<PeopleD>();
 			foreach (var person in persons)
 			{
 				var personDetails = await _adminData.GetPersonByIdAsync(person.PersonId);
@@ -1678,7 +1724,7 @@ namespace MealToken.Application.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateMealConsumption(int mealConsumptionId, bool status)
+        public async Task<ServiceResult> UpdateMealConsumption(int mealConsumptionId, bool status, string jobStatus)
         {
             // Assume 'status' means whether the meal consumption record is finalized/validated (e.g., TockenIssued).
 
@@ -1694,6 +1740,7 @@ namespace MealToken.Application.Services
                 };
             }
             consumptionRecord.TockenIssued = status;
+			consumptionRecord.JobStatus = jobStatus;
 
             try
             {
