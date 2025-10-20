@@ -15,9 +15,9 @@ namespace MealToken.Domain.Entities
 		public int MealTypeAddOnId { get; set; }
 		public int TenantId { get; set; }
 		public int MealTypeId { get; set; }
+		public int AddOnSubTypeId { get; set; }
 		public string AddOnName { get; set; }
 		public AddOnType AddOnType { get; set; }
-		public string? Description { get; set; }
 	}
 
 	public enum AddOnType

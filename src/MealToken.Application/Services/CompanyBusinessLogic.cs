@@ -45,24 +45,17 @@ namespace MealToken.Application.Services
         public async Task<ServiceResult> HemasCompanyLogic(MealDeviceRequest request)
         {
             try
-            { // Validate person
+            {
+                // Validate person
                 var person = await _adminData.GetPersonByNumberAsync(request.PersonNumber);
                 if (person == null)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Person not found"
-                    };
+                    return new ServiceResult { Success = false, Message = "Person not found" };
                 }
 
                 if (person.IsActive != true)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Person is not active"
-                    };
+                    return new ServiceResult { Success = false, Message = "Person is not active" };
                 }
 
                 // Prepare meal token request
@@ -74,25 +67,17 @@ namespace MealToken.Application.Services
                     FunctionKey = request.FunctionKey
                 };
 
-                // Get meal schedule
+                // Get meal schedule with addon meals
                 var schedule = await _tokenProcessService.GetMealDistributionAsync(mealtokenRequest);
                 if (!schedule.Success)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = schedule.Message
-                    };
+                    return new ServiceResult { Success = false, Message = schedule.Message };
                 }
 
                 var scheduleMeals = schedule.MealInfo;
                 if (scheduleMeals == null)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "No meal schedule found for this time"
-                    };
+                    return new ServiceResult { Success = false, Message = "No meal schedule found for this time" };
                 }
 
                 // Check if meal already issued
@@ -104,11 +89,7 @@ namespace MealToken.Application.Services
 
                 if (exMealConsumption != null && exMealConsumption.TockenIssued)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Meal token already issued for this meal type"
-                    };
+                    return new ServiceResult { Success = false, Message = "Meal token already issued for this meal type" };
                 }
 
                 // Validate device
@@ -116,11 +97,7 @@ namespace MealToken.Application.Services
                 var deviceShift = await _businessData.GetDeviceShiftBySerialNoAsync(request.DeviceSerialNo) ?? DeviceShift.Day;
                 if (deviceId == 0)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Invalid device serial number"
-                    };
+                    return new ServiceResult { Success = false, Message = "Invalid device serial number" };
                 }
 
                 // Get meal history for shift detection
@@ -129,25 +106,23 @@ namespace MealToken.Application.Services
                     mealtokenRequest.RequestDate
                 );
 
-                var lastMealIn13Hours = await _businessData.GetMealConsumptionInLast13HoursAsync(
-                    person.PersonId
-                );
+                var lastMealIn13Hours = await _businessData.GetMealConsumptionInLast13HoursAsync(person.PersonId);
 
                 // Define time boundaries
-                var dayStart = new TimeOnly(7, 0);        // 7:00 AM
-                var dayEnd = new TimeOnly(19, 0);         // 7:00 PM
-                var extendedDayEnd = new TimeOnly(22, 15); // 10:15 PM
+                var dayStart = new TimeOnly(7, 0);
+                var dayEnd = new TimeOnly(19, 0);
+                var extendedDayEnd = new TimeOnly(22, 15);
 
                 var shiftResult = ValidateAndIdentifyShift(
-                mealtokenRequest.RequestTime,
-                deviceShift,
-                todaysMeals,
-                lastMealIn13Hours,
-                dayStart,
-                dayEnd,
-                extendedDayEnd,
-                out Shift detectedShift
-                 );
+                    mealtokenRequest.RequestTime,
+                    deviceShift,
+                    todaysMeals,
+                    lastMealIn13Hours,
+                    dayStart,
+                    dayEnd,
+                    extendedDayEnd,
+                    out Shift detectedShift
+                );
 
                 if (!shiftResult.Success)
                 {
@@ -155,70 +130,44 @@ namespace MealToken.Application.Services
                     return shiftResult;
                 }
 
-                PayStatus payStatus = PayStatus.Free; // Set a safe default (or null, depending on your wider logic)
+                // Determine pay status
+                var payStatus = await DeterminPayStatusAsync(person, detectedShift, scheduleMeals.MealTypeId);
 
-                if (person.PersonType == PersonType.Employer)
-                {
-                    var policy = await _businessData.GetPayPolicyAsync(detectedShift, scheduleMeals.MealTypeId);
-
-                    if (policy != null)
-                    {
-                        if (person.Gender == "Male")
-                        {
-                            payStatus = policy.IsMalePaid ? PayStatus.Paid : PayStatus.Free;
-                        }
-                        else if (person.Gender == "Female")
-                        {
-
-                            payStatus = policy.IsFemalePaid ? PayStatus.Paid : PayStatus.Free;
-                        }
-                        else
-                        {
-                            // Unknown gender - default to paid (safer)
-                            _logger.LogWarning($"Unknown gender for Person: {person.PersonId}, Gender: {person.Gender}");
-                            payStatus = PayStatus.Paid;
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning($"No payment policy found for Shift: {detectedShift}, MealType: {scheduleMeals.MealTypeId}");
-                        payStatus = PayStatus.Paid;
-                    }
-                }
-             
-                
-                var mealCost = await _adminData.GetMealCostByDetailAsync(scheduleMeals.SupplierId, scheduleMeals.MealTypeId, scheduleMeals.MealSubTypeId);
+                // Get meal cost
+                var mealCost = await _adminData.GetMealCostByDetailAsync(
+                    scheduleMeals.SupplierId,
+                    scheduleMeals.MealTypeId,
+                    scheduleMeals.MealSubTypeId
+                );
 
                 if (mealCost == null)
                 {
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Meal cost not found for this meal configuration"
-                    };
+                    return new ServiceResult { Success = false, Message = "Meal cost not found for this meal configuration" };
                 }
-                decimal empContribution = (payStatus == PayStatus.Free)
-                    ? 0
-                    : mealCost?.EmployeeCost ?? 0;
 
-                decimal companyContribution = (payStatus == PayStatus.Free)
+                // Calculate contributions
+                decimal empContribution = payStatus == PayStatus.Free ? 0 : mealCost?.EmployeeCost ?? 0;
+                decimal companyContribution = payStatus == PayStatus.Free
                     ? ((mealCost?.EmployeeCost ?? 0) + (mealCost?.CompanyCost ?? 0))
                     : mealCost?.CompanyCost ?? 0;
 
+                // Create main meal consumption record
                 var mealConsumption = new MealConsumption
                 {
-                    TenantId = person.TenantId, // Assuming person has TenantId
+                    TenantId = person.TenantId,
                     PersonId = person.PersonId,
                     PersonName = person.Name,
+                    Gender = person.Gender,
                     Date = mealtokenRequest.RequestDate,
-                    SchduleId = scheduleMeals.ScheduleId,
-                    SchduleName = scheduleMeals.ScheduleName,
                     Time = mealtokenRequest.RequestTime,
+                    ScheduleId = scheduleMeals.ScheduleId,
+                    ScheduleName = scheduleMeals.ScheduleName,
+                    AddOnMeal = false,
                     MealTypeId = scheduleMeals.MealTypeId,
                     MealTypeName = scheduleMeals.MealTypeName,
-                    SubTypeId = scheduleMeals.MealSubTypeId, // If applicable
-                    SubTypeName = scheduleMeals.MealSubTypeName, // If applicable
-                    MealCostId = mealCost.MealCostId, // If applicable
+                    SubTypeId = scheduleMeals.MealSubTypeId,
+                    SubTypeName = scheduleMeals.MealSubTypeName,
+                    MealCostId = mealCost.MealCostId,
                     SupplierCost = mealCost.SupplierCost,
                     SellingPrice = mealCost.SellingPrice,
                     CompanyCost = companyContribution,
@@ -227,19 +176,51 @@ namespace MealToken.Application.Services
                     DeviceSerialNo = request.DeviceSerialNo,
                     ShiftName = detectedShift,
                     PayStatus = payStatus,
-                    TockenIssued = false                  
+                    TockenIssued = false
                 };
 
-                // Save to database
+                // Save main meal
                 await _businessData.CreateMealConsumptionAsync(mealConsumption);
+
+                // Create addon meal consumption records
+                var addonMealConsumptions = new List<MealConsumption>();
+                if (scheduleMeals.MealAddOns != null && scheduleMeals.MealAddOns.Any())
+                {
+                    addonMealConsumptions = await CreateAddOnMealConsumptionsAsync(
+                        scheduleMeals.MealAddOns,
+                        mealConsumption,
+                        person,
+                        detectedShift,
+                        mealtokenRequest
+                    );
+
+                    if (addonMealConsumptions.Any())
+                    {
+                        await _businessData.CreateMealConsumptionBatchAsync(addonMealConsumptions);
+                        _logger.LogInformation("Created {AddOnCount} addon meal consumption records for PersonId: {PersonId}",
+                            addonMealConsumptions.Count, person.PersonId);
+                    }
+                }
+
+                // Prepare token response
                 string department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId) ?? "N/A";
+                // Build meal type display text
+                string mealTypeDisplay = scheduleMeals.MealSubTypeId != null
+                    ? scheduleMeals.MealSubTypeName
+                    : scheduleMeals.MealTypeName;
+
+                // Build addon meals text
+                string addonMealsText = "";
+                if (addonMealConsumptions.Any())
+                {
+                    var addonNames = addonMealConsumptions.Select(a => a.SubTypeName).ToList();
+                    addonMealsText = " With " + string.Join(", ", addonNames);
+                }
                 var tokenResponse = new TokenResponse
                 {
                     Date = mealtokenRequest.RequestDate,
                     Time = mealtokenRequest.RequestTime,
-                    MealType = scheduleMeals.MealSubTypeId != null
-                            ? scheduleMeals.MealSubTypeName
-                            : scheduleMeals.MealTypeName,
+                    MealType = mealTypeDisplay + addonMealsText,
                     Shift = detectedShift.ToString(),
                     EmpNo = request.PersonNumber,
                     EmpName = person.Name,
@@ -249,6 +230,7 @@ namespace MealToken.Application.Services
                     Contribution = empContribution,
                     MealConsumptionId = mealConsumption.MealConsumptionId
                 };
+
                 return new ServiceResult
                 {
                     Success = true,
@@ -265,9 +247,9 @@ namespace MealToken.Application.Services
                     Message = "An error occurred while processing your meal request. Please contact support."
                 };
             }
-    }
+        }
 
-private ServiceResult ValidateAndIdentifyShift(
+        private ServiceResult ValidateAndIdentifyShift(
       TimeOnly currentTime,
       DeviceShift deviceShift,
       List<MealConsumption> todaysMeals,
@@ -280,38 +262,39 @@ private ServiceResult ValidateAndIdentifyShift(
             detectedShift = Shift.DayShift; // Default
 
             // Determine current time period
+            // Day hours: 7 AM - 7 PM
             bool isInDayHours = currentTime >= dayStart && currentTime < dayEnd;
-            bool isInExtendedDayHours = currentTime >= dayEnd && currentTime < extendedDayEnd;
-            bool isInNightHours = currentTime >= extendedDayEnd || currentTime < dayStart;
+
+            // Extended day hours: 7 PM - 11:59 PM OR 12 AM - 6 AM
+            bool isInExtendedDayHours = currentTime >= dayEnd || currentTime < extendedDayEnd;
+
+            // Night hours: 6 AM - 7 AM (only 1 hour window before day starts)
+            bool isInNightHours = currentTime >= extendedDayEnd && currentTime < dayStart;
 
             // Check meal history
             bool hadDayShiftMeal = todaysMeals?.Any(m =>
                 m.Time >= dayStart &&
                 m.Time < dayEnd &&
                 (m.ShiftName == Shift.DayShift ||
-                 m.ShiftName == Shift.DayShiftExtended ||
-                 m.ShiftName == Shift.DayandNightShift)
+                 m.ShiftName == Shift.DayShiftExtended)
+            ) ?? false;
+
+            bool hadExtendedDayMeal = todaysMeals?.Any(m =>
+                (m.Time >= dayEnd || m.Time < extendedDayEnd) &&
+                m.ShiftName == Shift.DayShiftExtended
             ) ?? false;
 
             bool hadNightShiftMeal = todaysMeals?.Any(m =>
                 (m.Time >= dayEnd || m.Time < dayStart) &&
                 (m.ShiftName == Shift.NightShift ||
-                 m.ShiftName == Shift.NightandDayShift ||
-                 m.ShiftName == Shift.DayandNightShift)
+                 m.ShiftName == Shift.NightandDayShift)
             ) ?? false;
 
             bool hadEarlyMorningNightMeal = todaysMeals?.Any(m =>
+                m.Time >= extendedDayEnd &&
                 m.Time < dayStart &&
                 (m.ShiftName == Shift.NightShift ||
-                 m.ShiftName == Shift.NightandDayShift ||
-                 m.ShiftName == Shift.DayandNightShift)
-            ) ?? false;
-
-            bool hadDayShiftExtendedMeal = todaysMeals?.Any(m =>
-                m.Time >= dayEnd &&
-                m.Time < extendedDayEnd &&
-                (m.ShiftName == Shift.DayShiftExtended ||
-                 m.ShiftName == Shift.DayandNightShift)
+                 m.ShiftName == Shift.NightandDayShift)
             ) ?? false;
 
             if (isInDayHours)
@@ -322,12 +305,10 @@ private ServiceResult ValidateAndIdentifyShift(
                     if (hadEarlyMorningNightMeal ||
                         hadNightShiftMeal ||
                         lastMealIn13Hours?.ShiftName == Shift.NightShift ||
-                        lastMealIn13Hours?.ShiftName == Shift.NightandDayShift ||
-                        lastMealIn13Hours?.ShiftName == Shift.DayandNightShift)
+                        lastMealIn13Hours?.ShiftName == Shift.NightandDayShift)
                     {
                         // Night worker continuing into day
-                        // Dinner (9 PM yesterday) → ... → Lunch (12 PM today)
-                        detectedShift = Shift.DayandNightShift;
+                        detectedShift = Shift.NightandDayShift;
                         return new ServiceResult { Success = true };
                     }
 
@@ -360,16 +341,14 @@ private ServiceResult ValidateAndIdentifyShift(
             {
                 if (deviceShift == DeviceShift.Day)
                 {
-                    // Check if they had day shift meal earlier
-                    if (hadDayShiftMeal)
+                    if (hadDayShiftMeal || hadExtendedDayMeal)
                     {
-                        // Day worker working until 10 PM
-                        // Breakfast (8 AM) → ... → Dinner (9 PM)
+                        // Day worker working extended hours (until 6 AM next day)
                         detectedShift = Shift.DayShiftExtended;
                         return new ServiceResult { Success = true };
                     }
 
-                    // Check if last meal was during day
+                    // Check if last meal was during day shift
                     if (lastMealIn13Hours != null &&
                         lastMealIn13Hours.Time >= dayStart &&
                         lastMealIn13Hours.Time < dayEnd &&
@@ -380,7 +359,11 @@ private ServiceResult ValidateAndIdentifyShift(
                         return new ServiceResult { Success = true };
                     }
 
+                    // No day shift history but using day device in extended hours
+                    // Could be starting extended shift without earlier meals
+                    // Allow it but default to extended day
                     detectedShift = Shift.DayShiftExtended;
+                    return new ServiceResult { Success = true };
                 }
                 else if (deviceShift == DeviceShift.Night)
                 {
@@ -396,13 +379,13 @@ private ServiceResult ValidateAndIdentifyShift(
                 {
                     // Check if continuing from day shift
                     if (hadDayShiftMeal ||
-                        hadDayShiftExtendedMeal ||
-                        lastMealIn13Hours?.ShiftName == Shift.DayShift ||
-                        lastMealIn13Hours?.ShiftName == Shift.DayShiftExtended)
+                     hadExtendedDayMeal ||
+                     lastMealIn13Hours?.ShiftName == Shift.DayShift ||
+                     lastMealIn13Hours?.ShiftName == Shift.DayShiftExtended)
                     {
-                        // Day worker continuing into night
-                        // Breakfast (8 AM) → ... → Midnight Tea (12 AM)
-                        detectedShift = Shift.DayandNightShift;
+                        // This shouldn't happen often - extended day ends at 6 AM
+                        // But if someone has day meal history, they're on extended day
+                        detectedShift = Shift.DayShiftExtended;
                         return new ServiceResult { Success = true };
                     }
 
@@ -412,15 +395,13 @@ private ServiceResult ValidateAndIdentifyShift(
                 }
                 else if (deviceShift == DeviceShift.Day)
                 {
-                    // ⚠️ DEVICE VALIDATION: Day device during night hours
 
                     // Check if continuing from day shift (legitimate use)
                     if (hadDayShiftMeal ||
-                        hadDayShiftExtendedMeal ||
                         lastMealIn13Hours?.ShiftName == Shift.DayShift ||
                         lastMealIn13Hours?.ShiftName == Shift.DayShiftExtended)
                     {
-                        detectedShift = Shift.DayandNightShift;
+                        detectedShift = Shift.DayShiftExtended;
                         return new ServiceResult { Success = true };
                     }
 
@@ -453,6 +434,90 @@ private ServiceResult ValidateAndIdentifyShift(
             return new ServiceResult { Success = true };
         }
 
+        private async Task<PayStatus> DeterminPayStatusAsync(Person person, Shift shift, int mealTypeId)
+        {
+            if (person.PersonType != PersonType.Employer)
+            {
+                return PayStatus.Free;
+            }
+
+            var policy = await _businessData.GetPayPolicyAsync(shift, mealTypeId);
+            if (policy == null)
+            {
+                _logger.LogWarning($"No payment policy found for Shift: {shift}, MealType: {mealTypeId}");
+                return PayStatus.Free;
+            }
+
+            if(policy.IsMalePaid == false && policy.IsFemalePaid == false)
+            {
+                return PayStatus.Free;
+			}
+
+			return person.Gender switch
+            {
+                "Male" => policy.IsMalePaid ? PayStatus.Paid : PayStatus.Free,
+                "Female" => policy.IsFemalePaid ? PayStatus.Paid : PayStatus.Free,
+                _ => PayStatus.Paid // Unknown gender defaults to paid (safer)
+            };
+        }
+
+        private async Task<List<MealConsumption>> CreateAddOnMealConsumptionsAsync(
+            List<MealAddOnDto> addOns,
+            MealConsumption mainMeal,
+            Person person,
+            Shift shift,
+            MealTokenRequest request)
+        {
+            var addonConsumptions = new List<MealConsumption>();
+
+            foreach (var addOn in addOns)
+            {
+                // Get addon meal cost
+                var addonMealCost = await _adminData.GetMealCostByDetailAsync(
+                    addOn.SupplierId,
+                    addOn.AddOnMealTypeId,
+                    addOn.AddOnSubTypeId
+                );
+
+                if (addonMealCost == null)
+                {
+                    _logger.LogWarning("Meal cost not found for AddOnId: {AddOnId}, SkippingAddon", addOn.AddOnSubTypeId);
+                    continue;
+                }
+
+                // Addon meals are always free for employees
+                var addonConsumption = new MealConsumption
+                {
+                    TenantId = person.TenantId,
+                    PersonId = person.PersonId,
+                    PersonName = person.Name,
+                    Gender = person.Gender,
+                    Date = request.RequestDate,
+                    Time = request.RequestTime,
+                    ScheduleId = mainMeal.ScheduleId,
+                    ScheduleName = mainMeal.ScheduleName,
+                    AddOnMeal = true,
+                    MealTypeId = addOn.AddOnMealTypeId,
+                    MealTypeName = addOn.AddonType.ToString(),
+                    SubTypeId = addOn.AddOnSubTypeId,
+                    SubTypeName = addOn.AddOnName,
+                    MealCostId = addonMealCost.MealCostId,
+                    SupplierCost = addonMealCost.SupplierCost,
+                    SellingPrice = addonMealCost.SellingPrice,
+                    CompanyCost = addonMealCost.EmployeeCost + addonMealCost.CompanyCost, // Company pays full cost for addons
+                    EmployeeCost = 0, // Employee pays nothing for addon meals
+                    DeviceId = mainMeal.DeviceId,
+                    DeviceSerialNo = mainMeal.DeviceSerialNo,
+                    ShiftName = shift,
+                    PayStatus = PayStatus.Free, // Addon meals are always free
+                    TockenIssued = false
+                };
+
+                addonConsumptions.Add(addonConsumption);
+            }
+
+            return addonConsumptions;
+        }
 
     }
 }

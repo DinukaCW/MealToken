@@ -25,5 +25,6 @@ namespace MealToken.Domain.Entities
 		public decimal EmployeeCost { get; set; } // Employee contribution in LKR
 
 		public string? Description { get; set; }
-	}
+		public bool IsActive { get; set; } = true;
+    }
 }

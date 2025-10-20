@@ -6,6 +6,7 @@ using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Interfaces;
 using MealToken.Domain.Models;
+using MealToken.Domain.Models.Reports;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,27 +25,30 @@ namespace MealToken.Application.Services
 		private readonly ILogger<BusinessService> _logger;
 		private readonly ITenantContext _tenantContext;
 		private readonly IAdminRepository _adminData;
-		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly ICompanyBusinessLogic _companyBusinessLogic;
+        private readonly IUserContext _userContext;
+        private readonly IUserRepository _userData;
 
-		public BusinessService(
+        public BusinessService(
 			IEncryptionService encryptionService,
 			IBusinessRepository businessRepository,
 			ILogger<BusinessService> logger,
 			ITenantContext tenantContext,
 			IAdminRepository adminData,
-            IHttpContextAccessor httpContextAccessor,
-			ICompanyBusinessLogic companyBusinessLogic)
+			ICompanyBusinessLogic companyBusinessLogic,
+            IUserContext userContext,
+            IUserRepository userData)
 		{
 			_encryption = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
 			_businessData = businessRepository ?? throw new ArgumentNullException(nameof(businessRepository));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
 			_adminData = adminData ?? throw new ArgumentNullException(nameof(adminData));
-			_httpContextAccessor = httpContextAccessor;
 			_companyBusinessLogic = companyBusinessLogic;
-		
-		}
+            _userContext = userContext;
+            _userData = userData;
+
+        }
 
 		public async Task<List<DeviceDto>> GetClientDeviceDetails(int clientId)
 		{
@@ -99,99 +103,124 @@ namespace MealToken.Application.Services
 		}
 
 
-		public async Task<ServiceResult> CreateScheduleAsync(SheduleDTO scheduleDto)
-		{
-			using var scope = _logger.BeginScope("Schedule Creation - {CorrelationId}", Guid.NewGuid());
-			_logger.LogInformation("Starting schedule creation. ScheduleName: {ScheduleName}", scheduleDto?.ScheduleName);
+        public async Task<ServiceResult> CreateScheduleAsync(SheduleDTO scheduleDto)
+        {
+            _logger.LogInformation("Starting schedule creation. ScheduleName: {ScheduleName}", scheduleDto?.ScheduleName);
 
-			try
-			{
-				var validationResult = await ValidateScheduleInput(scheduleDto);
-				if (!validationResult.Success)
-				{
-					return validationResult;
-				}
+            // Track the created schedule entity so we can delete it if later steps fail.
+            Schedule? createdSchedule = null;
+            bool success = false;
 
-				// Validate tenant context
-				if (!_tenantContext.TenantId.HasValue)
-				{
-					return new ServiceResult
-					{
-						Success = false,
-						Message = "Invalid tenant context"
-					};
-				}
+            try
+            {
+                // 1. Initial Validation and Context Check
+                var validationResult = await ValidateScheduleInput(scheduleDto);
+                if (!validationResult.Success)
+                {
+                    return validationResult;
+                }
 
-				var schedule = await CreateScheduleEntity(scheduleDto);
+                if (!_tenantContext.TenantId.HasValue)
+                {
+                    return new ServiceResult
+                    {
+                        Success = false,
+                        Message = "Invalid tenant context"
+                    };
+                }
 
-				var dateResult = await CreateScheduleDates(schedule, scheduleDto.ScheduleDates);
-				if (!dateResult.Success)
-				{
-					return dateResult;
-				}
+                // 2. Create Parent Entity
+                createdSchedule = await CreateScheduleEntity(scheduleDto);
 
-				var mealResult = await CreateScheduleMeals(schedule, scheduleDto.MealTypes);
-				if (!mealResult.Success)
-				{
-					return mealResult;
-				}
+                // 3. Create Dates
+                var dateResult = await CreateScheduleDates(createdSchedule, scheduleDto.ScheduleDates);
+                if (!dateResult.Success)
+                {
+                    // Logging failure, cleanup will be done in the finally block
+                    _logger.LogError("Failed to create schedule dates. ScheduleId: {ScheduleId}", createdSchedule.SheduleId);
+                    return dateResult;
+                }
 
-				if (scheduleDto.AssignedPersonIds?.Any() == true)
-				{
-					var conflictResult = await ValidateTokenTimeConflictsAsync(
-						scheduleDto.AssignedPersonIds,
-						scheduleDto.ScheduleDates,
-						scheduleDto.MealTypes);
+                // 4. Create Meals
+                var mealResult = await CreateScheduleMeals(createdSchedule, scheduleDto.MealTypes);
+                if (!mealResult.Success)
+                {
+                    _logger.LogError("Failed to create schedule meals. ScheduleId: {ScheduleId}", createdSchedule.SheduleId);
+                    return mealResult;
+                }
 
-					if (!conflictResult.Success)
-					{
-						return conflictResult;
-					}
+                // 5. Validate and Assign Persons
+                if (scheduleDto.AssignedPersonIds?.Any() == true)
+                {
+                    var conflictResult = await ValidateTokenTimeConflictsAsync(
+                        scheduleDto.AssignedPersonIds,
+                        scheduleDto.ScheduleDates,
+                        scheduleDto.MealTypes);
 
-					var assignmentResult = await AssignPersonsToSchedule(schedule, scheduleDto.AssignedPersonIds);
-					if (!assignmentResult.Success)
-					{
-						return assignmentResult;
-					}
-				}
+                    if (!conflictResult.Success)
+                    {
+                        _logger.LogError("Conflict validation failed. ScheduleId: {ScheduleId}", createdSchedule.SheduleId);
+                        return conflictResult;
+                    }
 
-				_logger.LogInformation(
-					"Schedule created successfully. ScheduleId: {ScheduleId}, Name: {Name}, Dates: {Dates}, MealTypes: {MealTypes}, Persons: {Persons}",
-					schedule.SheduleId,
-					schedule.SheduleName,
-					scheduleDto.ScheduleDates?.Count ?? 0,
-					scheduleDto.MealTypes?.Count ?? 0,
-					scheduleDto.AssignedPersonIds?.Count ?? 0
-				);
+                    var assignmentResult = await AssignPersonsToSchedule(createdSchedule, scheduleDto.AssignedPersonIds);
+                    if (!assignmentResult.Success)
+                    {
+                        _logger.LogError("Failed to assign persons. ScheduleId: {ScheduleId}", createdSchedule.SheduleId);
+                        return assignmentResult;
+                    }
+                }
 
-				return new ServiceResult
-				{
-					Success = true,
-					Message = "Schedule created successfully",
-					ObjectId = schedule.SheduleId,
-					Data = new
-					{
-						ScheduleId = schedule.SheduleId,
-						ScheduleName = schedule.SheduleName,
-						DatesCount = scheduleDto.ScheduleDates?.Count ?? 0,
-						MealTypesCount = scheduleDto.MealTypes?.Count ?? 0,
-						AssignedPersonsCount = scheduleDto.AssignedPersonIds?.Count ?? 0
-					}
-				};
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Critical error during schedule creation. ScheduleName: {ScheduleName}",
-					scheduleDto?.ScheduleName);
-				return new ServiceResult
-				{
-					Success = false,
-					Message = "An unexpected error occurred while creating the schedule."
-				};
-			}
-		}
+                // 6. Final Success and Return
+                success = true; // Mark the operation as fully successful
 
-		private async Task<ServiceResult> ValidateScheduleInput(SheduleDTO scheduleDto)
+                _logger.LogInformation(
+                    "Schedule created successfully. ScheduleId: {ScheduleId}, Name: {Name}",
+                    createdSchedule.SheduleId, createdSchedule.SheduleName
+                );
+
+                return new ServiceResult
+                {
+                    Success = true,
+                    Message = "Schedule created successfully",
+                    ObjectId = createdSchedule.SheduleId,
+                    Data = new
+                    {
+                        ScheduleId = createdSchedule.SheduleId,
+                        ScheduleName = createdSchedule.SheduleName,
+                        DatesCount = scheduleDto.ScheduleDates?.Count ?? 0,
+                        MealTypesCount = scheduleDto.MealTypes?.Count ?? 0,
+                        AssignedPersonsCount = scheduleDto.AssignedPersonIds?.Count ?? 0
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Critical error during schedule creation. ScheduleName: {ScheduleName}",
+                    scheduleDto?.ScheduleName);
+                return new ServiceResult
+                {
+                    Success = false,
+                    Message = "An unexpected error occurred while creating the schedule."
+                };
+            }
+            finally
+            {
+                
+                if (!success && createdSchedule != null)
+                {
+                    _logger.LogWarning("Initiating rollback/cleanup for failed schedule creation. ScheduleId: {ScheduleId}", createdSchedule.SheduleId);
+
+                    // Assuming DeleteScheduleAsync handles deleting the Schedule and all its related 
+                    // entities (Dates, Meals, Persons, etc.) cascadingly.
+                    await DeleteScheduleAsync(createdSchedule.SheduleId);
+
+                    _logger.LogInformation("Rollback complete. Schedule {ScheduleId} deleted.", createdSchedule.SheduleId);
+                }
+            }
+        }
+
+        private async Task<ServiceResult> ValidateScheduleInput(SheduleDTO scheduleDto)
 		{
 			if (scheduleDto == null)
 			{
@@ -336,14 +365,7 @@ namespace MealToken.Application.Services
                     }
                     if (!string.IsNullOrEmpty(subType.Functionkey))
 					{
-						if (functionKeysUsed.Contains(subType.Functionkey))
-						{
-							return new ServiceResult
-							{
-								Success = false,
-								Message = $"Duplicate function key '{subType.Functionkey}' found"
-							};
-						}
+						
 						functionKeysUsed.Add(subType.Functionkey);
 					}
 
@@ -973,7 +995,7 @@ namespace MealToken.Application.Services
 				};
 			}
 		}
-
+        /*
 		private async Task<ScheduleDetails> BuildScheduleDetailsAsync(Schedule schedule)
 		{
 			var dates = await _businessData.GetScheduleDatesAsync(schedule.SheduleId);
@@ -1067,16 +1089,101 @@ namespace MealToken.Application.Services
 				AssignedPersons = assignedPersons
 			};
 		}
+        */
+        private async Task<ScheduleDetails> BuildScheduleDetailsAsync(Schedule schedule)
+        {
+            // Fetch all data sequentially (avoid DBContext threading issues)
+            var dates = await _businessData.GetScheduleDatesAsync(schedule.SheduleId);
+            var meals = await _businessData.GetScheduleMealsAsync(schedule.SheduleId);
+            var persons = await _businessData.GetSchedulePeopleAsync(schedule.SheduleId);
 
-		public async Task<ServiceResult> GetScheduleCreationDetailsAsync()
+            // Extract unique IDs to batch fetch
+            var mealTypeIds = meals.Select(m => m.MealTypeId).Distinct().ToList();
+            var supplierIds = meals.Select(m => m.SupplierId).Distinct().ToList();
+            var subTypeIds = meals.Where(m => m.MealSubTypeId.HasValue).Select(m => m.MealSubTypeId.Value).Distinct().ToList();
+            var personIds = persons.Select(p => p.PersonId).Distinct().ToList();
+
+            // Batch fetch all related data
+            var mealTypesDict = (await _adminData.GetMealTypesByIdsAsync(mealTypeIds))
+                .ToDictionary(mt => mt.MealTypeId);
+
+            var suppliersDict = (await _adminData.GetSuppliersByIdsAsync(supplierIds))
+                .ToDictionary(s => s.SupplierId);
+
+            var subTypesDict = subTypeIds.Any()
+                ? (await _adminData.GetMealSubTypesByIdsAsync(subTypeIds)).ToDictionary(st => st.MealSubTypeId)
+                : new Dictionary<int, MealSubType>();
+
+            var personsDict = (await _adminData.GetPeopleByIdsAsync(personIds))
+                .ToDictionary(p => p.PersonId);
+
+            // Build meal types and subtypes
+            var mealTypesSet = new HashSet<int>();
+            var mealTypes = new List<MealTypeD>();
+            var subTypes = new List<SubMealTypeD>();
+
+            foreach (var meal in meals)
+            {
+                var supplier = supplierIds.Contains(meal.SupplierId) ? suppliersDict.GetValueOrDefault(meal.SupplierId) : null;
+                var supplierDto = supplier != null ? new SupplierD
+                {
+                    SupplierId = supplier.SupplierId,
+                    SupplierName = supplier.SupplierName
+                } : null;
+
+                // Add meal type if not already added (avoid duplicates)
+                if (mealTypesDict.TryGetValue(meal.MealTypeId, out var mealType) && mealTypesSet.Add(meal.MealTypeId))
+                {
+                    mealTypes.Add(new MealTypeD
+                    {
+                        MealTypeId = mealType.MealTypeId,
+                        MealTypeName = mealType.TypeName,
+                        Supplier = supplierDto
+                    });
+                }
+
+                // Add subtypes
+                if (meal.MealSubTypeId.HasValue && subTypesDict.TryGetValue(meal.MealSubTypeId.Value, out var subType))
+                {
+                    subTypes.Add(new SubMealTypeD
+                    {
+                        MealSubTypeId = subType.MealSubTypeId,
+                        MealSubTypeName = subType.SubTypeName,
+                        MealTypeId = meal.MealTypeId,
+                        Supplier = supplierDto
+                    });
+                }
+            }
+
+            // Build assigned persons
+            var assignedPersons = personsDict.Values
+                .Select(p => new PeopleD
+                {
+                    PersonId = p.PersonId,
+                    FullName = p.Name
+                })
+                .ToList();
+
+            return new ScheduleDetails
+            {
+                ScheduleId = schedule.SheduleId,
+                ScheduleName = schedule.SheduleName,
+                SchedulePeriod = schedule.ShedulePeriod,
+                ScheduleDates = dates.Select(d => d.Date).ToList(),
+                MealTypes = mealTypes,
+                SubTypes = subTypes,
+                AssignedPersons = assignedPersons
+            };
+        }
+        public async Task<ServiceResult> GetScheduleCreationDetailsAsync()
 		{
 			try
 			{
 				_logger.LogInformation("Starting to retrieve schedule creation details");
 
-				// Fetch all required data concurrently
-				var persons = await _adminData.GetAllPersonsAsync();
-				var mealTypes = await _adminData.GetMealTypesAsync();
+                // Filter at database level instead of in memory
+                var persons = await _adminData.GetPersonsByDepartmentsAsync(_userContext.DepartmentIds);
+                var mealTypes = await _adminData.GetMealTypesAsync();
 				var suppliers = await _adminData.GetAllSupplierAsync();
 				var subMealTypes = await _adminData.GetMealSubTypesListAsync(); // 👈 new fetch
 
@@ -1269,7 +1376,7 @@ namespace MealToken.Application.Services
                     Description = requestDto.Description,
                     NoofAttendees = requestDto.NoOfAttendess,
                     Status = UserRequestStatus.Pending,
-                    RequesterId = GetCurrentUserId()
+                    RequesterId = _userContext.UserId.Value
                 };
 
                 await _businessData.CreateRequestAsync(request);
@@ -1343,7 +1450,7 @@ namespace MealToken.Application.Services
                 existingRequest.Description = requestDto.Description;
                 existingRequest.NoofAttendees = requestDto.NoOfAttendess;
                 existingRequest.Status = existingRequest.Status;
-                existingRequest.RequesterId = GetCurrentUserId();
+                existingRequest.RequesterId = _userContext.UserId.Value;
 
                 await _businessData.UpdateRequestAsync(existingRequest);
 
@@ -1441,13 +1548,13 @@ namespace MealToken.Application.Services
         {
             try
             {
-                _logger.LogInformation("Fetching pending request list.");
+                _logger.LogInformation("Fetching pending request list for user departments");
 
-                // Get the requests based on search parameters
-                var requests = await _businessData.GetPendingRequestListAsync();
-                if (requests == null || !requests.Any())
+                // Get all pending requests
+                var pendingRequests = await _businessData.GetPendingRequestListAsync();
+                if (pendingRequests == null || !pendingRequests.Any())
                 {
-                    _logger.LogInformation("No requests found");
+                    _logger.LogInformation("No pending requests found");
                     return new ServiceResult
                     {
                         Success = true,
@@ -1455,10 +1562,51 @@ namespace MealToken.Application.Services
                         Message = "No requests found"
                     };
                 }
+                // Get requester IDs based on user's departments
+                var requesterIds = await _userData.GetUserIdsByDepartmentsAsync(_userContext.DepartmentIds);
+                if (requesterIds == null || !requesterIds.Any())
+                {
+                    _logger.LogInformation("No requesters found in the user's departments");
+                    return new ServiceResult
+                    {
+                        Success = true,
+                        Data = new List<RequestReturn>(),
+                        Message = "No requests found for your departments"
+                    };
+                }
+                // Filter pending requests by requester departments
+                var filteredRequests = pendingRequests
+                    .Where(r => requesterIds.Contains(r.RequesterId))
+                    .ToList();
+
+                if (!filteredRequests.Any())
+                {
+                    _logger.LogInformation("No pending requests found for requesters in user's departments");
+                    return new ServiceResult
+                    {
+                        Success = true,
+                        Data = new List<RequestReturn>(),
+                        Message = "No requests found for your departments"
+                    };
+                }
+
+                // Batch fetch all requester names
+                var requestersDict = (await _userData.GetUserNamesByIdsAsync(
+                    filteredRequests.Select(r => r.RequesterId).Distinct().ToList()
+                )).ToDictionary(u => u.UserId, u => u.UserName);
+
+                // Batch fetch all meals for filtered requests
+                var requestIds = filteredRequests.Select(r => r.MealRequestId).ToList();
+                var allRequestMeals = await _businessData.GetRequestMealsByRequestIdsAsync(requestIds);
+
+                // Group meals by request ID for faster lookup
+                var mealsByRequestId = allRequestMeals
+                    .GroupBy(m => m.RequestId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
 
                 // Map the requests to DTOs
                 var requestDtos = new List<RequestReturn>();
-                foreach (var request in requests)
+                foreach (var request in filteredRequests)
                 {
                     var requestDto = new RequestReturn
                     {
@@ -1466,19 +1614,28 @@ namespace MealToken.Application.Services
                         EventDate = request.EventDate,
                         EventType = request.EventType,
                         Description = request.Description,
-                        NoOfAttendess = request.NoofAttendees
+                        NoOfAttendess = request.NoofAttendees,
+                        RequesterId = request.RequesterId,
+                        Requester = requestersDict.ContainsKey(request.RequesterId)
+                            ? requestersDict[request.RequesterId]
+                            : "Unknown"
                     };
 
-                    // Get and map the meals for each request
-                    var meals = await _businessData.GetRequestMealsAsync(request.MealRequestId);
-                    requestDto.RequestMeals = meals.Select(m => new RequestMealDto
+                    // Get meals for this request
+                    if (mealsByRequestId.TryGetValue(request.MealRequestId, out var meals))
                     {
-                        MealTypeId = m.MealTypeId,
-                        SubTypeId = m.SubTypeId,
-                        MealCostId = m.MealCostId,
-                        Quantity = m.Quantity,
-                       
-                    }).ToList();
+                        requestDto.RequestMeals = meals.Select(m => new RequestMealDto
+                        {
+                            MealTypeId = m.MealTypeId,
+                            SubTypeId = m.SubTypeId,
+                            MealCostId = m.MealCostId,
+                            Quantity = m.Quantity
+                        }).ToList();
+                    }
+                    else
+                    {
+                        requestDto.RequestMeals = new List<RequestMealDto>();
+                    }
 
                     requestDtos.Add(requestDto);
                 }
@@ -1494,7 +1651,6 @@ namespace MealToken.Application.Services
             {
                 _logger.LogError(ex, "Error fetching request list. ErrorType: {ErrorType}",
                     ex.GetType().Name);
-
                 return new ServiceResult
                 {
                     Success = false,
@@ -1521,9 +1677,50 @@ namespace MealToken.Application.Services
                     };
                 }
 
+                var requesterIds = await _userData.GetUserIdsByDepartmentsAsync(_userContext.DepartmentIds);
+                if (requesterIds == null || !requesterIds.Any())
+                {
+                    _logger.LogInformation("No requesters found in the user's departments");
+                    return new ServiceResult
+                    {
+                        Success = true,
+                        Data = new List<RequestReturn>(),
+                        Message = "No requests found for your departments"
+                    };
+                }
+                // Filter pending requests by requester departments
+                var filteredRequests = requests
+                    .Where(r => requesterIds.Contains(r.RequesterId))
+                    .ToList();
+
+                if (!filteredRequests.Any())
+                {
+                    _logger.LogInformation("No pending requests found for requesters in user's departments");
+                    return new ServiceResult
+                    {
+                        Success = true,
+                        Data = new List<RequestReturn>(),
+                        Message = "No requests found for your departments"
+                    };
+                }
+
+                // Batch fetch all requester names
+                var requestersDict = (await _userData.GetUserNamesByIdsAsync(
+                    filteredRequests.Select(r => r.RequesterId).Distinct().ToList()
+                )).ToDictionary(u => u.UserId, u => u.UserName);
+
+                // Batch fetch all meals for filtered requests
+                var requestIds = filteredRequests.Select(r => r.MealRequestId).ToList();
+                var allRequestMeals = await _businessData.GetRequestMealsByRequestIdsAsync(requestIds);
+
+                // Group meals by request ID for faster lookup
+                var mealsByRequestId = allRequestMeals
+                    .GroupBy(m => m.RequestId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
                 // Map the requests to DTOs
                 var requestDtos = new List<RequestReturn>();
-                foreach (var request in requests)
+                foreach (var request in filteredRequests)
                 {
                     var requestDto = new RequestReturn
                     {
@@ -1531,22 +1728,32 @@ namespace MealToken.Application.Services
                         EventDate = request.EventDate,
                         EventType = request.EventType,
                         Description = request.Description,
-                        NoOfAttendess = request.NoofAttendees
+                        NoOfAttendess = request.NoofAttendees,
+                        RequesterId = request.RequesterId,
+                        Requester = requestersDict.ContainsKey(request.RequesterId)
+                            ? requestersDict[request.RequesterId]
+                            : "Unknown"
                     };
 
-                    // Get and map the meals for each request
-                    var meals = await _businessData.GetRequestMealsAsync(request.MealRequestId);
-                    requestDto.RequestMeals = meals.Select(m => new RequestMealDto
+                    // Get meals for this request
+                    if (mealsByRequestId.TryGetValue(request.MealRequestId, out var meals))
                     {
-                        MealTypeId = m.MealTypeId,
-                        SubTypeId = m.SubTypeId,
-                        MealCostId = m.MealCostId,
-                        Quantity = m.Quantity,
-
-                    }).ToList();
+                        requestDto.RequestMeals = meals.Select(m => new RequestMealDto
+                        {
+                            MealTypeId = m.MealTypeId,
+                            SubTypeId = m.SubTypeId,
+                            MealCostId = m.MealCostId,
+                            Quantity = m.Quantity
+                        }).ToList();
+                    }
+                    else
+                    {
+                        requestDto.RequestMeals = new List<RequestMealDto>();
+                    }
 
                     requestDtos.Add(requestDto);
                 }
+
 
                 return new ServiceResult
                 {
@@ -1574,10 +1781,10 @@ namespace MealToken.Application.Services
             {
                 _logger.LogInformation("Fetching request list for user.");
 
-				int userId = GetCurrentUserId();
+				int userId = _userContext.UserId.Value;
 				var user = await _adminData.GetUserByIdAsync(userId);
                 // Get the requests based on search parameters
-                var requests = await _businessData.GetRequesListByIdAsync(userId);
+                var requests = await _businessData.GetRequesListAsync();
                 if (requests == null || !requests.Any())
                 {
                     _logger.LogInformation("No requests found");
@@ -1589,9 +1796,50 @@ namespace MealToken.Application.Services
                     };
                 }
 
+                var requesterIds = await _userData.GetUserIdsByDepartmentsAsync(_userContext.DepartmentIds);
+                if (requesterIds == null || !requesterIds.Any())
+                {
+                    _logger.LogInformation("No requesters found in the user's departments");
+                    return new ServiceResult
+                    {
+                        Success = true,
+                        Data = new List<RequestReturn>(),
+                        Message = "No requests found for your departments"
+                    };
+                }
+                // Filter pending requests by requester departments
+                var filteredRequests = requests
+                    .Where(r => requesterIds.Contains(r.RequesterId))
+                    .ToList();
+
+                if (!filteredRequests.Any())
+                {
+                    _logger.LogInformation("No pending requests found for requesters in user's departments");
+                    return new ServiceResult
+                    {
+                        Success = true,
+                        Data = new List<RequestReturn>(),
+                        Message = "No requests found for your departments"
+                    };
+                }
+
+                // Batch fetch all requester names
+                var requestersDict = (await _userData.GetUserNamesByIdsAsync(
+                    filteredRequests.Select(r => r.RequesterId).Distinct().ToList()
+                )).ToDictionary(u => u.UserId, u => u.UserName);
+
+                // Batch fetch all meals for filtered requests
+                var requestIds = filteredRequests.Select(r => r.MealRequestId).ToList();
+                var allRequestMeals = await _businessData.GetRequestMealsByRequestIdsAsync(requestIds);
+
+                // Group meals by request ID for faster lookup
+                var mealsByRequestId = allRequestMeals
+                    .GroupBy(m => m.RequestId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
                 // Map the requests to DTOs
                 var requestDtos = new List<RequestReturn>();
-                foreach (var request in requests)
+                foreach (var request in filteredRequests)
                 {
                     var requestDto = new RequestReturn
                     {
@@ -1599,22 +1847,32 @@ namespace MealToken.Application.Services
                         EventDate = request.EventDate,
                         EventType = request.EventType,
                         Description = request.Description,
-                        NoOfAttendess = request.NoofAttendees
+                        NoOfAttendess = request.NoofAttendees,
+                        RequesterId = request.RequesterId,
+                        Requester = requestersDict.ContainsKey(request.RequesterId)
+                            ? requestersDict[request.RequesterId]
+                            : "Unknown"
                     };
 
-                    // Get and map the meals for each request
-                    var meals = await _businessData.GetRequestMealsAsync(request.MealRequestId);
-                    requestDto.RequestMeals = meals.Select(m => new RequestMealDto
+                    // Get meals for this request
+                    if (mealsByRequestId.TryGetValue(request.MealRequestId, out var meals))
                     {
-                        MealTypeId = m.MealTypeId,
-                        SubTypeId = m.SubTypeId,
-                        MealCostId = m.MealCostId,
-                        Quantity = m.Quantity,
-
-                    }).ToList();
+                        requestDto.RequestMeals = meals.Select(m => new RequestMealDto
+                        {
+                            MealTypeId = m.MealTypeId,
+                            SubTypeId = m.SubTypeId,
+                            MealCostId = m.MealCostId,
+                            Quantity = m.Quantity
+                        }).ToList();
+                    }
+                    else
+                    {
+                        requestDto.RequestMeals = new List<RequestMealDto>();
+                    }
 
                     requestDtos.Add(requestDto);
                 }
+
 
                 return new ServiceResult
                 {
@@ -1767,22 +2025,41 @@ namespace MealToken.Application.Services
 
         private bool IsValidStatusTransition(UserRequestStatus currentStatus, UserRequestStatus newStatus)
         {
-            // Add your status transition rules here
-            // Example:
-            return newStatus == UserRequestStatus.Pending || newStatus == UserRequestStatus.Approved;
-        }
-
-        public int GetCurrentUserId()
-        {
-            var user = _httpContextAccessor.HttpContext?.User;
-            var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-			if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim))
-				// throw new UnauthorizedAccessException("User ID not found in token.");
-				return 3;
-
-            return int.Parse(userIdClaim);
            
+            // A status can never transition back to itself unless it is intentionally allowed, 
+            // but typically updates should change the state.
+            if (currentStatus == newStatus)
+            {
+                return true;
+            }
+
+            switch (currentStatus)
+            {
+                case UserRequestStatus.Pending:
+                    // A request can move from Pending to Approved, Rejected, or Expired.
+                    return newStatus == UserRequestStatus.Approved ||
+                           newStatus == UserRequestStatus.Rejected ||
+                           newStatus == UserRequestStatus.Expired;
+
+                case UserRequestStatus.Approved:
+                    // Once a request is Approved, it is typically a terminal state and cannot be changed.
+                    // If the request can be cancelled/revoked, add that status here (e.g., Canceled).
+                    return false;
+
+                case UserRequestStatus.Rejected:
+                    // Once a request is Rejected, it is a terminal state and cannot be changed.
+                    return false;
+
+                case UserRequestStatus.Expired:
+                    // Once a request has Expired (e.g., due to a timeout), it cannot be changed.
+                    return false;
+
+                default:
+                    // Should not happen, but handles any future/unknown states safely.
+                    return false;
+            }
         }
+
     }
 	
 }

@@ -1,5 +1,6 @@
 ﻿using Authentication.Extensions;
 using Authentication.Interfaces;
+using Authentication.Services;
 using MealToken.API.Helpers;
 using MealToken.API.Middlewear;
 using MealToken.Application.Interfaces;
@@ -11,7 +12,26 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
+/*
+using System.Security.Cryptography;
 
+// Specify the desired key length in bytes (e.g., 32 bytes for a 256-bit key)
+const int keyLengthInBytes = 64;
+
+// Generate a cryptographically strong random byte array
+byte[] keyBytes = RandomNumberGenerator.GetBytes(keyLengthInBytes);
+
+// Convert the byte array to a Base64 string for easy storage
+string securedKey = Convert.ToBase64String(keyBytes);
+
+// securedKey will be a long, random, non-readable string suitable for your Jwt:Key setting
+Console.WriteLine(securedKey);
+
+var (key, iv) = EncryptionKeyGenerator.GenerateAesKeyAndIv();
+Console.WriteLine($"Key: {key}");
+Console.WriteLine($"IV: {iv}");*/
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -19,6 +39,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<TenantContext>();
 builder.Services.AddScoped<ITenantContext>(provider => provider.GetRequiredService<TenantContext>());
+builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<TenantDbContextFactory>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEntityCreationService, EntityCreationService>();
@@ -29,6 +50,10 @@ builder.Services.AddScoped<IBusinessService,BusinessService>();
 builder.Services.AddScoped<ScheduleDateGeneratorService>();
 builder.Services.AddScoped<ITokenProcessService, TokenProcessService>();
 builder.Services.AddScoped<ICompanyBusinessLogic, CompanyBusinessLogic>();
+builder.Services.AddScoped<IMealReportService, MealReportService>();
+builder.Services.AddScoped<IUserHistoryService,UserHistoryService>();
+builder.Services.AddScoped<UserHistoryActionFilter>();
+
 
 builder.Services.AddHttpContextAccessor();
 
@@ -51,11 +76,8 @@ builder.Services.AddSwaggerGen(c =>
 
 // 🔹 Register your class library services
 builder.Services.AddAuthenticationLibrary(builder.Configuration);
-var tempProvider = builder.Services.BuildServiceProvider();
-var encryptionService = tempProvider.GetRequiredService<IEncryptionService>();
 
-var encryptedJwtKey = builder.Configuration["JwtSettings:Key"];
-string jwtKey = encryptionService.DecryptData(encryptedJwtKey);
+var jwtKey = builder.Configuration["JwtSettings:Key"];
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
 var jwtAudience = builder.Configuration["JwtSettings:Audience"];
 
@@ -83,22 +105,46 @@ builder.Services.AddAuthorization(options =>
 {
 	options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 	options.AddPolicy("DepartmentHeadOnly", policy => policy.RequireRole("DepartmentHead"));
-	options.AddPolicy("ShedulerOnly", policy => policy.RequireRole("Sheduler"));
+	options.AddPolicy("SchedulerOnly", policy => policy.RequireRole("Sheduler"));
 	options.AddPolicy("RequesterOnly", policy => policy.RequireRole("Requester"));
 });
+
+builder.Services.AddRateLimiter(options =>
+{
+	options.AddPolicy("LoginLimit", httpContext =>
+		RateLimitPartition.GetTokenBucketLimiter(
+			partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+			_ => new TokenBucketRateLimiterOptions
+			{
+				TokenLimit = 5, // Max 5 attempts
+				TokensPerPeriod = 5, // Reset to 5 tokens each period
+				ReplenishmentPeriod = TimeSpan.FromMinutes(1), // 1-minute reset
+				AutoReplenishment = true,
+				QueueLimit = 0
+			}));
+});
+
 // Add CORS policy
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowFrontend", policy =>
 	{
-		policy.WithOrigins("http://207.180.217.101:85" , "https://localhost:3000") // Your frontend URL
+		policy.WithOrigins("http://10.30.1.1:8082", "http://localhost:8082") // Your frontend URL
 			  .AllowAnyHeader()
 			  .AllowAnyMethod()
 			  .AllowCredentials(); // If you need cookies/auth
 	});
 });
-
-
+*/
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -114,10 +160,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
-app.UseMiddleware<TenantMiddleware>();
+//app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<TenantMiddleware>();
+app.UseMiddleware<UserContextMiddleware>();
 
 app.MapControllers();
 

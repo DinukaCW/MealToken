@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MealToken.Domain.Models.Reports;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,8 @@ namespace MealToken.Domain.Models
         public string EventType { get; set; }
         public string Description { get; set; }
         public int NoOfAttendess { get; set; }
+        public int RequesterId { get; set; }
+        public string Requester { get; set; }
         public List<RequestMealDto>? RequestMeals { get; set; }
     }
 }

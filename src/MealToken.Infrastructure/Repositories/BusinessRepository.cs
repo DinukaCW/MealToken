@@ -1,6 +1,7 @@
 ﻿using MealToken.Application.Interfaces;
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
+using MealToken.Domain.Models;
 using MealToken.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -372,6 +373,135 @@ namespace MealToken.Infrastructure.Repositories
                 await _tenantContext.SaveChangesAsync();
             }
         }
+        public async Task<List<MealConsumptionWithDetails>> GetMealConsumptioninWeekAsync(DateOnly startDate, DateOnly endDate)
+        {
+            // Step 1: Query the first context (_tenantContext) and bring the initial data into memory.
+            // We select into an anonymous type to get just what we need.
+            var consumptionsFromTenantDb = await (
+                from mc in _tenantContext.MealConsumption
+                join p in _tenantContext.Person on mc.PersonId equals p.PersonId
+				where mc.Date >= startDate
+			          && mc.Date <= endDate
+			          && mc.TockenIssued
+				select new
+                {
+                    Consumption = mc, // Keep the original consumption object
+                    p.DepartmentId,
+                    p.DesignationId
+                })
+                .ToListAsync();
 
+            // If there's no data, return an empty list early.
+            if (!consumptionsFromTenantDb.Any())
+            {
+                return new List<MealConsumptionWithDetails>();
+            }
+
+            // Step 2: Get the unique IDs needed for the second context.
+            var departmentIds = consumptionsFromTenantDb.Select(c => c.DepartmentId).Distinct().ToList();
+            var designationIds = consumptionsFromTenantDb.Select(c => c.DesignationId).Distinct().ToList();
+
+            // Step 3: Query the second context (_platformContext) for departments and designations.
+            // Fetching into dictionaries makes the lookup in the next step very fast.
+            var departments = await _platformContext.Department
+                .Where(d => departmentIds.Contains(d.DepartmnetId))
+                .ToDictionaryAsync(d => d.DepartmnetId, d => d.Name);
+
+            var designations = await _platformContext.Designation
+                .Where(des => designationIds.Contains(des.DesignationId))
+                .ToDictionaryAsync(des => des.DesignationId, des => des.Title);
+
+            // Step 4: Join the data in memory to build the final list.
+            var result = consumptionsFromTenantDb.Select(c => new MealConsumptionWithDetails
+            {
+                MealConsumptionId = c.Consumption.MealConsumptionId,
+                Date = c.Consumption.Date,
+                PersonId = c.Consumption.PersonId,
+                PersonName = c.Consumption.PersonName,
+                Gender = c.Consumption.Gender,
+                // Look up the name from the dictionaries. Provide a default value if not found.
+                DepartmentName = departments.TryGetValue(c.DepartmentId, out var deptName) ? deptName : "N/A",
+                DesignationName = designations.TryGetValue(c.DesignationId??11, out var desigTitle) ? desigTitle : "N/A",
+                MealTypeName = c.Consumption.MealTypeName,
+                SubTypeName = c.Consumption.SubTypeName,
+                EmployeeCost = c.Consumption.EmployeeCost,
+                CompanyCost = c.Consumption.CompanyCost,
+                SupplierCost = c.Consumption.SupplierCost
+            }).ToList();
+
+            // Apply sorting to the final in-memory list
+            return result
+                .OrderBy(m => m.Date)
+                .ThenBy(m => m.MealTypeName)
+                .ThenBy(m => m.SubTypeName)
+                .ThenBy(m => m.PersonId)
+                .ToList();
+        }
+        public async Task<int> GetMealsServedThisMonthAsync()
+        {
+            var today = DateTime.Now;
+            var firstDayOfMonth = new DateOnly(today.Year, today.Month, 1);
+            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            return await _tenantContext.MealConsumption
+				.Where(m => m.Date >= firstDayOfMonth
+				             && m.Date <= lastDayOfMonth
+				             && m.TockenIssued)
+				.CountAsync();
+        }
+
+        public async Task<int> GetMealsServedLastMonthAsync()
+        {
+            var today = DateTime.Now;
+            var firstDayOfLastMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(-1);
+            var lastDayOfLastMonth = new DateOnly(today.Year, today.Month, 1).AddDays(-1);
+
+            return await _tenantContext.MealConsumption
+                .Where(m => m.Date >= firstDayOfLastMonth
+                         && m.Date <= lastDayOfLastMonth
+						 && m.TockenIssued)
+                .CountAsync();
+        }
+
+        public async Task<int> GetActiveEmployeesCountAsync()
+        {
+            return await _tenantContext.Person
+                .Where(e => e.PersonType == PersonType.Employer && e.IsActive == true)
+                .CountAsync();
+        }
+
+        public async Task<int> GetActiveVisitorsCountAsync()
+        {
+           
+            return await _tenantContext.Person
+                .Where(v => v.PersonType == PersonType.Visitor && v.IsActive == true)
+                .CountAsync();
+        }
+
+        public async Task<int> GetPendingRequestsCountAsync()
+        {
+            return await _tenantContext.Request
+                .Where(r => r.Status == UserRequestStatus.Pending)
+                .CountAsync();
+        }
+        public async Task CreateMealConsumptionBatchAsync(IEnumerable<MealConsumption> mealConsumptions)
+        {
+            await _tenantContext.MealConsumption.AddRangeAsync(mealConsumptions);
+            await _tenantContext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<RequestMeal>> GetRequestMealsByRequestIdsAsync(IEnumerable<int> requestIds)
+        {
+
+                if (requestIds == null || !requestIds.Any())
+                    return new List<RequestMeal>();
+
+                var idList = requestIds.Distinct().ToList();
+                return await _tenantContext.RequestMeal
+                    .Where(rm => idList.Contains(rm.RequestId))
+                    .AsNoTracking()
+                    .ToListAsync();
+  
+        }
     }
 }

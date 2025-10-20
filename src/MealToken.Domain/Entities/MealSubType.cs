@@ -19,5 +19,6 @@ namespace MealToken.Domain.Entities
 		public string? Description { get; set; }
 		public string Functionkey { get; set; }
 		public DateTime CreatedAt { get; set; }
-	}
+		public bool IsActive { get; set; }
+    }
 }

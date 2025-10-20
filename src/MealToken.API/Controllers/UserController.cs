@@ -1,6 +1,7 @@
 ﻿using Authentication.Interfaces;
 using Authentication.Models.DTOs;
 using Google.Apis.Auth;
+using MealToken.API.Helpers;
 using MealToken.Application.Interfaces;
 using MealToken.Application.Services;
 using MealToken.Domain.Models;
@@ -33,13 +34,14 @@ namespace MealToken.API.Controllers
 		/// <param name="configuration">The configuration.</param>
 		/// <param name="mfaService">The MFA service.</param>
 		/// <param name="authenticationService">The authentication service.</param>
-		public UserController(IUserService userService, IConfiguration configuration, IMfaService mfaService, IMultifacAuthenticationService authenticationService, IEntityCreationService entityCreationService)
+		public UserController(IUserService userService, IConfiguration configuration, IMfaService mfaService, IMultifacAuthenticationService authenticationService, IEntityCreationService entityCreationService, IJwtTokenService jwtTokenService)
 		{
 			_userService = userService;
 			_configuration = configuration;
 			_mfaService = mfaService;
 			_authenticationService = authenticationService;
 			_entityCreationService = entityCreationService;
+			_jwtTokenService = jwtTokenService;
 		}
 
 		// Endpoint for user login
@@ -49,7 +51,7 @@ namespace MealToken.API.Controllers
 		/// <param name="loginRequest">The login request data.</param>
 		/// <returns>Returns an action result indicating the login outcome.</returns>
 		[HttpPost("login")]
-		//[EnableRateLimiting("LoginLimit")]
+		[EnableRateLimiting("LoginLimit")]
 		public async Task<IActionResult> Login([FromBody] RequestLogin loginRequest)
 		{
 			try
@@ -107,7 +109,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpGet("GetPendingRequests")]
-		[Authorize(Roles = "Admin,Reviewer")] // Require admin or reviewer role
+		[Authorize(Roles = "Admin,DepartmentHead")] // Require admin or reviewer role
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetPendingUserRequests()
 		{
 			try
@@ -128,7 +131,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("ApproveRequest")]
-		[Authorize(Roles = "Admin")]
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> ApproveUserRequest([FromBody] ApproveRequestModel model)
 		{
 			try
@@ -146,10 +150,7 @@ namespace MealToken.API.Controllers
 					return Unauthorized(new { message = "Unable to identify reviewer." });
 				}
 
-				var result = await _entityCreationService.ApproveUserRequestAsync(
-					model.RequestId,
-					reviewerId.Value,
-					model.Comments);
+				var result = await _entityCreationService.ApproveUserRequestAsync(reviewerId.Value, model);
 
 				if (!result.Success)
 				{
@@ -170,6 +171,7 @@ namespace MealToken.API.Controllers
 
 		[HttpPost("RejectRequest")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> RejectUserRequest([FromBody] RejectRequestModel model)
 		{
 			try
@@ -206,6 +208,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetRequestById")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetUserRequestById(int requestId)
 		{
 			try
@@ -229,7 +232,8 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpGet("GetAllUsers")]
-		//[Authorize(Roles = "Admin,DepartmentHead")]
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetAllUsers()
 		{
 			try
@@ -253,6 +257,8 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpGet("GetUserById")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetUserById(int userId)
 		{
 			try
@@ -277,6 +283,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdateUser")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> UpdateUserInfo(int userId, [FromBody] UserDetails userDetails)
 		{
 			try
@@ -495,7 +503,27 @@ namespace MealToken.API.Controllers
 				return StatusCode(500, new { message = "Internal server error occurred while retrieving request." });
 			}
 		}
-		private int? GetCurrentUserId()
+
+        [HttpGet("GetDepartments")]
+		public async Task<IActionResult> GetDepartments()
+        {
+            try
+            {
+                var departments = await _entityCreationService.GetListofDepartmentsAsync();
+
+                if (departments == null)
+                {
+                    return NotFound(new { message = "No any department found." });
+                }
+
+                return Ok(departments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error occurred while retrieving request." });
+            }
+        }
+        private int? GetCurrentUserId()
 		{
 			var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 			if (int.TryParse(userIdClaim, out int userId))

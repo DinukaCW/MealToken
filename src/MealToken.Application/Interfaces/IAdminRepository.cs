@@ -22,7 +22,8 @@ namespace MealToken.Domain.Interfaces
 		Task<List<Department>> GetDepartmentsAsync();
 		Task<List<Designation>> GetDesignationsAsync();
 		Task<string?> GetDepartmentByIdAsync(int departmentId);
-		Task<string?> GetDesignationByIdAsync(int designationId);
+		Task<string?> GetUserNameByIdAsync(int userId);
+        Task<string?> GetDesignationByIdAsync(int designationId);
 		Task<Supplier> GetSupplierByEmailAsync(string email);
 		Task<Supplier> GetSupplierByIdAsync(int supplierId);
 		Task CreateSupplierAsync(Supplier supplier);
@@ -54,7 +55,26 @@ namespace MealToken.Domain.Interfaces
 		Task<List<MealSubType>> GetMealSubTypesListAsync();
 		Task<User> GetUserByIdAsync(int userId);
 		Task<List<MealCost>> GetMealCostsByIdsAsync(IEnumerable<int> mealCostIds);
-	
+		Task<List<Person>> GetPersonsByDepartmentsAsync(List<int> departmentIds);
+		Task<List<DepartmentD>> GetDepartmentsByIdsAsync(List<int> departmentIds);
+		Task<List<DesignationD>> GetDesignationsByIdsAsync(List<int> designationIds);
+		Task<List<MealSubType>> GetMealSubTypesByMealTypeIdAsync(int mealTypeId);
+		Task UpdateMealSubTypesAsync(List<MealSubType> subTypes);
+		Task SoftDeleteMealSubTypesAsync(int mealTypeId);
+		Task SoftDeleteMealSubTypesByIdsAsync(List<int> subTypeIds);
+		Task UpdateMealAddOnsAsync(List<MealAddOn> addOns);
+		Task<List<MealAddOn>> GetMealAddOnsByMealTypeIdAsync(int mealTypeId);
+		Task<MealCost> GetMealCostByDetailsAsync(int mealTypeId, int? mealSubTypeId);
+		Task<int> GetMealTypeIdbyNameAsync(string mealTypeName);
+		Task<IEnumerable<MealType>> GetMealTypesByIdsAsync(IEnumerable<int> ids);
+		Task<IEnumerable<Supplier>> GetSuppliersByIdsAsync(IEnumerable<int> ids);
+		Task<IEnumerable<MealSubType>> GetMealSubTypesByIdsAsync(IEnumerable<int> ids);
+		Task<IEnumerable<Person>> GetPeopleByIdsAsync(IEnumerable<int> ids);
+		Task<List<ScheduleMeal>> GetScheduleMealsByMealTypeIdAsync(int mealTypeId);
+		Task UpdateScheduleMeals(IEnumerable<ScheduleMeal> meals);
+		Task UpdateTenantSettingsAsync(TenantInfo tenant);
+		Task<TenantInfo> GetTenantInfoByIdAsync(int tenantId);
 
-    }
+
+	}
 }

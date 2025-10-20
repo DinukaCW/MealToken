@@ -18,6 +18,9 @@ namespace MealToken.Domain.Entities
 		public string SchemaName { get; set; } = string.Empty;
 		public string ConnectionString { get; set; } = string.Empty;
 		public bool IsActive { get; set; } = true;
+		public string? Currency { get; set; } = "LKR";
+		public bool? EnableNotifications { get; set; }= true;
+		public bool? EnableFunctionKeys { get; set; }= true;
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 	}
 }

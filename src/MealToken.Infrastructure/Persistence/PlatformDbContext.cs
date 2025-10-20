@@ -54,6 +54,15 @@ namespace MealToken.Infrastructure.Persistence
 					  .IsRequired()
 					  .HasDefaultValue(true);
 
+				entity.Property(e => e.Currency)
+					  .HasMaxLength(10);
+
+				entity.Property(e => e.EnableNotifications)
+					  .HasDefaultValue(true);
+
+				entity.Property(e => e.EnableFunctionKeys)
+					  .HasDefaultValue(true);
+
 				entity.Property(e => e.CreatedAt)
 					  .IsRequired()
 					  .HasDefaultValueSql("GETUTCDATE()");

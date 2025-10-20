@@ -16,11 +16,13 @@ namespace MealToken.Domain.Entities
         public int MealConsumptionId { get; set; }
         public int TenantId { get; set; }
         public int PersonId { get; set; }
-        public string PersonName { get; set; }
+        public string? PersonName { get; set; }
+        public string? Gender { get; set; }
         public DateOnly Date {  get; set; }
         public TimeOnly Time { get; set; }
-        public int SchduleId { get; set; }
-        public string SchduleName { get; set; }
+        public int ScheduleId { get; set; }
+        public string ScheduleName { get; set; }
+        public bool AddOnMeal {  get; set; } = false;
         public int MealTypeId { get; set; }
         public string MealTypeName { get; set; }
         public int? SubTypeId { get; set; }

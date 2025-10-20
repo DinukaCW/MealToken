@@ -12,6 +12,7 @@ namespace MealToken.Domain.Models
 		public string FullName { get; set; }
 		public int UserRoleId { get; set; }
 		public string UserRole { get; set; }
+		public List<DepartmentD> Departments { get; set; }
 
 	}
 }

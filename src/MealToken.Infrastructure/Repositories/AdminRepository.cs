@@ -1,6 +1,7 @@
 ﻿using Authentication.Models.Entities;
 using MealToken.Application.Interfaces;
 using MealToken.Domain.Entities;
+using MealToken.Domain.Enums;
 using MealToken.Domain.Interfaces;
 using MealToken.Domain.Models;
 using MealToken.Infrastructure.Persistence;
@@ -41,13 +42,15 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<Person> GetPersonByNumberAsync(string personNumber)
 		{
 			return await _tenantContext.Person
-				.FirstOrDefaultAsync(e => e.PersonNumber == personNumber);
-		}
+				.Where(e => e.PersonNumber == personNumber && e.IsActive)
+				.FirstOrDefaultAsync();
+        }
 
 		public async Task<Person> GetPersonByNICAsync(string nicNumber)
 		{
 			return await _tenantContext.Person
-				.FirstOrDefaultAsync(e => e.NICNumber == nicNumber);
+				.Where(e => e.NICNumber == nicNumber && e.IsActive)
+                .FirstOrDefaultAsync();
 		}
 
 		public async Task<List<Person>> GetAllPersonsAsync()
@@ -111,8 +114,14 @@ namespace MealToken.Infrastructure.Repositories
 				.Select(d => d.Name)
 				.FirstOrDefaultAsync();
 		}
-
-		public async Task<string?> GetDesignationByIdAsync(int designationId)
+        public async Task<string?> GetUserNameByIdAsync(int userId)
+        {
+            return await _tenantContext.Users
+                .Where(d => d.UserID == userId)
+                .Select(d => d.FullName)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<string?> GetDesignationByIdAsync(int designationId)
 		{
 			return await _platformContext.Designation
 				.Where(d => d.DesignationId == designationId)
@@ -122,7 +131,8 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<Supplier> GetSupplierByEmailAsync(string email)
 		{
 			return await _tenantContext.Supplier
-				.FirstOrDefaultAsync(e => e.Email == email);
+				.Where(e => e.IsActive)
+                .FirstOrDefaultAsync(e => e.Email == email );
 		}
 		public async Task<Supplier> GetSupplierByIdAsync(int supplierId)
 		{
@@ -170,22 +180,26 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<List<MealTypeDto>> GetMealTypesAsync()
 		{
 			return await _tenantContext.MealType
-				.Select(d => new MealTypeDto
+                .Where(d => d.IsActive)
+                .Select(d => new MealTypeDto
 				{
 					MealTypeId = d.MealTypeId,
 					MealTypeName = d.TypeName,
 					Description = d.Description
-				})
-				.ToListAsync();
+				}) 
+                .ToListAsync();
 		}
 		public async Task<MealType> GetMealTypeByIdAsync(int mealTypeId)
 		{
-			return await _tenantContext.MealType.FindAsync(mealTypeId);
+			return await _tenantContext.MealType
+				.Where(e => e.IsActive && e.MealTypeId == mealTypeId)
+                .FirstOrDefaultAsync();
 		}
 		public async Task<MealType> GetMealTypeByNameAsync(string name)
 		{
 			return await _tenantContext.MealType
-				.FirstOrDefaultAsync(e => e.TypeName == name);
+                .Where(e => e.IsActive)
+                .FirstOrDefaultAsync(e => e.TypeName == name);
 		}
 		public async Task CreateMealSubTypesAsync(List<MealSubType> mealSubTypes)
 		{
@@ -231,7 +245,7 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<List<MealSubType>> GetMealSubTypesAsync(int mealTypeId)
 		{
 			return await _tenantContext.MealSubType
-				.Where(e => e.MealTypeId == mealTypeId)
+				.Where(e => e.MealTypeId == mealTypeId && e.IsActive)
 				.ToListAsync();
 		}
 		public async Task<List<MealAddOn>> GetMealAddOnsAsync(int mealTypeId)
@@ -242,7 +256,9 @@ namespace MealToken.Infrastructure.Repositories
 		}
 		public async Task<MealSubType> GetMealSubTypesByIdAsync(int mealSubTypeId)
 		{
-			return await _tenantContext.MealSubType.FindAsync(mealSubTypeId);
+			return await _tenantContext.MealSubType
+				.Where(s => s.MealSubTypeId == mealSubTypeId && s.IsActive)
+				.FirstOrDefaultAsync();
 		}
 		public async Task<MealCost?> GetMealCostByDetailAsync(int supplierId, int mealTypeId, int? mealSubTypeId)
 		{
@@ -250,7 +266,8 @@ namespace MealToken.Infrastructure.Repositories
 				.FirstOrDefaultAsync(e =>
 					e.SupplierId == supplierId
 					&& e.MealTypeId == mealTypeId
-					&& e.MealSubTypeId == mealSubTypeId);
+					&& e.MealSubTypeId == mealSubTypeId
+					&& e.IsActive);
 		}
 
 		public async Task AddMealCostAsync(MealCost mealCost)
@@ -265,7 +282,9 @@ namespace MealToken.Infrastructure.Repositories
 		}
 		public async Task<MealCost> GetMealCostByIdAsync(int mealCostId)
 		{
-			return await _tenantContext.MealCost.FindAsync(mealCostId);
+			return await _tenantContext.MealCost
+				.Where(mc => mc.MealCostId == mealCostId && mc.IsActive)
+				.FirstOrDefaultAsync();
 		}
 		public async Task DeleteMealCostAsync(MealCost mealCost)
 		{
@@ -275,7 +294,9 @@ namespace MealToken.Infrastructure.Repositories
 		}
 		public async Task<List<MealCost>> GetAllMealCostsAsync()
 		{
-			return await _tenantContext.MealCost.ToListAsync();
+			return await _tenantContext.MealCost
+				.Where(mc => mc.IsActive)
+                .ToListAsync();
 		}
 		public async Task<string> GetSupplierNameAsync(int supplierId)
 		{
@@ -317,8 +338,182 @@ namespace MealToken.Infrastructure.Repositories
         public async Task<List<MealCost>> GetMealCostsByIdsAsync(IEnumerable<int> mealCostIds)
         {          
             return await _tenantContext.MealCost
-                .Where(mc => mealCostIds.Contains(mc.MealCostId))
+                .Where(mc => mealCostIds.Contains(mc.MealCostId)&& mc.IsActive)
                 .ToListAsync();
         }
-    }
+        public async Task<List<Person>> GetPersonsByDepartmentsAsync(List<int> departmentIds)
+        {
+            return await _tenantContext.Person
+                .Where(p => departmentIds.Contains(p.DepartmentId))
+                .ToListAsync();
+        }
+
+        public async Task<List<DepartmentD>> GetDepartmentsByIdsAsync(List<int> departmentIds)
+        {
+            return await _platformContext.Department
+                .Where(d => departmentIds.Contains(d.DepartmnetId))
+                .Select(d => new DepartmentD
+				{
+					DepartmentId = d.DepartmnetId,
+					Name = d.Name
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<DesignationD>> GetDesignationsByIdsAsync(List<int> designationIds)
+        {
+            return await _platformContext.Designation
+                .Where(d => designationIds.Contains(d.DesignationId))
+                .Select(d => new DesignationD
+				{
+					DesignationId = d.DesignationId,
+					Name = d.Title
+                })
+                .ToListAsync();
+        }
+        public async Task<List<MealSubType>> GetMealSubTypesByMealTypeIdAsync(int mealTypeId)
+        {
+            return await _tenantContext.MealSubType
+                .Where(s => s.MealTypeId == mealTypeId && s.IsActive)
+                .ToListAsync();
+        }
+
+        public async Task UpdateMealSubTypesAsync(List<MealSubType> subTypes)
+        {
+            _tenantContext.MealSubType.UpdateRange(subTypes);
+            await _tenantContext.SaveChangesAsync();
+        }
+
+        public async Task SoftDeleteMealSubTypesAsync(int mealTypeId)
+        {
+            var subTypes = await _tenantContext.MealSubType
+                .Where(s => s.MealTypeId == mealTypeId && s.IsActive)
+                .ToListAsync();
+
+            foreach (var subType in subTypes)
+            {
+                subType.IsActive = false;
+            }
+
+            await _tenantContext.SaveChangesAsync();
+        }
+
+        public async Task SoftDeleteMealSubTypesByIdsAsync(List<int> subTypeIds)
+        {
+            var subTypes = await _tenantContext.MealSubType
+                .Where(s => subTypeIds.Contains(s.MealSubTypeId))
+                .ToListAsync();
+
+            foreach (var subType in subTypes)
+            {
+                subType.IsActive = false;
+            }
+
+            await _tenantContext.SaveChangesAsync();
+        }
+
+        // MealAddOn Methods
+        public async Task<List<MealAddOn>> GetMealAddOnsByMealTypeIdAsync(int mealTypeId)
+        {
+            return await _tenantContext.MealAddOn
+                .Where(a => a.MealTypeId == mealTypeId)
+                .ToListAsync();
+        }
+
+        public async Task UpdateMealAddOnsAsync(List<MealAddOn> addOns)
+        {
+           _tenantContext.MealAddOn.UpdateRange(addOns);
+            await _tenantContext.SaveChangesAsync();
+        }
+        public async Task<MealCost> GetMealCostByDetailsAsync(int mealTypeId, int? mealSubTypeId)
+        {
+            return await _tenantContext.MealCost
+                .Where(a =>
+                    a.MealTypeId == mealTypeId &&
+                    ((mealSubTypeId == null && a.MealSubTypeId == null) || a.MealSubTypeId == mealSubTypeId)
+                )
+                .FirstOrDefaultAsync();
+        }
+        public async Task<int> GetMealTypeIdbyNameAsync(string mealTypeName)
+        {
+            return await _tenantContext.MealType
+                .Where(m => m.TypeName == mealTypeName  )
+				.Select(m => m.MealTypeId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<MealType>> GetMealTypesByIdsAsync(IEnumerable<int> ids)
+        {
+           
+              if (ids == null || !ids.Any())
+                   return new List<MealType>();
+
+                var idList = ids.Distinct().ToList();
+                return await _tenantContext.MealType
+                    .Where(mt => idList.Contains(mt.MealTypeId))
+                    .AsNoTracking()
+                    .ToListAsync();
+    
+        }
+
+        public async Task<IEnumerable<Supplier>> GetSuppliersByIdsAsync(IEnumerable<int> ids)
+        {
+                if (ids == null || !ids.Any())
+                    return new List<Supplier>();
+
+                var idList = ids.Distinct().ToList();
+                return await _tenantContext.Supplier
+                    .Where(s => idList.Contains(s.SupplierId))
+                    .AsNoTracking()
+                    .ToListAsync();
+        }
+
+        public async Task<IEnumerable<MealSubType>> GetMealSubTypesByIdsAsync(IEnumerable<int> ids)
+        {
+                if (ids == null || !ids.Any())
+                    return new List<MealSubType>();
+
+                var idList = ids.Distinct().ToList();
+                return await _tenantContext.MealSubType
+                    .Where(mst => idList.Contains(mst.MealSubTypeId))
+                    .AsNoTracking()
+                    .ToListAsync();
+
+        }
+        public async Task<IEnumerable<Person>> GetPeopleByIdsAsync(IEnumerable<int> ids)
+        {
+                if (ids == null || !ids.Any())
+                    return new List<Person>();
+
+                var idList = ids.Distinct().ToList();
+                return await _tenantContext.Person
+                    .Where(p => idList.Contains(p.PersonId))
+                    .AsNoTracking()
+                    .ToListAsync();
+        }
+		public async Task<List<ScheduleMeal>> GetScheduleMealsByMealTypeIdAsync(int mealTypeId)
+		{
+			return await _tenantContext.ScheduleMeal
+				.Where(a => a.MealTypeId == mealTypeId)
+				.ToListAsync();
+		}
+
+		public async Task UpdateScheduleMeals(IEnumerable<ScheduleMeal> meals)
+		{
+			_tenantContext.ScheduleMeal.UpdateRange(meals);
+			await _tenantContext.SaveChangesAsync();
+		}
+
+		public async Task UpdateTenantSettingsAsync(TenantInfo tenant)
+		{
+			_platformContext.TenantInfo.Update(tenant);
+			await _platformContext.SaveChangesAsync();
+		}
+		public async Task<TenantInfo> GetTenantInfoByIdAsync(int tenantId)
+		{
+			return await _platformContext.TenantInfo
+				.Where(m => m.Id == tenantId)
+				.FirstOrDefaultAsync();
+		}
+	}
 }

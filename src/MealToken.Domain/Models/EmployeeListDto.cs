@@ -20,7 +20,9 @@ namespace MealToken.Domain.Models
 		public string? EmployeeGrade { get; set; }
 		public string? EmployeeType { get; set; }
 		public string Gender { get; set; }
-		public string? MealGroup { get; set; }
+		public string? WhatsappNumber { get; set; }
+		public string? EMail { get; set; }
+        public string? MealGroup { get; set; }
 		public bool MealEligibility { get; set; }
 		public bool ActiveEmployee { get; set; }
 	}

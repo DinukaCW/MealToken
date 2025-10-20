@@ -13,12 +13,14 @@ namespace MealToken.Application.Interfaces
 	{
 		Task<ServiceResult> SubmitUserRequestAsync(UserDetails userDetails);
 		Task<List<UserRequestDto>> GetPendingUserRequestsAsync();
-		Task<ServiceResult> ApproveUserRequestAsync(int requestId, int reviewerId, string? comments = null);
-		Task<ServiceResult> RejectUserRequestAsync(int requestId, int reviewerId, string rejectionReason);
+		Task<ServiceResult> ApproveUserRequestAsync(int reviewerId, ApproveRequestModel model);
+        Task<ServiceResult> RejectUserRequestAsync(int requestId, int reviewerId, string rejectionReason);
 		Task<UserRequest> GetUserRequestByIdAsync(int requestId);
 		Task<List<UserListDto>> GetUsersListAsync();
 		Task<UserListDto?> GetUserByIdAsync(int userId);
 		Task<ServiceResult> UpdateUserAsync(int userId, UserDetails updateDto);
 		Task<List<UserRoleDto>> GetUserRolesAsync();
-	}
+		Task<List<DepartmentD>> GetListofDepartmentsAsync();
+
+    }
 }

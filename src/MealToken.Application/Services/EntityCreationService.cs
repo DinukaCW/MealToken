@@ -22,7 +22,8 @@ namespace MealToken.Application.Services
 		private readonly ITenantContext _tenantContext;
 		private readonly IEmailNotification _emailNotification;
 		private readonly IMessageService _messageService;
-		public EntityCreationService(IEncryptionService encryptionService, IUserRepository userData, ILogger<EntityCreationService> logger, ITenantContext tenantContext, IEmailNotification emailNotification, IMessageService messageService) 
+		private readonly IUserContext _userContext;
+		public EntityCreationService(IEncryptionService encryptionService, IUserRepository userData, ILogger<EntityCreationService> logger, ITenantContext tenantContext, IEmailNotification emailNotification, IMessageService messageService, IUserContext userContext) 
 		{ 
 			_encryption = encryptionService;
 			_userData = userData;
@@ -30,6 +31,7 @@ namespace MealToken.Application.Services
 			_tenantContext = tenantContext;
 			_emailNotification = emailNotification;
 			_messageService = messageService;
+			_userContext = userContext;
 		}
 		// Submit user account creation request
 		public async Task<ServiceResult> SubmitUserRequestAsync(UserDetails userDetails)
@@ -91,16 +93,33 @@ namespace MealToken.Application.Services
 				};
 
 				await _userData.CreateUserRequestAsync(userRequest);
-
-				string userROle = await _userData.GetUserRoleNameAsync(userRequest.UserRoleId);
+				
+				var userDepartments = new List<UserDepartment>();
+                foreach (var deptId in userDetails.DepartmentIds.Distinct())
+				{
+					userDepartments.Add(new UserDepartment
+					{
+						TenantId = userRequest.TenantId,
+						UserRequestId = userRequest.UserRequestId,
+						DepartmentId = deptId,
+						RequestStatus = UserRequestStatus.Pending
+					});
+                }
+				await _userData.AddUserDepartmentsAync(userDepartments);
+				
+                string userROle = await _userData.GetUserRoleNameAsync(userRequest.UserRoleId);
 
 				// Get admin users and send email notifications
 				var admins = await _userData.GetAdminUsersAsync();
-				if (admins.Any())
+				var userIds = await _userData.GetUsersByDepartmentsAsync(userDetails.DepartmentIds);
+                var filteredAdmins = admins
+					 .Where(admin => userIds.Contains(admin.UserID))
+					  .ToList();
+                if (filteredAdmins.Any())
 				{
 					// Extract admin email addresses (decrypt if they're encrypted)
 					var adminEmails = new List<string>();
-					foreach (var admin in admins)
+					foreach (var admin in filteredAdmins)
 					{
 						// Assuming admin.Email is encrypted, decrypt it
 						var decryptedEmail = _encryption.DecryptData(admin.Email);
@@ -177,21 +196,40 @@ namespace MealToken.Application.Services
 					_logger.LogInformation("No pending user requests found");
 					return new List<UserRequestDto>();
 				}
-
-				var requestDtos = new List<UserRequestDto>();
-				foreach (var request in pendingRequests)
+				var requestIds = await _userData.GetRequestsbByDepartmentsAsync(_userContext.DepartmentIds);
+				if (requestIds == null || !requestIds.Any())
 				{
-					var userRole = await _userData.GetUserRoleNameAsync(request.UserRoleId);
-					requestDtos.Add(new UserRequestDto
-					{
-						RequestId = request.UserRequestId,
-						FullName = request.FullName,
-						UserRoleId = request.UserRoleId,
-						UserRole = userRole
-					});
-				}
+                    _logger.LogInformation("No requests found for the user's departments.");
+                    return new List<UserRequestDto>();
+                }
+                var filteredPendingRequests = pendingRequests
+				  .Where(pr => requestIds.Contains(pr.UserRequestId)) // Assuming pr also has a UserRequestId
+				 .ToList();
+				var departmentsList =await _userData.GetAllDepartmentsAsync();
+                var requestDtos = new List<UserRequestDto>();
+                foreach (var request in filteredPendingRequests)
+                {
+                    var userRole = await _userData.GetUserRoleNameAsync(request.UserRoleId);
+                    var departments = await _userData.GetUserDepartmentsbyRequestAsync(request.UserRequestId);
 
-				return requestDtos;
+					var departmentDtos = departments.Select(d => new DepartmentD
+					{
+						DepartmentId = d.DepartmentId,
+                        Name = departmentsList
+								.FirstOrDefault(x => x.DepartmnetId == d.DepartmentId)?.Name
+                    }).ToList();
+
+                    requestDtos.Add(new UserRequestDto
+                    {
+                        RequestId = request.UserRequestId,
+                        FullName = request.FullName,
+                        UserRoleId = request.UserRoleId,
+                        UserRole = userRole,
+                        Departments = departmentDtos
+                    });
+                }
+
+                return requestDtos;
 			}
 			catch (Exception ex)
 			{
@@ -201,13 +239,13 @@ namespace MealToken.Application.Services
 		}
 
 		// Approve user request and create account
-		public async Task<ServiceResult> ApproveUserRequestAsync(int requestId, int reviewerId, string? comments = null)
+		public async Task<ServiceResult> ApproveUserRequestAsync(int reviewerId, ApproveRequestModel model)
 		{
 			try
 			{
-				_logger.LogInformation("Approving user request: {RequestId} by {ReviewerId}", requestId, reviewerId);
+				_logger.LogInformation("Approving user request: {RequestId} by {ReviewerId}", model.RequestId, reviewerId);
 
-				var userRequest = await _userData.GetUserRequestByIdAsync(requestId);
+				var userRequest = await _userData.GetUserRequestByIdAsync(model.RequestId);
 				if (userRequest == null)
 				{
 					return new ServiceResult
@@ -231,8 +269,7 @@ namespace MealToken.Application.Services
 				if (existingUser != null)
 				{
 					// Update request status to rejected
-					await _userData.UpdateRequestStatusAsync(requestId, UserRequestStatus.Approved, reviewerId,
-						"User already exists in system");
+					await _userData.UpdateRequestStatusAsync(model.RequestId, UserRequestStatus.Approved, reviewerId,model.Comments,"User already exists in system");
 
 					return new ServiceResult
 					{
@@ -248,7 +285,7 @@ namespace MealToken.Application.Services
 					Username = userRequest.Username,
 					FullName = userRequest.FullName,
 					PasswordHash = userRequest.PasswordHash,
-					UserRoleId = userRequest.UserRoleId,
+					UserRoleId = model.UserRoleId ?? userRequest.UserRoleId,
 					Email = userRequest.Email,
 					PhoneNumber = userRequest.PhoneNumber,
 					IsActive = true,
@@ -264,11 +301,52 @@ namespace MealToken.Application.Services
 					PreferredMFAType = "Email",
 
 				};
-				await _userData.AddMfaSettingAsync(mfa);
+                var existingDepartments = await _userData.GetUserDepartmentsbyRequestAsync(userRequest.UserRequestId);
+                var modelDepartmentIds = model.Departments;
+
+                var toUpdate = new List<UserDepartment>();
+                var toDelete = new List<UserDepartment>();
+
+                foreach (var dept in existingDepartments)
+                {
+                    if (modelDepartmentIds.Contains(dept.DepartmentId))
+                    {
+                        dept.UserId = user.UserID;
+                        dept.RequestStatus = UserRequestStatus.Approved;
+                        toUpdate.Add(dept);
+                    }
+                    else
+                    {
+                        toDelete.Add(dept);
+                    }
+                }
+                var existingDeptIds = existingDepartments.Select(d => d.DepartmentId).ToList();
+                var newDeptIds = modelDepartmentIds.Except(existingDeptIds).ToList();
+
+                var newDepartments = newDeptIds.Select(deptId => new UserDepartment
+                {
+                    TenantId = userRequest.TenantId,
+                    UserRequestId = userRequest.UserRequestId,
+                    UserId = user.UserID,
+                    DepartmentId = deptId,
+                    RequestStatus = UserRequestStatus.Approved,
+                }).ToList();
+
+                // Step 3: Apply changes efficiently
+                if (toDelete.Any())
+                    await _userData.DeleteUserDepartmentAsync(toDelete); // bulk delete
+
+                if (newDepartments.Any())
+                    await _userData.AddUserDepartmentsAync(newDepartments);
+
+                if (toUpdate.Any())
+                    await _userData.UpdateUserDepartmentsAync(toUpdate);
+
+                await _userData.AddMfaSettingAsync(mfa);
 				// Update request status to approved
-				await _userData.UpdateRequestStatusAsync(requestId, UserRequestStatus.Approved, reviewerId, comments);
+				await _userData.UpdateRequestStatusAsync(model.RequestId, UserRequestStatus.Approved, reviewerId, model.Comments,null); 
 				// Send approval email to the requester
-				await SendApprovalEmail(userRequest, comments);
+				await SendApprovalEmail(userRequest, model.Comments);
 				_logger.LogInformation("User request approved and account created: {UserId}", user.UserID);
 
 				return new ServiceResult
@@ -280,7 +358,7 @@ namespace MealToken.Application.Services
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "User request approval error: {RequestId}", requestId);
+				_logger.LogError(ex, "User request approval error: {RequestId}", model.RequestId);
 				return new ServiceResult
 				{
 					Success = false,
@@ -290,7 +368,7 @@ namespace MealToken.Application.Services
 		}
 
 		// Reject user request
-		public async Task<ServiceResult> RejectUserRequestAsync(int requestId, int reviewerId, string rejectionReason)
+		public async Task<ServiceResult> RejectUserRequestAsync(int requestId, int reviewerId, string? rejectionReason)
 		{
 			try
 			{
@@ -315,7 +393,7 @@ namespace MealToken.Application.Services
 					};
 				}
 
-				await _userData.UpdateRequestStatusAsync(requestId, UserRequestStatus.Rejected, reviewerId, rejectionReason);
+				await _userData.UpdateRequestStatusAsync(requestId, UserRequestStatus.Rejected, reviewerId, null, rejectionReason);
 				// Send rejection email to the requester
 				await SendRejectionEmail(userRequest, rejectionReason);
 				_logger.LogInformation("User request rejected: {RequestId}", requestId);
@@ -433,77 +511,107 @@ namespace MealToken.Application.Services
 			}
 		}
 
-		public async Task<ServiceResult> UpdateUserAsync(int userId, UserDetails updateDto)
-		{
-			try
-			{
-				_logger.LogInformation("Updating user with ID: {UserId}", userId);
+        public async Task<ServiceResult> UpdateUserAsync(int userId, UserDetails updateDto)
+        {
+            try
+            {
+                _logger.LogInformation("Starting update for user with ID: {UserId}", userId);
 
-				// Get existing user
-				var existingUser = await _userData.GetUserByIdAsync(userId);
-				if (existingUser == null)
-				{
-					return new ServiceResult
-					{
-						Success = false,
-						Message = "User not found."
-					};
-				}
+                var existingUser = await _userData.GetUserByIdAsync(userId);
+                if (existingUser == null)
+                {
+                    _logger.LogWarning("User not found with ID: {UserId}", userId);
+                    return new ServiceResult { Success = false, Message = "User not found." };
+                }
 
-				// Check if email is being changed and if new email already exists
-				if (!string.Equals(existingUser.Email, _encryption.EncryptData(updateDto.Email), StringComparison.OrdinalIgnoreCase))
-				{
-					var userWithEmail = await _userData.CheckUserByUsernameOrEmailAsync(null, _encryption.EncryptData(updateDto.Email));
-					if (userWithEmail != null && userWithEmail.UserID != userId)
-					{
-						return new ServiceResult
-						{
-							Success = false,
-							Message = "Email address is already in use by another user."
-						};
-					}
-				}
+                // 1. Validate the update request
+                if (string.IsNullOrWhiteSpace(updateDto.FullName))
+                {
+                    return new ServiceResult { Success = false, Message = "Full name is required." };
+                }
 
-				// Validate input (you might want to extract this to a separate validation method)
-				if (string.IsNullOrWhiteSpace(updateDto.FullName))
-				{
-					return new ServiceResult
-					{
-						Success = false,
-						Message = "Full name is required."
-					};
-				}
+                var encryptedNewEmail = _encryption.EncryptData(updateDto.Email);
 
-				// Update fields
-				existingUser.FullName = updateDto.FullName;
-				existingUser.UserRoleId = updateDto.UserRoleId;
-				existingUser.Email = _encryption.EncryptData(updateDto.Email);
-				existingUser.PhoneNumber = _encryption.EncryptData(updateDto.PhoneNumber);
-				existingUser.IsActive = updateDto.IsActive;
+                if (!string.Equals(existingUser.Email, encryptedNewEmail, StringComparison.OrdinalIgnoreCase))
+                {
+                    var userWithEmail = await _userData.CheckUserByUsernameOrEmailAsync(null, encryptedNewEmail);
+                    if (userWithEmail != null && userWithEmail.UserID != userId)
+                    {
+                        _logger.LogWarning("Email '{Email}' is already in use by another user.", updateDto.Email);
+                        return new ServiceResult { Success = false, Message = "Email address is already in use." };
+                    }
+                }
 
-				await _userData.UpdateUserAsync(existingUser);
+                // 2. Update the primary user properties
+                existingUser.FullName = updateDto.FullName;
+                existingUser.UserRoleId = updateDto.UserRoleId;
+                existingUser.Email = _encryption.EncryptData(updateDto.Email);
+                existingUser.PhoneNumber = _encryption.EncryptData(updateDto.PhoneNumber);
+                existingUser.IsActive = updateDto.IsActive;
 
-				_logger.LogInformation("User updated successfully: {UserId}", userId);
+                await _userData.UpdateUserAsync(existingUser);
 
-				return new ServiceResult
-				{
-					Success = true,
-					Message = "User updated successfully.",
-					ObjectId = userId
-				};
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error updating user with ID: {UserId}", userId);
-				return new ServiceResult
-				{
-					Success = false,
-					Message = "User update error. Please try again."
-				};
-			}
-		}
+                // 3. Update user's department associations
+                await UpdateUserDepartmentsAsync(userId, updateDto.DepartmentIds, existingUser.TenantId);
 
-		public async Task<List<UserRoleDto>> GetUserRolesAsync()
+                _logger.LogInformation("Successfully updated user: {UserId}", userId);
+                return new ServiceResult
+                {
+                    Success = true,
+                    Message = "User updated successfully.",
+                    ObjectId = userId
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while updating user with ID: {UserId}", userId);
+                return new ServiceResult { Success = false, Message = "An error occurred during the update process. Please try again." };
+            }
+        }
+
+        /// <summary>
+        /// Manages the additions and deletions of user department associations.
+        /// </summary>
+        private async Task UpdateUserDepartmentsAsync(int userId, List<int> newDepartmentIds, int tenantId)
+        {
+            var existingDepartments = await _userData.GetUserDepartmentsbyUserAsync(userId);
+            var existingDepartmentIds = existingDepartments.Select(d => d.DepartmentId).ToList();
+
+            // Determine which departments to remove
+            var departmentsToDelete = existingDepartments
+                .Where(d => !newDepartmentIds.Contains(d.DepartmentId))
+                .ToList();
+            var departmentIdsToAdd = newDepartmentIds.Except(existingDepartmentIds).ToList();
+
+            int? userRequestId = existingDepartments.FirstOrDefault()?.UserRequestId;
+
+            if (departmentIdsToAdd.Any() && userRequestId == null)
+            {
+                throw new InvalidOperationException("Cannot add new departments without a valid UserRequestId context.");
+            }
+
+            var departmentsToAdd = departmentIdsToAdd.Select(deptId => new UserDepartment
+            {
+                TenantId = tenantId,
+                UserId = userId,
+                DepartmentId = deptId,
+                UserRequestId = userRequestId.Value, // Now safely accessed
+                RequestStatus = UserRequestStatus.Approved,
+            }).ToList();
+
+            // Apply the changes to the database
+            if (departmentsToDelete.Any())
+            {
+                await _userData.DeleteUserDepartmentAsync(departmentsToDelete);
+            }
+
+            if (departmentsToAdd.Any())
+            {
+                await _userData.AddUserDepartmentsAync(departmentsToAdd);
+            }
+        }
+
+        public async Task<List<UserRoleDto>> GetUserRolesAsync()
 		{
 			try
 			{
@@ -621,6 +729,38 @@ namespace MealToken.Application.Services
 				_logger.LogError(ex, "Error sending rejection email for user request {RequestId}", userRequest.UserRequestId);
 			}
 		}
-	}
+        public async Task<List<DepartmentD>> GetListofDepartmentsAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving list of departments");
+
+                var departments = await _userData.GetAllDepartmentsAsync();
+
+                if (departments == null || !departments.Any())
+                {
+                    _logger.LogInformation("No departments found");
+                    return new List<DepartmentD>();
+                }
+
+                var departmentReturn = departments.Select(d => new DepartmentD
+                {
+                    // Note: Check if "DepartmnetId" is a typo in your source entity. 
+                    // It should likely be "DepartmentId".
+                    DepartmentId = d.DepartmnetId,
+                    Name = d.Name
+                }).ToList();
+
+                _logger.LogInformation("Retrieved {DepartmentCount} departments successfully", departmentReturn.Count);
+
+                return departmentReturn;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving list of departments");
+                throw; // Re-throwing the exception is good practice to let higher-level handlers manage it.
+            }
+        }
+    }
 }
 

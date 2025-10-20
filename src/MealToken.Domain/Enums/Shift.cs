@@ -11,7 +11,7 @@ namespace MealToken.Domain.Enums
         DayShift = 1,
         NightShift = 2,
         DayShiftExtended = 3,
-        DayandNightShift = 4,
-        NightandDayShift = 5
+        NightandDayShift = 4,
+        DayandNightShift = 5
     }
 }

@@ -84,22 +84,11 @@ namespace MealToken.Domain.Models
 
 			// AddOns duplicate validation
 			if (IsAddOnsEnable && AddOns != null && AddOns.Any())
-			{
-				var duplicateKeys = AddOns
-					.Where(a => !string.IsNullOrWhiteSpace(a.Functionkey))
-					.GroupBy(a => a.Functionkey.ToUpper())
-					.Where(g => g.Count() > 1)
-					.Select(g => g.Key);
-				if (duplicateKeys.Any())
-				{
-					yield return new ValidationResult(
-						$"Duplicate AddOn function keys found: {string.Join(", ", duplicateKeys)}",
-						new[] { nameof(AddOns) });
-				}
+			{ 
 
 				var duplicateNames = AddOns
-					.Where(a => !string.IsNullOrWhiteSpace(a.AddonName))
-					.GroupBy(a => a.AddonName.ToUpper())
+					.Where(a => !string.IsNullOrWhiteSpace(a.AddOnName))
+					.GroupBy(a => a.AddOnName.ToUpper())
 					.Where(g => g.Count() > 1)
 					.Select(g => g.Key);
 				if (duplicateNames.Any())
@@ -118,10 +107,9 @@ namespace MealToken.Domain.Models
 		}
 		public class MealAddOns
 		{
-			public string AddonName { get; set; }
+			public int AddOnId { get; set; }
+			public string AddOnName { get; set; }
 			public AddOnType AddonType { get; set; }
-			public string? Description { get; set; }
-			public string Functionkey { get; set; }
 		}
 	}
 }

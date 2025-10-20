@@ -1,5 +1,6 @@
 ﻿using Authentication.Models.DTOs;
 using Authentication.Models.Entities;
+using MealToken.API.Helpers;
 using MealToken.Application.Interfaces;
 using MealToken.Application.Services;
 using MealToken.Domain.Interfaces;
@@ -25,7 +26,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("AddPerson")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> AddPerson([FromBody] PersonCreateDto personCreateDto)
 		{
 			try
@@ -47,7 +49,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdatePerson")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> UpdatePerson(int personId, [FromBody] PersonCreateDto personCreateDto)
 		{
 			try
@@ -69,7 +72,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpDelete("DeletePerson")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> DeletePerson(int personId)
 		{
 			try
@@ -90,6 +94,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetPersonList")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetPersonsList()
 		{
 			try
@@ -110,6 +115,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetPersonById")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetPersonById(int personId)
 		{
 			try
@@ -149,7 +155,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("CreateSupplier")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> CreateSupplier([FromBody] SupplierCreateRequestDto supplierDto)
 		{
 			try
@@ -171,7 +178,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdateSupplier")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> UpdateSupplier(int supplierId, [FromBody] SupplierCreateRequestDto supplierDto)
 		{
 			try
@@ -193,7 +201,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpDelete("DeleteSupplier")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> DeleteSupplier(int supplierId)
 		{
 			try
@@ -213,6 +222,7 @@ namespace MealToken.API.Controllers
 		}
 		[HttpGet("GetSuppliersList")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetSuppliersList()
 		{
 			try
@@ -233,6 +243,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetSupplierById")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetSupplierById(int supplierId)
 		{
 			try
@@ -251,8 +262,9 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpPost("AddMealType")]
-		[Authorize]
-		public async Task<IActionResult> AddMealType(string mealTypeName, string description)
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> AddMealType(string mealTypeName, string? description)
 		{
 			try
 			{
@@ -273,7 +285,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdateMealType")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> UpdateMealType(int mealTypeId, [FromBody] MealTypeUpdateDto mealTypeUpdateDto)
 		{
 			try
@@ -295,7 +308,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpDelete("DeleteMealType")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> DeleteMealType(int mealTypeId)
 		{
 			try
@@ -346,6 +360,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetMealTypes")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetMealTypeList()
 		{
 			try
@@ -366,6 +381,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetMealTypeDetailsById")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetMealTypeDetailsById(int mealTypeId)
 		{
 			try
@@ -384,7 +400,8 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpPost("AddMealCost")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> AddMealCost([FromBody] MealCostDto mealCostDto)
 		{
 			try
@@ -406,7 +423,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdateMealCost")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> UpdateMealCost(int mealCostId, [FromBody] MealCostDto mealCostDto)
 		{
 			try
@@ -428,7 +446,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpDelete("DeleteMealCost")]
-		[Authorize]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> DeleteMealCost(int mealCostId)
 		{
 			try
@@ -449,6 +468,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetMealCostCreationDetails")]
 		[Authorize]
+
 		public async Task<IActionResult> GetMealCostCreationDetails()
 		{
 			try
@@ -480,6 +500,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetMealCostList")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetMealCostsList()
 		{
 			try
@@ -500,6 +521,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetMealCostById")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetMealCostById(int mealCostId)
 		{
 			try
@@ -514,6 +536,48 @@ namespace MealToken.API.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error retrieving mealCost {mealCostId}", mealCostId);
+				return StatusCode(500, new { Success = false, Message = $"Internal server error: {ex.Message}" });
+			}
+		}
+		[HttpPut("UpdateSettings")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> UpdateSettings([FromBody] ApplicationSettings settings)
+		{
+			try
+			{
+				if (!ModelState.IsValid) return BadRequest(ModelState);
+
+				var result = await _adminService.UpdateSettingsAsync(settings);
+
+				if (!result.Success)
+					return NotFound(new { result.Success, result.Message });
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating settings");
+				return StatusCode(500, new { Success = false, Message = $"Internal server error: {ex.Message}" });
+			}
+		}
+		[HttpGet("GetApplicationSettings")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetApplicationSettings()
+		{
+			try
+			{
+				var tenant = await _adminService.GetApplicationSettingsAsync();
+
+				if (tenant == null)
+					return NotFound(new { Success = false, Message = "tenant not found" });
+
+				return Ok(tenant);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error retrieving settings");
 				return StatusCode(500, new { Success = false, Message = $"Internal server error: {ex.Message}" });
 			}
 		}

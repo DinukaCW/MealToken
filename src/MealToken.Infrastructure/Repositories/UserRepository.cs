@@ -72,10 +72,10 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<User> CheckUserByUsernameOrEmailAsync(string userName, string email)
 		{
 			return await _tenantContext.Users
-				.FirstOrDefaultAsync(u => u.Username == userName || u.Email == email);
+				.FirstOrDefaultAsync(u =>u.Username == userName || u.Email == email);
 		}
-
-		public async Task<User> CheckUserByUsernameOrEmailExceptIdAsync(int userId, string userName, string email)
+        
+        public async Task<User> CheckUserByUsernameOrEmailExceptIdAsync(int userId, string userName, string email)
 		{
 			return await _tenantContext.Users
 				.FirstOrDefaultAsync(u => u.UserID != userId && (u.Username == userName || u.Email == email));
@@ -251,7 +251,7 @@ namespace MealToken.Infrastructure.Repositories
 					ur.Status == UserRequestStatus.Pending);
 			return existingRequest;
 		}
-		public async Task UpdateRequestStatusAsync(int requestId, UserRequestStatus status, int reviewerId, string comments)
+		public async Task UpdateRequestStatusAsync(int requestId, UserRequestStatus status, int reviewerId, string? comments, string? rejectReason)
 		{
 				var userRequest = await _tenantContext.Set<UserRequest>()
 					.FirstOrDefaultAsync(ur => ur.UserRequestId == requestId);
@@ -264,8 +264,9 @@ namespace MealToken.Infrastructure.Repositories
 				userRequest.Status = status;
 				userRequest.ReviewedBy = reviewerId;
 				userRequest.ReviewedAt = DateTime.UtcNow;
+				userRequest.RejectionReason = rejectReason;
 
-				if (status == UserRequestStatus.Approved)
+			if (status == UserRequestStatus.Approved)
 				{
 					userRequest.ReviewComments = comments;
 				}
@@ -285,13 +286,96 @@ namespace MealToken.Infrastructure.Repositories
 				.Where(d => d.IsActive)
 				.ToListAsync();
 		}
-		public async Task<List<User>> GetAdminUsersAsync()
+        public async Task<List<Department>> GetAllDepartmentsAsync()
+        {
+            return await _platformContext.Department
+                .Where(d => d.IsActive)
+                .ToListAsync();
+        }
+        public async Task<List<User>> GetAdminUsersAsync()
 		{
 			return await _tenantContext.Users
 				.Where(u => u.UserRoleId == 1) 
 				.Where(d => d.IsActive)
 				.ToListAsync();
 		}
+        public async Task AddUserDepartmentsAync(IEnumerable<UserDepartment> departments)
+        {
+            await _tenantContext.UserDepartment.AddRangeAsync(departments);
+            await _tenantContext.SaveChangesAsync();
+        }
+        public async Task<List<UserDepartment>> GetUserDepartmentsbyRequestAsync(int requestId)
+        {
+            return await _tenantContext.UserDepartment
+                .Where(u => u.UserRequestId == requestId && u.RequestStatus == UserRequestStatus.Pending)
+                .ToListAsync();
+        }
+        public async Task UpdateUserDepartmentsAync(IEnumerable<UserDepartment> departments)
+        {
+          _tenantContext.UserDepartment.UpdateRange(departments);
+           await _tenantContext.SaveChangesAsync();
+        }
+        public async Task<List<int>> GetRequestsbByDepartmentsAsync(List<int> departmentIds)
+        {
+            return await _tenantContext.UserDepartment
+                .Where(p => departmentIds.Contains(p.DepartmentId) && p.RequestStatus == UserRequestStatus.Pending)
+				.Select(p => p.UserRequestId)
+                .Distinct()
+                .ToListAsync();
+        }
+        public async Task<List<int?>> GetUsersByDepartmentsAsync(List<int> departmentIds)
+        {
+            return await _tenantContext.UserDepartment
+                .Where(p => departmentIds.Contains(p.DepartmentId) && p.RequestStatus == UserRequestStatus.Approved)
+                .Select(p => p.UserId)
+                .Distinct()
+                .ToListAsync();
+        }
+        public async Task DeleteUserDepartmentAsync(IEnumerable<UserDepartment> departments)
+        {
 
+            _tenantContext.UserDepartment.RemoveRange(departments);
+            await _tenantContext.SaveChangesAsync();
+
+        }
+        public async Task<List<UserDepartment>> GetUserDepartmentsbyUserAsync(int userId)
+        {
+            return await _tenantContext.UserDepartment
+                .Where(u => u.UserId == userId && u.RequestStatus == UserRequestStatus.Approved)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<int>> GetUserIdsByDepartmentsAsync(IEnumerable<int> departmentIds)
+        {
+            if (departmentIds == null || !departmentIds.Any())
+                return Enumerable.Empty<int>();
+
+            var deptList = departmentIds.Distinct().ToList();
+
+            var userIds = await _tenantContext.UserDepartment
+                .Where(u => deptList.Contains(u.DepartmentId) && u.UserId != null)
+                .Select(u => u.UserId.Value)
+                .Distinct()
+                .ToListAsync();
+
+            return userIds;
+        }
+        public async Task<IEnumerable<(int UserId, string UserName)>> GetUserNamesByIdsAsync(IEnumerable<int> userIds)
+        {
+			if (userIds == null || !userIds.Any())
+                    return new List<(int, string)>();
+
+                var idList = userIds.Distinct().ToList();
+                return await _tenantContext.Users
+                    .Where(u => idList.Contains(u.UserID))
+                    .Select(u => new ValueTuple<int, string>(u.UserID, u.FullName))
+                    .ToListAsync();
+
+        }
+		public async Task AddUserHistorysAync(UserHistory userHistory)
+		{
+			await _tenantContext.UserHistory.AddAsync(userHistory);
+			await _tenantContext.SaveChangesAsync();
+		}
 	}
 }

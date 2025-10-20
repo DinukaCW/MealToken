@@ -2,6 +2,7 @@
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
+using MealToken.Domain.Models.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;

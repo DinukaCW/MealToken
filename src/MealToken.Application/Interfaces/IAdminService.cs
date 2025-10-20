@@ -33,5 +33,7 @@ namespace MealToken.Application.Interfaces
 		Task<MealCostCreationDetails> GetMealCostCreationDetails();
 		Task<List<MealCostDetails>> GetMealCostsListAsync();
 		Task<ServiceResult> GetMealCostByIdAsync(int mealCostId);
+			Task<ServiceResult> UpdateSettingsAsync(ApplicationSettings updatedSettings);
+		Task<ServiceResult> GetApplicationSettingsAsync();
 	}
 }

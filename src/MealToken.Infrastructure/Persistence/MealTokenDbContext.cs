@@ -50,8 +50,10 @@ namespace MealToken.Infrastructure.Persistence
 		public DbSet<RequestMeal> RequestMeal { get; set; }
         public DbSet<MealConsumption> MealConsumption { get; set; }
         public DbSet<PayStatusByShift> PayStatusByShiftPolicy { get; set; }
+        public DbSet<UserDepartment> UserDepartment { get; set; }
+		public DbSet<UserHistory> UserHistory { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 
@@ -456,7 +458,9 @@ namespace MealToken.Infrastructure.Persistence
 				entity.Property(e => e.EmployeeGrade).HasMaxLength(50);
 				entity.Property(e => e.PersonSubType).HasMaxLength(50);
 				entity.Property(e => e.Gender).HasMaxLength(10);
-				entity.Property(e => e.MealGroup).HasMaxLength(50);
+                entity.Property(e => e.WhatsappNumber).HasMaxLength(50);
+                entity.Property(e => e.Email).HasMaxLength(100);
+                entity.Property(e => e.MealGroup).HasMaxLength(50);
 				entity.Property(e => e.MealEligibility).HasDefaultValue(false);
 				entity.Property(e => e.IsActive).HasDefaultValue(true);
 				entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
@@ -550,7 +554,10 @@ namespace MealToken.Infrastructure.Persistence
 				entity.Property(e => e.UpdatedAt)
 					  .IsRequired(false);
 
-				entity.HasOne<TenantInfo>()
+                entity.Property(e => e.IsActive)
+                      .HasDefaultValue(true);
+
+                entity.HasOne<TenantInfo>()
 					  .WithMany()
 					  .HasForeignKey(e => e.TenantId)
 					  .OnDelete(DeleteBehavior.NoAction);
@@ -578,8 +585,10 @@ namespace MealToken.Infrastructure.Persistence
 
 				entity.Property(e => e.CreatedAt)
 					  .HasDefaultValueSql("GETUTCDATE()");
+				entity.Property(e => e.IsActive)
+					  .HasDefaultValue(true);
 
-				entity.HasOne<TenantInfo>()
+                entity.HasOne<TenantInfo>()
 					  .WithMany()
 					  .HasForeignKey(e => e.TenantId)
 					  .OnDelete(DeleteBehavior.NoAction);
@@ -599,16 +608,15 @@ namespace MealToken.Infrastructure.Persistence
 				entity.Property(e => e.MealTypeId)
 					.IsRequired();
 
-				entity.Property(e => e.AddOnName)
+                entity.Property(e => e.AddOnSubTypeId)
+                    .IsRequired();
+                entity.Property(e => e.AddOnName)
 					  .IsRequired()
 					  .HasMaxLength(100);
 
 				entity.Property(e => e.AddOnType)
 					  .HasConversion<string>() // saves enum as string
 					  .IsRequired();
-
-				entity.Property(e => e.Description)
-					  .HasMaxLength(500);
 
 				entity.HasOne<TenantInfo>()
 					  .WithMany()
@@ -619,7 +627,12 @@ namespace MealToken.Infrastructure.Persistence
 					  .WithMany()
 					  .HasForeignKey(e => e.MealTypeId)
 					  .OnDelete(DeleteBehavior.Restrict);
-			});
+
+                entity.HasOne<MealSubType>()
+                      .WithMany()
+                      .HasForeignKey(e => e.AddOnSubTypeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
 			modelBuilder.Entity<MealCost>(entity =>
 			{
@@ -644,7 +657,10 @@ namespace MealToken.Infrastructure.Persistence
 					.HasColumnType("decimal(18,2)").IsRequired();
 
 				entity.Property(e => e.Description).HasMaxLength(500);
-				entity.HasOne<Supplier>() 
+				entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+				
+                entity.HasOne<Supplier>() 
 					  .WithMany()
 					  .HasForeignKey(e => e.SupplierId)
 					  .OnDelete(DeleteBehavior.Cascade);
@@ -847,7 +863,7 @@ namespace MealToken.Infrastructure.Persistence
 			});
             modelBuilder.Entity<Request>(entity =>
             {
-                entity.ToTable("Request");
+                entity.ToTable("Request", _schema);
                 entity.HasKey(e => e.MealRequestId);
                 entity.Property(e => e.TenantId)
                   .IsRequired();
@@ -890,7 +906,7 @@ namespace MealToken.Infrastructure.Persistence
             // 🔹 RequestMeal entity
             modelBuilder.Entity<RequestMeal>(entity =>
             {
-                entity.ToTable("RequestMeal");
+                entity.ToTable("RequestMeal", _schema);
                 entity.HasKey(e => e.RequestMealId);
 
                 entity.Property(e => e.TenantId)
@@ -939,7 +955,7 @@ namespace MealToken.Infrastructure.Persistence
             });
             modelBuilder.Entity<MealConsumption>(entity =>
             {
-                entity.ToTable("MealConsumption");
+                entity.ToTable("MealConsumption", _schema);
                 entity.HasKey(e => e.MealConsumptionId);
 
                 // Basic required properties
@@ -949,9 +965,12 @@ namespace MealToken.Infrastructure.Persistence
                 entity.Property(e => e.PersonId)
                       .IsRequired();
 
+                entity.Property(e => e.Gender)
+                      .IsRequired(false);
+
                 entity.Property(e => e.PersonName)
                       .HasMaxLength(200)
-                      .IsRequired();
+                      .IsRequired(false);
 
                 entity.Property(e => e.Date)
                       .IsRequired();
@@ -959,16 +978,18 @@ namespace MealToken.Infrastructure.Persistence
                 entity.Property(e => e.Time)
                       .IsRequired();
 
-                entity.Property(e => e.SchduleId)
+                entity.Property(e => e.ScheduleId)
                       .IsRequired();
 
-                entity.Property(e => e.SchduleName)
+                entity.Property(e => e.ScheduleName)
                       .HasMaxLength(200)
+                      .IsRequired();
+
+                entity.Property(e => e.AddOnMeal)
                       .IsRequired();
 
                 entity.Property(e => e.MealTypeId)
                       .IsRequired();
-
                 entity.Property(e => e.MealTypeName)
                       .HasMaxLength(100)
                       .IsRequired();
@@ -1058,7 +1079,7 @@ namespace MealToken.Infrastructure.Persistence
             });
             modelBuilder.Entity<PayStatusByShift>(entity =>
             {
-                entity.ToTable("PayStatusByShiftPolicy"); // Renaming the table for clarity
+                entity.ToTable("PayStatusByShiftPolicy", _schema); // Renaming the table for clarity
                 entity.HasKey(e => e.PolicyId);
 
                 entity.Property(e => e.ShiftType)
@@ -1081,8 +1102,68 @@ namespace MealToken.Infrastructure.Persistence
                     .OnDelete(DeleteBehavior.NoAction);
 
             });
+            modelBuilder.Entity<UserDepartment>(entity =>
+            {
+                entity.ToTable("UserDepartment", _schema); 
 
-        }
+                entity.HasKey(e => e.UserDepartmentId);
+
+                entity.Property(e => e.TenantId)
+                     .IsRequired();
+                entity.Property(e => e.UserRequestId)
+                      .IsRequired();
+
+                entity.Property(e => e.UserId)
+                      .IsRequired(false);
+
+                entity.Property(e => e.DepartmentId)
+                      .IsRequired();
+
+                entity.Property(e => e.RequestStatus)
+                      .HasConversion<int>() // store enum as int
+                      .IsRequired();
+
+                entity.HasOne<TenantInfo>()
+                       .WithMany()
+                       .HasForeignKey(e => e.TenantId)
+                       .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne<User>()
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<Department>()
+                    .WithMany()
+                    .HasForeignKey(e => e.DepartmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+			modelBuilder.Entity<UserHistory>(entity =>
+			{
+				entity.ToTable("UserHistory", _schema);
+				entity.HasKey(e => e.UserHistoryId);
+				entity.Property(e => e.TenantId).IsRequired();
+				entity.Property(e => e.UserId).IsRequired();
+				entity.Property(e => e.ActionType).IsRequired();
+				entity.Property(e => e.EntityType);
+				entity.Property(e => e.Endpoint);
+				entity.Property(e => e.Timestamp).IsRequired();
+				entity.Property(e => e.IPAddress);
+
+				entity.HasOne<User>()
+					  .WithMany()
+					  .HasForeignKey(e => e.UserId)
+					  .OnDelete(DeleteBehavior.NoAction);
+
+				entity.HasOne<TenantInfo>()
+					   .WithMany()
+					   .HasForeignKey(e => e.TenantId)
+					   .OnDelete(DeleteBehavior.NoAction);
+
+
+			});
+			
+		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

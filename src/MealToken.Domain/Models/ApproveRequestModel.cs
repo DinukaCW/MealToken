@@ -13,5 +13,7 @@ namespace MealToken.Domain.Models
 		public int RequestId { get; set; }
 
 		public string? Comments { get; set; }
+		public int? UserRoleId { get; set; }
+		public List<int> Departments { get; set; }
 	}
 }

@@ -12,8 +12,7 @@ namespace MealToken.Domain.Models
 		[Required]
 		public int RequestId { get; set; }
 
-		[Required]
 		[StringLength(500)]
-		public string RejectionReason { get; set; }
+		public string? RejectionReason { get; set; }
 	}
 }

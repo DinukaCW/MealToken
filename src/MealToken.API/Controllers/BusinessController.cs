@@ -4,6 +4,7 @@ using MealToken.Application.Interfaces;
 using MealToken.Application.Services;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
+using MealToken.Domain.Models.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -78,7 +79,8 @@ namespace MealToken.API.Controllers
 			}
 		}*/
 		[HttpPost("CreateSchedule")]
-		[Authorize]
+		[Authorize(Roles = "Admin,Sheduler")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> CreateSchedule([FromBody] SheduleCreateDto request)
 		{
 			if (!ModelState.IsValid)
@@ -145,7 +147,8 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPut("UpdateSchedule")]
-		[Authorize]
+		[Authorize(Roles = "Admin,Sheduler")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> UpdateSchedule(int scheduleId, [FromBody] SheduleCreateDto request)
 		{
 			if (!ModelState.IsValid)
@@ -214,7 +217,8 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpDelete("DeleteSchedule")]
-		[Authorize]
+		[Authorize(Roles = "Admin,Sheduler")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> DeleteSchedule(int scheduleId)
 		{
 			try
@@ -253,6 +257,7 @@ namespace MealToken.API.Controllers
 
 		[HttpGet("GetListOfShedules")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetschedulesList()
 		{
 			try
@@ -270,8 +275,9 @@ namespace MealToken.API.Controllers
 				return StatusCode(500, new { Success = false, Message = $"Internal server error: {ex.Message}" });
 			}
 		}
-		[HttpGet("GeSheduleById")]
+		[HttpGet("GetSheduleById")]
 		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetSchedulesById(int scheduleId)
 		{
 			try
@@ -310,8 +316,9 @@ namespace MealToken.API.Controllers
 		}
 
         [HttpPost("CreateMealRequest")]
-        [Authorize] 
-        public async Task<IActionResult> CreateMealRequest([FromBody] RequestDto requestDto)
+		[Authorize(Roles = "Admin,Requester")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> CreateMealRequest([FromBody] RequestDto requestDto)
         {
             try
             {
@@ -344,8 +351,9 @@ namespace MealToken.API.Controllers
 
         // Update existing meal request
         [HttpPut("UpdateMealRequest")]
-        [Authorize] // Only request owner can update
-        public async Task<IActionResult> UpdateMealRequest(int requestId, [FromBody] RequestDto requestDto)
+		[Authorize(Roles = "Admin,Requester")] // Only request owner can update
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> UpdateMealRequest(int requestId, [FromBody] RequestDto requestDto)
         {
             try
             {
@@ -384,7 +392,8 @@ namespace MealToken.API.Controllers
         // Get specific request details
         [HttpGet("GetRequestDetails")]
         [Authorize]
-        public async Task<IActionResult> GetRequestDetails(int requestId)
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetRequestDetails(int requestId)
         {
             try
             {
@@ -416,8 +425,9 @@ namespace MealToken.API.Controllers
 
         // Get pending requests (for approvers)
         [HttpGet("GetPendingRequests")]
-        [Authorize]
-        public async Task<IActionResult> GetPendingRequests()
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetPendingRequests()
         {
             try
             {
@@ -447,8 +457,9 @@ namespace MealToken.API.Controllers
 
         // Get approved requests
         [HttpGet("GetApprovedRequests")]
-        [Authorize]
-        public async Task<IActionResult> GetApprovedRequests()
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetApprovedRequests()
         {
             try
             {
@@ -478,8 +489,9 @@ namespace MealToken.API.Controllers
 
         // Get current user's requests
         [HttpGet("GetMyRequests")]
-        [Authorize]
-        public async Task<IActionResult> GetMyRequests()
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetMyRequests()
         {
             try
             {
@@ -509,8 +521,9 @@ namespace MealToken.API.Controllers
 
         // Approve or reject request
         [HttpPut("UpdateRequestStatus")]
-        [Authorize]
-        public async Task<IActionResult> UpdateRequestStatus(int requestId, UserRequestStatus status)
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> UpdateRequestStatus(int requestId, UserRequestStatus status)
         {
             try
             {
