@@ -293,7 +293,7 @@ namespace MealToken.Infrastructure.Repositories
 
             return await _tenantContext.MealConsumption
                 .Where(s => s.MealTypeId == mealTypeId && s.PersonId == personId)
-                .Where(s => s.Date == date)
+                .Where(s => s.Date == date && s.TockenIssued)
                 .FirstOrDefaultAsync();
         }
 

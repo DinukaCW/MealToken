@@ -152,12 +152,17 @@ namespace MealToken.Application.Services
             if (!matchingMeals.Any())
                 return null;
 
-            if (!string.IsNullOrEmpty(functionKey))
-            {
-                return matchingMeals.FirstOrDefault(sm => sm.IsFunctionKeysEnable && sm.FunctionKey == functionKey);
-            }
+			if (!string.IsNullOrEmpty(functionKey))
+			{
+				var matchedMeal = matchingMeals
+					.FirstOrDefault(sm => sm.IsFunctionKeysEnable && sm.FunctionKey == functionKey);
 
-            return matchingMeals.First();
+				// If no valid meal found for the function key, return default meal instead
+				if (matchedMeal != null)
+					return matchedMeal;
+			}
+
+			return matchingMeals.First();
         }
 
         private async Task<List<MealAddOnDto>> CreateAddOnsAsync(IEnumerable<MealAddOn>? addons)

@@ -451,16 +451,16 @@ namespace MealToken.Infrastructure.Persistence
 				entity.Property(e => e.PersonType).HasConversion<int>().IsRequired();
 				entity.Property(e => e.PersonNumber).IsRequired().HasMaxLength(50);
 				entity.Property(e => e.Name).HasMaxLength(200);
-				entity.Property(e => e.NICNumber).HasMaxLength(50);
+				entity.Property(e => e.NICNumber).HasMaxLength(50); // Can be null
 				entity.Property(e => e.JoinedDate);
-				entity.Property(e => e.DepartmentId).IsRequired();
-				entity.Property(e => e.DesignationId);
+				entity.Property(e => e.DepartmentId).IsRequired(); 
+				entity.Property(e => e.DesignationId); // Already nullable
 				entity.Property(e => e.EmployeeGrade).HasMaxLength(50);
 				entity.Property(e => e.PersonSubType).HasMaxLength(50);
 				entity.Property(e => e.Gender).HasMaxLength(10);
-                entity.Property(e => e.WhatsappNumber).HasMaxLength(50);
-                entity.Property(e => e.Email).HasMaxLength(100);
-                entity.Property(e => e.MealGroup).HasMaxLength(50);
+				entity.Property(e => e.WhatsappNumber).HasMaxLength(50);
+				entity.Property(e => e.Email).HasMaxLength(100);
+				entity.Property(e => e.MealGroup).HasMaxLength(50);
 				entity.Property(e => e.MealEligibility).HasDefaultValue(false);
 				entity.Property(e => e.IsActive).HasDefaultValue(true);
 				entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
@@ -470,22 +470,26 @@ namespace MealToken.Infrastructure.Persistence
 				entity.HasOne<Department>()
 					  .WithMany()
 					  .HasForeignKey(e => e.DepartmentId)
-					  .OnDelete(DeleteBehavior.Restrict);
+					  .OnDelete(DeleteBehavior.NoAction); // Because DepartmentId can now be null
 
 				entity.HasOne<Designation>()
 					  .WithMany()
 					  .HasForeignKey(e => e.DesignationId)
-					  .OnDelete(DeleteBehavior.SetNull);
+					  .OnDelete(DeleteBehavior.SetNull); // Keeps nullable
 
 				entity.HasOne<TenantInfo>()
 					  .WithMany()
 					  .HasForeignKey(e => e.TenantId)
 					  .OnDelete(DeleteBehavior.NoAction);
 
+				// Indexes
 				entity.HasIndex(e => new { e.TenantId, e.PersonNumber }).IsUnique();
-				entity.HasIndex(e => new { e.TenantId, e.NICNumber }).IsUnique().HasFilter("[NICNumber] IS NOT NULL");
+				entity.HasIndex(e => new { e.TenantId, e.NICNumber })
+					  .IsUnique()
+					  .HasFilter("[NICNumber] IS NOT NULL");
 				entity.HasIndex(e => e.PersonType);
 			});
+
 
 			modelBuilder.Entity<Supplier>(entity =>
 			{
@@ -918,7 +922,7 @@ namespace MealToken.Infrastructure.Persistence
                       .IsRequired();
 
                 entity.Property(e => e.SubTypeId)
-                      .IsRequired();
+                      .IsRequired(false);
 
                 entity.Property(e => e.MealCostId)
                       .IsRequired();

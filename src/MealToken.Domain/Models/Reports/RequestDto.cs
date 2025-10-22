@@ -33,8 +33,7 @@ namespace MealToken.Domain.Models.Reports
         [Required(ErrorMessage = "Meal type is required")]
         public int MealTypeId { get; set; }
 
-        [Required(ErrorMessage = "Sub type is required")]
-        public int SubTypeId { get; set; }
+        public int? SubTypeId { get; set; }
 
         [Required(ErrorMessage = "Meal cost ID is required")]
         public int MealCostId { get; set; }

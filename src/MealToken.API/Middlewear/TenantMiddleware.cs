@@ -27,8 +27,9 @@ namespace MealToken.API.Middlewear
             // Handle known hosts (localhost or Azure App Service URL)
             if (string.IsNullOrEmpty(subdomain) ||
                 host.Contains("localhost", StringComparison.OrdinalIgnoreCase) ||
-                host.Contains("azurewebsites.net", StringComparison.OrdinalIgnoreCase))
-            {
+                host.Contains("azurewebsites.net", StringComparison.OrdinalIgnoreCase)||
+				host.Contains("10.30.1.1", StringComparison.OrdinalIgnoreCase))
+			{
                 _logger.LogInformation($"No subdomain found or running on a known host ({host}). Using default tenant.");
 
                 var defaultTenantKey = _configuration["DefaultTenant"] ?? "default";

@@ -79,19 +79,20 @@ namespace MealToken.Application.Services
                 {
                     return new ServiceResult { Success = false, Message = "No meal schedule found for this time" };
                 }
-
-                // Check if meal already issued
-                var exMealConsumption = await _businessData.GetMealConsumptionAsync(
-                    scheduleMeals.MealTypeId,
-                    person.PersonId,
-                    mealtokenRequest.RequestDate
-                );
-
-                if (exMealConsumption != null && exMealConsumption.TockenIssued)
+                if (person.PersonType == PersonType.Employer)
                 {
-                    return new ServiceResult { Success = false, Message = "Meal token already issued for this meal type" };
-                }
+                    // Check if meal already issued
+                    var exMealConsumption = await _businessData.GetMealConsumptionAsync(
+                        scheduleMeals.MealTypeId,
+                        person.PersonId,
+                        mealtokenRequest.RequestDate
+                    );
 
+                    if (exMealConsumption != null && exMealConsumption.TockenIssued)
+                    {
+                        return new ServiceResult { Success = false, Message = "Meal token already issued for this meal type" };
+                    }
+                }
                 // Validate device
                 int deviceId = await _businessData.GetDeviceBySerialNoAsync(request.DeviceSerialNo);
                 var deviceShift = await _businessData.GetDeviceShiftBySerialNoAsync(request.DeviceSerialNo) ?? DeviceShift.Day;

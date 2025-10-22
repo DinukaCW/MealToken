@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MealToken.Domain.Models
 {
-    public class PersonCreateDto : IValidatableObject
+    public class PersonCreateDto
     {
         public PersonType PersonType { get; set; }
 
@@ -25,22 +25,21 @@ namespace MealToken.Domain.Models
         [DataType(DataType.Date)]
         public DateTime? JoinedDate { get; set; }
 
-        // Removed [Range] attribute to align with the new requirement that it's NOT required for create employee
-        public int? DepartmentId { get; set; }
+		[Required(ErrorMessage = "Department ID is required for employees.")]
+		public int DepartmentId { get; set; }
 
-        public int? DesignationId { get; set; }
+		public int? DesignationId { get; set; }
 
         [StringLength(50, ErrorMessage = "Employee grade cannot exceed 50 characters.")]
         public string? EmployeeGrade { get; set; }
-
+        [Required]
         [StringLength(50, ErrorMessage = "Person sub-type cannot exceed 50 characters.")]
         public string PersonSubType { get; set; } // EmployeeType or VisitorType]
 
-        [Required(ErrorMessage = "Gender Type Should be Provide")]
         [StringLength(10, ErrorMessage = "Gender cannot exceed 10 characters.")]
         [RegularExpression("^(Male|Female|Other)$", ErrorMessage = "Gender must be Male, Female, or Other.")]
 
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         [StringLength(20, ErrorMessage = "WhatsApp number cannot exceed 20 characters.")]
         [RegularExpression(@"^\+?\d{7,15}$", ErrorMessage = "Invalid WhatsApp number format.")]
@@ -60,40 +59,6 @@ namespace MealToken.Domain.Models
         [StringLength(500, ErrorMessage = "Special note cannot exceed 500 characters.")]
         public string? SpecialNote { get; set; }
 
-        // Using IValidatableObject for custom conditional validations
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            // For 'create', the built-in [Required] on PersonNumber is sufficient for both types.
-            // We only need to check for invalid/extra data based on the type.
-
-            if (PersonType == PersonType.Employer)
-            {
-                // NEW REQUIREMENT: Employee Number (PersonNumber) is the only required thing for create employee.
-                // This means we remove the checks for DepartmentId, DesignationId, and JoinedDate.
-
-                // Only perform checks for properties that *shouldn't* be set for an employee if it makes sense,
-                // but based on your requirement, the goal seems to be minimal validation on create.
-            }
-            else if (PersonType == PersonType.Visitor)
-            {
-                // NEW REQUIREMENT: Card Number (PersonNumber) is only required to create visitor.
-                // Visitors should not have employee-specific data.
-
-                if (DesignationId.HasValue && DesignationId > 0)
-                {
-                    yield return new ValidationResult("Designation should not be set for visitors.", new[] { nameof(DesignationId) });
-                }
-
-                if (!string.IsNullOrEmpty(EmployeeGrade))
-                {
-                    yield return new ValidationResult("Employee Grade should not be set for visitors.", new[] { nameof(EmployeeGrade) });
-                }
-
-                if (JoinedDate.HasValue)
-                {
-                    yield return new ValidationResult("Joined Date should not be set for visitors.", new[] { nameof(JoinedDate) });
-                }
-            }
-        }
+        
     }
 }

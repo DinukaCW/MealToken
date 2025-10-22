@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace MealToken.Infrastructure.Migrations.MealTokenDb
+namespace MealToken.Infrastructure.Migrations
 {
     [DbContext(typeof(MealTokenDbContext))]
-    [Migration("20251018062753_chnagenulls")]
-    partial class chnagenulls
+    [Migration("20251021095206_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -596,7 +596,6 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("JobStatus")
@@ -622,7 +621,6 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                         .HasColumnType("int");
 
                     b.Property<string>("PersonName")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -914,7 +912,6 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
@@ -1052,7 +1049,7 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                     b.Property<int>("RequestId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SubTypeId")
+                    b.Property<int?>("SubTypeId")
                         .HasColumnType("int");
 
                     b.Property<int>("TenantId")
@@ -1293,6 +1290,15 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Currency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("EnableFunctionKeys")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("EnableNotifications")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -1345,6 +1351,48 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                     b.HasIndex("UserId");
 
                     b.ToTable("UserDepartment", "dbo");
+                });
+
+            modelBuilder.Entity("MealToken.Domain.Entities.UserHistory", b =>
+                {
+                    b.Property<int>("UserHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserHistoryId"));
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IPAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserHistoryId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserHistory", "dbo");
                 });
 
             modelBuilder.Entity("MealToken.Domain.Entities.UserRequest", b =>
@@ -1647,7 +1695,7 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                     b.HasOne("MealToken.Domain.Entities.Department", null)
                         .WithMany()
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("MealToken.Domain.Entities.Designation", null)
@@ -1705,8 +1753,7 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                     b.HasOne("MealToken.Domain.Entities.MealSubType", null)
                         .WithMany()
                         .HasForeignKey("SubTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("MealToken.Domain.Entities.TenantInfo", null)
                         .WithMany()
@@ -1814,6 +1861,21 @@ namespace MealToken.Infrastructure.Migrations.MealTokenDb
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("MealToken.Domain.Entities.UserHistory", b =>
+                {
+                    b.HasOne("MealToken.Domain.Entities.TenantInfo", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Authentication.Models.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MealToken.Domain.Entities.UserRequest", b =>

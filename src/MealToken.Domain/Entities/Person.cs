@@ -42,7 +42,7 @@ namespace MealToken.Domain.Entities
 		public string PersonSubType { get; set; } // EmployeeType or VisitorType
 
 		[MaxLength(10)]
-		public string Gender { get; set; }
+		public string? Gender { get; set; }
         [MaxLength(50)]
         public string? WhatsappNumber { get; set; }
         [MaxLength(100)]

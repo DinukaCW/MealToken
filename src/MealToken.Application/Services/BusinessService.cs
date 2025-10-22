@@ -1389,7 +1389,7 @@ namespace MealToken.Application.Services
                         TenantId = _tenantContext.TenantId.Value,
 						RequestId = request.MealRequestId,
                         MealTypeId = meal.MealTypeId,
-                        SubTypeId = meal.SubTypeId,
+                        SubTypeId = meal.SubTypeId.Value,
                         MealCostId = meal.MealCostId,
                         Quantity = meal.Quantity
                     });
@@ -1463,7 +1463,7 @@ namespace MealToken.Application.Services
                         TenantId = _tenantContext.TenantId.Value,
 						RequestId = mealRequestId,
                         MealTypeId = meal.MealTypeId,
-                        SubTypeId = meal.SubTypeId,
+                        SubTypeId = meal.SubTypeId.Value,
                         MealCostId = meal.MealCostId,
                         Quantity = meal.Quantity
                     });

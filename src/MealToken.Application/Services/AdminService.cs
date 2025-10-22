@@ -64,7 +64,7 @@ namespace MealToken.Application.Services
 					}
 				}
 				var userDepartmentIds = _userContext.DepartmentIds ?? new List<int>();
-				if (personDto.DepartmentId.HasValue && !userDepartmentIds.Contains(personDto.DepartmentId.Value))
+				if (!userDepartmentIds.Contains(personDto.DepartmentId))
 				{
 					return new ServiceResult
 					{
@@ -72,6 +72,7 @@ namespace MealToken.Application.Services
 						Message = "You do not have permission to add a person to the specified department."
 					};
 				}
+
 				var person = new Person
 				{
 					PersonType = personDto.PersonType,
@@ -81,8 +82,8 @@ namespace MealToken.Application.Services
 					NICNumber = !string.IsNullOrWhiteSpace(personDto.NICNumber) ?
 					   _encryption.EncryptData(personDto.NICNumber) : null,
 					JoinedDate = personDto.JoinedDate,
-					DepartmentId = personDto.DepartmentId.Value,
-					DesignationId = personDto.DesignationId.Value,
+					DepartmentId = personDto.DepartmentId,
+					DesignationId = personDto.DesignationId,
 					EmployeeGrade = personDto.EmployeeGrade,
 					PersonSubType = personDto.PersonSubType, // Updated from EmployeeType
 					Gender = personDto.Gender,
@@ -164,7 +165,7 @@ namespace MealToken.Application.Services
 						}
 					}
 				}
-                if (_userContext.DepartmentIds == null || !_userContext.DepartmentIds.Contains(personDto.DepartmentId.Value))
+                if (_userContext.DepartmentIds == null || !_userContext.DepartmentIds.Contains(personDto.DepartmentId))
                 {
                     throw new UnauthorizedAccessException(
                         $"You do not have access to department ID {personDto.DepartmentId}.");
@@ -176,7 +177,7 @@ namespace MealToken.Application.Services
 				existingPerson.NICNumber = !string.IsNullOrWhiteSpace(personDto.NICNumber) ?
 										  _encryption.EncryptData(personDto.NICNumber) : null;
 				existingPerson.JoinedDate = personDto.JoinedDate;
-				existingPerson.DepartmentId = personDto.DepartmentId ?? 11;
+				existingPerson.DepartmentId = personDto.DepartmentId;
 				existingPerson.DesignationId = personDto.DesignationId;
 				existingPerson.EmployeeGrade = personDto.EmployeeGrade;
 				existingPerson.PersonSubType = personDto.PersonSubType;
@@ -797,9 +798,20 @@ namespace MealToken.Application.Services
                 {
                     existingMealType.Description = mealTypeDto.Description;
                 }
+				var tenant = await _adminData.GetTenantInfoByIdAsync(_tenantContext.TenantId.Value);
 
-                // 3. Update all scalar properties at once using object initializer pattern
-                existingMealType.TokenIssueStartDate = mealTypeDto.TokenIssueStartDate;
+				if ((mealTypeDto.SubTypes != null && mealTypeDto.SubTypes.Any()) && !(tenant.EnableFunctionKeys ?? false))
+				{
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "Function Key Settings are not enabled."
+					};
+				}
+
+
+				// 3. Update all scalar properties at once using object initializer pattern
+				existingMealType.TokenIssueStartDate = mealTypeDto.TokenIssueStartDate;
                 existingMealType.TokenIssueEndDate = mealTypeDto.TokenIssueEndDate;
                 existingMealType.TokenIssueStartTime = mealTypeDto.TokenIssueStartTime;
                 existingMealType.TokenIssueEndTime = mealTypeDto.TokenIssueEndTime;

@@ -16,7 +16,7 @@ namespace MealToken.Domain.Entities
         public int TenantId { get; set; }
         public int RequestId { get; set; }
         public int MealTypeId { get; set; }
-        public int SubTypeId { get; set; }
+        public int? SubTypeId { get; set; }
         public int MealCostId { get; set; }
         public decimal Quantity { get; set; }
     }
