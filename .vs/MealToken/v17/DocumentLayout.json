@@ -150,8 +150,7 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Helpers\\EncryptionService.cs",
               "ViewState": "AgIAAEgAAAAAAAAAAAAUwF0AAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-22T06:26:07.481Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-22T06:26:07.481Z"
             },
             {
               "$type": "Document",
@@ -163,8 +162,7 @@
               "RelativeToolTip": "src\\MealToken.Domain\\Models\\SupplierDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-22T06:25:52.05Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-22T06:25:52.05Z"
             },
             {
               "$type": "Document",
@@ -176,8 +174,7 @@
               "RelativeToolTip": "src\\MealToken.Domain\\Entities\\Supplier.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAUwBEAAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-22T06:25:49.616Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-22T06:25:49.616Z"
             },
             {
               "$type": "Document",
@@ -202,8 +199,7 @@
               "RelativeToolTip": "src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
               "ViewState": "AgIAAIQEAAAAAAAAAAAUwJEEAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:33:02.013Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:33:02.013Z"
             },
             {
               "$type": "Document",
@@ -215,8 +211,7 @@
               "RelativeToolTip": "src\\MealToken.API\\Controllers\\AdminController.cs",
               "ViewState": "AgIAANgAAAAAAAAAAAAUwOUAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.335Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.335Z"
             },
             {
               "$type": "Document",
@@ -228,8 +223,7 @@
               "RelativeToolTip": "src\\MealToken.Application\\Services\\AdminService.cs",
               "ViewState": "AgIAAHUCAAAAAAAAAAAkwHoCAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.351Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.351Z"
             },
             {
               "$type": "Document",
@@ -253,8 +247,7 @@
               "RelativeToolTip": "src\\MealToken.Application\\Services\\TokenPrcoessService.cs",
               "ViewState": "AgIAAIcAAAAAAAAAAAAAAJIAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:26:10.912Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:26:10.912Z"
             },
             {
               "$type": "Document",
@@ -266,8 +259,7 @@
               "RelativeToolTip": "src\\MealToken.API\\Controllers\\BusinessController.cs",
               "ViewState": "AgIAADICAAAAAAAAAAArwD0CAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.446Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.446Z"
             },
             {
               "$type": "Document",
@@ -279,8 +271,7 @@
               "RelativeToolTip": "src\\MealToken.Application\\Services\\CompanyBusinessLogic.cs",
               "ViewState": "AgIAADwAAAAAAAAAAAAswFQAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.497Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.497Z"
             },
             {
               "$type": "Document",
@@ -316,8 +307,7 @@
               "RelativeToolTip": "src\\MealToken.Application\\Services\\BusinessService.cs",
               "ViewState": "AgIAAKEHAAAAAAAAAAAcwK8HAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:33:02.209Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-20T12:33:02.209Z"
             },
             {
               "$type": "Document",
@@ -485,8 +475,7 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Services\\UserService.cs",
               "ViewState": "AgIAAO0BAAAAAAAAAAAMwP4BAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.28Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.28Z"
             },
             {
               "$type": "Document",
@@ -498,8 +487,7 @@
               "RelativeToolTip": "src\\MealToken.API\\Controllers\\UserController.cs",
               "ViewState": "AgIAAC4AAAAAAAAAAAAMwD8AAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.249Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.249Z"
             },
             {
               "$type": "Document",
