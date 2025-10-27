@@ -25,15 +25,22 @@ namespace MealToken.API.Controllers
 		[Authorize]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashboardSummary()
-        {
-            var result = await _reportService.GetDashboardSummaryAsync();
+		{
+			try
+			{
+				var result = await _reportService.GetDashboardSummaryAsync();
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
 
-            return Ok(result.Data);
+				return Ok(result.Data);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error:{ex.InnerException}");
+			}
         }
 
         [HttpGet("weekly")]
@@ -41,55 +48,144 @@ namespace MealToken.API.Controllers
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetWeeklyReport( [FromQuery] string startDate, [FromQuery] string endDate)
         {
-            if (!DateOnly.TryParse(startDate, out var start) ||
-                !DateOnly.TryParse(endDate, out var end))
-            {
-                return BadRequest("Invalid date format");
-            }
+			try
+			{
+				if (!DateOnly.TryParse(startDate, out var start) ||
+					!DateOnly.TryParse(endDate, out var end))
+				{
+					return BadRequest("Invalid date format");
+				}
 
-            var result = await _reportService.GenerateWeeklyReportAsync(start, end);
+				var result = await _reportService.GenerateWeeklyReportAsync(start, end);
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
 
-            return Ok(result.Data);
+
+				return Ok(result.Data);
+			}
+			catch (Exception ex) 
+			{
+				return StatusCode(500, $"Internal server error:{ex.InnerException}");
+			}
+
         }
 
         [HttpGet("current-week")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetCurrentWeekReport()
-        {
-            var result = await _reportService.GenerateCurrentWeekReportAsync();
+		{
+			try
+			{
+				var result = await _reportService.GenerateCurrentWeekReportAsync();
 
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
 
-            return Ok(result.Data);
+				return Ok(result.Data);
+			}
+			catch (Exception ex) {
+				return StatusCode(500, $"Internal server error:{ex.InnerException}");
+			}
+
         }
-		[HttpGet("weeklyMealTotalReport")]
+
+		[HttpGet("MealConsumptionSummary")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> WeeklyMealTotalReport([FromQuery] string startDate, [FromQuery] string endDate)
+		public async Task<IActionResult> MealConsumptionSummaryReport([FromQuery] string startDate, [FromQuery] string endDate)
 		{
-			if (!DateOnly.TryParse(startDate, out var start) ||
-				!DateOnly.TryParse(endDate, out var end))
+			try
 			{
-				return BadRequest("Invalid date format");
+				if (!DateOnly.TryParse(startDate, out var start) ||
+					!DateOnly.TryParse(endDate, out var end))
+				{
+					return BadRequest("Invalid date format");
+				}
+
+				var result = await _reportService.GetMealConsumptionSummaryAsync(start, end);
+
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
+
+				return Ok(result.Data);
 			}
+			catch (Exception ex) 
+			{ return StatusCode(500, $"Internal server error:{ex.InnerException}"); }
 
-			var result = await _reportService.GenerateMealConsumptionSummaryReportAsync(start, end);
-
-			if (!result.Success)
-			{
-				return BadRequest(result);
-			}
-
-			return Ok(result.Data);
 		}
+
+		[HttpGet("SupplierWiseReport")]
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> SupplierWiseReport([FromQuery] string startDate, [FromQuery] string endDate)
+		{
+			try
+			{
+				if (!DateOnly.TryParse(startDate, out var start) ||
+					!DateOnly.TryParse(endDate, out var end))
+				{
+					return BadRequest("Invalid date format");
+				}
+
+				var result = await _reportService.GetAllSuppliersPaymentReportAsync(start, end);
+
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
+
+				return Ok(result.Data);
+			}
+			catch (Exception ex)
+			{ return StatusCode(500, $"Internal server error:{ex.InnerException}"); }
+		}
+
+		[HttpGet("GetTodayMeals")]
+		[Authorize(Roles = "Admin,DepartmentHead")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetTodayMeals([FromQuery] string date, [FromQuery] string time)
+		{
+			try
+			{
+				if (!DateOnly.TryParse(date, out var parsedDate))
+				{
+					return BadRequest(new
+					{
+						Success = false,
+						Message = "Invalid date format. Please use YYYY-MM-DD."
+					});
+				}
+
+				if (!TimeOnly.TryParse(time, out var parsedTime))
+				{
+					return BadRequest(new
+					{
+						Success = false,
+						Message = "Invalid time format. Please use HH:mm (24-hour format)."
+					});
+				}
+
+				var result = await _reportService.GetTodayMealSchedulesAsync(parsedDate, parsedTime);
+
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{ return StatusCode(500, $"Internal server error:{ex.InnerException}"); }
+		}
+
+
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using Authentication.Interfaces;
 using Authentication.Models.DTOs;
 using MealToken.Application.Interfaces;
+using MealToken.Domain.Enums;
 using MealToken.Domain.Interfaces;
 using MealToken.Domain.Models;
 using MealToken.Domain.Models.Reports;
@@ -17,26 +18,27 @@ namespace MealToken.Application.Services
     public class MealReportService : IMealReportService
     {
         private readonly IEncryptionService _encryption;
-        private readonly IBusinessRepository _businessData;
         private readonly ILogger<TokenProcessService> _logger;
         private readonly ITenantContext _tenantContext;
-        private readonly IAdminRepository _adminData;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IReportRepository _reportRepository;
+        private readonly IBusinessRepository _businessData;
 
         public MealReportService(
             IEncryptionService encryptionService,
-            IBusinessRepository businessRepository,
             ILogger<TokenProcessService> logger,
             ITenantContext tenantContext,
             IAdminRepository adminData,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IReportRepository reportRepository,
+            IBusinessRepository businessData)
         {
             _encryption = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
-            _businessData = businessRepository ?? throw new ArgumentNullException(nameof(businessRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
-            _adminData = adminData ?? throw new ArgumentNullException(nameof(adminData));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _reportRepository = reportRepository ?? throw new ArgumentNullException(nameof(reportRepository));
+            _businessData = businessData ?? throw new ArgumentNullException(nameof(businessData));
         }
 
         public async Task<ServiceResult<ReportDashBoard>> GetDashboardSummaryAsync()
@@ -44,11 +46,11 @@ namespace MealToken.Application.Services
             try
             {
                 // FIXED: Run operations sequentially to avoid DbContext threading issues
-                var mealsThisMonth = await _businessData.GetMealsServedThisMonthAsync();
-                var mealsLastMonth = await _businessData.GetMealsServedLastMonthAsync();
-                var activeEmployees = await _businessData.GetActiveEmployeesCountAsync();
-                var activeVisitors = await _businessData.GetActiveVisitorsCountAsync();
-                var pendingRequests = await _businessData.GetPendingRequestsCountAsync();
+                var mealsThisMonth = await _reportRepository.GetMealsServedThisMonthAsync();
+                var mealsLastMonth = await _reportRepository.GetMealsServedLastMonthAsync();
+                var activeEmployees = await _reportRepository.GetActiveEmployeesCountAsync();
+                var activeVisitors = await _reportRepository.GetActiveVisitorsCountAsync();
+                var pendingRequests = await _reportRepository.GetPendingRequestsCountAsync();
 
                 // Calculate percentage change
                 var (percentageChange, isIncrease) = CalculatePercentageChange(mealsThisMonth, mealsLastMonth);
@@ -94,7 +96,7 @@ namespace MealToken.Application.Services
             try
             {
                 // Fetch data for the date range with all related data in ONE query
-                var mealConsumptions = await _businessData.GetMealConsumptioninWeekAsync(startDate, endDate);
+                var mealConsumptions = await _reportRepository.GetMealConsumptioninWeekAsync(startDate, endDate);
 
                 if (!mealConsumptions.Any())
                 {
@@ -126,106 +128,290 @@ namespace MealToken.Application.Services
             return await GenerateWeeklyReportAsync(startOfWeek, endOfWeek);
         }
 
-		public async Task<ServiceResult<List<MealConsumptionSummaryDto>>> GenerateMealConsumptionSummaryReportAsync(
-			DateOnly startDate, DateOnly endDate)
+		public async Task<ServiceResult> GetMealConsumptionSummaryAsync(DateOnly startDate, DateOnly? endDate = null)
 		{
+			_logger.LogInformation("Meal consumption summary request started. StartDate: {StartDate}, EndDate: {EndDate}", startDate, endDate);
+
 			try
 			{
-				// Use existing method to get weekly report data
-				var reportResult = await GenerateWeeklyReportAsync(startDate, endDate);
+				// If endDate is not provided, use startDate (single day report)
+				var reportEndDate = endDate ?? startDate;
 
-				if (!reportResult.Success)
+				// Validate date range
+				if (reportEndDate < startDate)
 				{
-					return ServiceResult<List<MealConsumptionSummaryDto>>.FailureResult(
-						reportResult.Message, reportResult.Errors);
+					_logger.LogWarning("Invalid date range detected. StartDate: {StartDate}, EndDate: {EndDate}", startDate, reportEndDate);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "End date cannot be before start date."
+					};
 				}
 
-				var mealConsumptionReport = reportResult.Data;
-				var summaryData = BuildSummaryReportData(mealConsumptionReport);
+				_logger.LogInformation("Fetching meal consumption data between {StartDate} and {EndDate}", startDate, reportEndDate);
 
-				return ServiceResult<List<MealConsumptionSummaryDto>>.SuccessResult(summaryData);
+				// Get all data for the requested range
+				var allData = await _reportRepository.GetMealConsumptionSummaryByDateRangeAsync(startDate, reportEndDate);
+
+				if (allData == null || !allData.Any())
+				{
+					_logger.LogInformation("No meal consumption records found for the given period. StartDate: {StartDate}, EndDate: {EndDate}", startDate, reportEndDate);
+
+					return new ServiceResult
+					{
+						Success = true,
+						Message = "No meal consumption records found for the selected date range.",
+						Data = new List<MealConsumptionSummaryDto>()
+					};
+				}
+
+				// Group by date to prepare summary list
+				var summaries = allData
+					.GroupBy(x => x.Date)
+					.Select(g => new MealConsumptionSummaryDto
+					{
+						MealConsumptionDetails = g.ToList(),
+						TotalMealServed = g.Sum(x => x.TotalMealCount),
+						TotalEmployeesContribution = g.Sum(x => x.TotalEmployeeContribution),
+						TotalSupplierContribution = g.Sum(x => x.TotalSupplierCost),
+						TotalCompanyContribution = g.Sum(x => x.TotalEmployerContribution)
+					})
+					.OrderBy(x => x.MealConsumptionDetails.First().Date)
+					.ToList();
+
+				_logger.LogInformation("Meal consumption summary generated successfully for {DaysCount} day(s).", summaries.Count);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Meal consumption summary generated successfully.",
+					Data = summaries
+				};
+			}
+			catch (ArgumentException ex)
+			{
+				_logger.LogWarning(ex, "Invalid input parameters: {Message}", ex.Message);
+				return new ServiceResult
+				{
+					Success = false,
+					Message = $"Invalid input: {ex.Message}"
+				};
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex,
-					"Error generating meal consumption summary report for date range {StartDate} to {EndDate}",
-					startDate, endDate);
-				return ServiceResult<List<MealConsumptionSummaryDto>>.FailureResult(
-					$"Error generating meal consumption summary report: {ex.Message}");
+				_logger.LogError(ex, "An unexpected error occurred while generating meal consumption summary.");
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An unexpected error occurred while processing the meal consumption summary. Please try again later."
+				};
 			}
 		}
 
-		/// <summary>
-		/// Builds summary report data from meal consumption report
-		/// </summary>
-		private List<MealConsumptionSummaryDto> BuildSummaryReportData(MealConsumptionReportDTO report)
+		public async Task<SupplierPaymentReportDto> GetSupplierPaymentReportAsync(int supplierId,DateOnly startDate,DateOnly? endDate = null)
 		{
-			var summaryList = new List<MealConsumptionSummaryDto>();
+			var reportEndDate = endDate ?? startDate;
 
-			foreach (var dailyReport in report.DailyReports)
+			if (reportEndDate < startDate)
 			{
-				foreach (var mealTypeGroup in dailyReport.MealTypeGroups)
-				{
-					// Add subtotal rows for each subtype
-					foreach (var subTypeTotal in mealTypeGroup.SubTypeSubTotals)
-					{
-						var summary = new MealConsumptionSummaryDto
-						{
-							Date = dailyReport.Date,
-							MealType = mealTypeGroup.MealTypeName,
-							SubType = subTypeTotal.SubTypeName,
-							EmployeeCount = subTypeTotal.EmployeeCount,
-							MaleCount = subTypeTotal.MaleCount,
-							FemaleCount = subTypeTotal.FemaleCount,
-							TotalEmployeeContribution = subTypeTotal.TotalEmployeeContribution,
-							TotalEmployerContribution = subTypeTotal.TotalEmployerCost,
-							TotalSupplierCost = subTypeTotal.TotalSupplierCost,
-							TotalMealCount = subTypeTotal.TotalMealCount,
-							RowType = "SubtypeTotal"
-						};
-						summaryList.Add(summary);
-					}
+				throw new ArgumentException("End date cannot be before start date.");
+			}
 
-					// Add meal type total row
-					var mealTypeTotal = new MealConsumptionSummaryDto
+			// Get supplier info
+			var supplierInfo = await _reportRepository.GetSupplierInfoAsync(supplierId);
+			if (supplierInfo == null)
+			{
+				throw new KeyNotFoundException($"Supplier with ID {supplierId} not found. or supplier is not Active");
+			}
+     
+			// Get meal details
+			var mealDetails = await _reportRepository.GetSupplierMealDetailsByDateRangeAsync(
+				supplierId,
+				startDate,
+				reportEndDate
+			);
+
+			// Get summary
+			var summary = await _reportRepository.GetSupplierSummaryByDateRangeAsync(
+				supplierId,
+				startDate,
+				reportEndDate
+			);
+
+			return new SupplierPaymentReportDto
+			{
+				SupplierName = supplierInfo.SupplierName,
+				ContactNumber = _encryption.DecryptData(supplierInfo.ContactNumber),
+				Address = _encryption.DecryptData(supplierInfo.Address),
+				MealDetails = mealDetails,
+				Summary = summary
+			};
+		}
+		public async Task<ServiceResult> GetAllSuppliersPaymentReportAsync(DateOnly startDate, DateOnly? endDate = null)
+		{
+
+			try
+			{
+				// If endDate is not provided, use startDate (single day report)
+				var reportEndDate = endDate ?? startDate;
+
+				// Validate date range
+				if (reportEndDate < startDate)
+				{
+					_logger.LogWarning("Invalid date range detected. StartDate: {StartDate}, EndDate: {EndDate}", startDate, reportEndDate);
+					return new ServiceResult
 					{
-						Date = dailyReport.Date,
-						MealType = mealTypeGroup.MealTypeName,
-						SubType = "Total",
-						EmployeeCount = mealTypeGroup.MealTypeTotal.EmployeeCount,
-						MaleCount = mealTypeGroup.MealTypeTotal.MaleCount,
-						FemaleCount = mealTypeGroup.MealTypeTotal.FemaleCount,
-						TotalEmployeeContribution = mealTypeGroup.MealTypeTotal.TotalEmployeeContribution,
-						TotalEmployerContribution = mealTypeGroup.MealTypeTotal.TotalEmployerCost,
-						TotalSupplierCost = mealTypeGroup.MealTypeTotal.TotalSupplierCost,
-						TotalMealCount = mealTypeGroup.MealTypeTotal.TotalMealCount,
-						RowType = "MealTypeTotal"
+						Success = false,
+						Message = "End date cannot be before start date."
 					};
-					summaryList.Add(mealTypeTotal);
 				}
 
-				// Add daily total row
-				var dailyTotal = new MealConsumptionSummaryDto
-				{
-					Date = dailyReport.Date,
-					MealType = "Daily Total",
-					SubType = "",
-					EmployeeCount = 0,
-					MaleCount = 0,
-					FemaleCount = 0,
-					TotalEmployeeContribution = dailyReport.DailyTotal.GrandTotalEmployeeContribution,
-					TotalEmployerContribution = dailyReport.DailyTotal.GrandTotalEmployerCost,
-					TotalSupplierCost = dailyReport.DailyTotal.GrandTotalSupplierCost,
-					TotalMealCount = dailyReport.DailyTotal.GrandTotalMealCount,
-					RowType = "DailyTotal"
-				};
-				summaryList.Add(dailyTotal);
-			}
+				_logger.LogInformation("Fetching active suppliers between {StartDate} and {EndDate}", startDate, reportEndDate);
 
-			return summaryList;
+				// Get all active suppliers
+				var supplierIds = await _reportRepository.GetActiveSupplierIdsByDateRangeAsync(startDate, reportEndDate);
+
+				if (supplierIds == null || !supplierIds.Any())
+				{
+					_logger.LogInformation("No active suppliers found in the specified date range. StartDate: {StartDate}, EndDate: {EndDate}", startDate, reportEndDate);
+					return new ServiceResult
+					{
+						Success = true,
+						Message = "No active suppliers found for the selected date range.",
+						Data = new List<SupplierPaymentReportDto>()
+					};
+				}
+
+				var reports = new List<SupplierPaymentReportDto>();
+
+				foreach (var supplierId in supplierIds)
+				{
+					try
+					{
+						var report = await GetSupplierPaymentReportAsync(supplierId, startDate, reportEndDate);
+
+						if (report != null)
+						{
+							reports.Add(report);
+						}
+						else
+						{
+							_logger.LogWarning("Report generation returned null for SupplierId: {SupplierId}", supplierId);
+						}
+					}
+					catch (Exception innerEx)
+					{
+						_logger.LogError(innerEx, "Error while generating report for SupplierId: {SupplierId}", supplierId);
+					}
+				}
+
+				_logger.LogInformation("Supplier payment report generation completed successfully. Total Reports: {Count}", reports.Count);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Supplier payment report generated successfully.",
+					Data = reports
+				};
+			}
+			catch (ArgumentException ex)
+			{
+				_logger.LogWarning(ex, "Invalid input parameters for supplier payment report: {Message}", ex.Message);
+				return new ServiceResult
+				{
+					Success = false,
+					Message = $"Invalid input: {ex.Message}"
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An unexpected error occurred while generating supplier payment reports.");
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An unexpected error occurred while generating supplier payment reports. Please try again later."
+				};
+			}
 		}
 
-		#region Private Helper Methods
+		public async Task<ServiceResult> GetTodayMealSchedulesAsync(DateOnly date, TimeOnly time)
+		{
+
+			try
+			{
+				// Get today's schedule IDs
+				var scheduleIds = await _businessData.GetScheduleByDateAsync(date);
+
+				if (scheduleIds == null || !scheduleIds.Any())
+				{
+					_logger.LogInformation("No schedules found for date {Date}.", date);
+					return new ServiceResult
+					{
+						Success = true,
+						Message = "No schedules found for the selected date.",
+						Data = new List<TodayScheduleDto>()
+					};
+				}
+
+				_logger.LogInformation("Retrieved {Count} schedule IDs for date {Date}.", scheduleIds.Count(), date);
+
+				// Get meals by schedule IDs
+				var meals = await _businessData.GetMealsByScheduleIdsAsync(scheduleIds);
+
+				if (meals == null || !meals.Any())
+				{
+					_logger.LogInformation("No meals found for the given schedule IDs on date {Date}.", date);
+					return new ServiceResult
+					{
+						Success = true,
+						Message = "No meals available for the selected date.",
+						Data = new List<TodayScheduleDto>()
+					};
+				}
+
+				// Determine meal status based on current time
+				foreach (var meal in meals)
+				{
+					if (time >= meal.StartTime && time <= meal.EndTime)
+					{
+						meal.Status = MealStatus.Active;
+					}
+					else if (time < meal.StartTime)
+					{
+						meal.Status = MealStatus.Upcoming;
+					}
+					else
+					{
+						meal.Status = MealStatus.Completed;
+					}
+				}
+
+				var sortedMeals = meals
+					.OrderBy(m => m.StartTime)
+					.ThenBy(m => m.ScheduleName)
+					.ToList();
+
+				_logger.LogInformation("Today's meal schedules fetched successfully. Total meals: {Count}", sortedMeals.Count);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Today's meal schedules retrieved successfully.",
+					Data = sortedMeals
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occurred while fetching today's meal schedules for {Date}.", date);
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An unexpected error occurred while fetching today's meal schedules. Please try again later."
+				};
+			}
+		}
+
+
 
 		private static (decimal percentageChange, bool isIncrease) CalculatePercentageChange(
             int currentValue, int previousValue)
@@ -408,7 +594,6 @@ namespace MealToken.Application.Services
             };
         }
 
-        #endregion
     }
 
     #region Helper Interfaces

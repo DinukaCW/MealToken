@@ -51,6 +51,7 @@ builder.Services.AddScoped<ScheduleDateGeneratorService>();
 builder.Services.AddScoped<ITokenProcessService, TokenProcessService>();
 builder.Services.AddScoped<ICompanyBusinessLogic, CompanyBusinessLogic>();
 builder.Services.AddScoped<IMealReportService, MealReportService>();
+builder.Services.AddScoped<IReportRepository,ReportRepository>();
 builder.Services.AddScoped<IUserHistoryService,UserHistoryService>();
 builder.Services.AddScoped<UserHistoryActionFilter>();
 

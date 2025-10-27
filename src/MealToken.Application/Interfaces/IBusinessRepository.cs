@@ -2,6 +2,7 @@
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
+using MealToken.Domain.Models.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,13 +61,10 @@ namespace MealToken.Application.Interfaces
 		Task<DeviceShift?> GetDeviceShiftBySerialNoAsync(string serialNo);
 		Task DeleteSchedulePersonsByIdsAsync(List<int> assignmentIds);
 		Task DeleteScheduleDatesByIdsAsync(List<int> dateIds);
-		Task<List<MealConsumptionWithDetails>> GetMealConsumptioninWeekAsync(DateOnly startDate, DateOnly endDate);
-        Task<int> GetMealsServedThisMonthAsync();
-		Task<int> GetMealsServedLastMonthAsync();
-		Task<int> GetActiveEmployeesCountAsync();
-		Task<int> GetActiveVisitorsCountAsync();
-		Task<int> GetPendingRequestsCountAsync();
 		Task CreateMealConsumptionBatchAsync(IEnumerable<MealConsumption> mealConsumptions);
 		Task<IEnumerable<RequestMeal>> GetRequestMealsByRequestIdsAsync(IEnumerable<int> requestIds);
-    }
+		Task<List<int>> GetScheduleByDateAsync(DateOnly date);
+		Task<List<TodayScheduleDto>> GetMealsByScheduleIdsAsync(IEnumerable<int> scheduleIds);
+
+	}
 }

@@ -1,4 +1,5 @@
-﻿using MealToken.Application.Services;
+﻿using Authentication.Models.DTOs;
+using MealToken.Application.Services;
 using MealToken.Domain.Models;
 using MealToken.Domain.Models.Reports;
 using System;
@@ -14,7 +15,9 @@ namespace MealToken.Application.Interfaces
         Task<ServiceResult<MealConsumptionReportDTO>> GenerateWeeklyReportAsync(DateOnly startDate, DateOnly endDate);
         Task<ServiceResult<MealConsumptionReportDTO>> GenerateCurrentWeekReportAsync();
         Task<ServiceResult<ReportDashBoard>> GetDashboardSummaryAsync();
-        Task<ServiceResult<List<MealConsumptionSummaryDto>>> GenerateMealConsumptionSummaryReportAsync(DateOnly startDate, DateOnly endDate);
-
+        Task<ServiceResult> GetMealConsumptionSummaryAsync(DateOnly startDate, DateOnly? endDate = null);
+        Task<SupplierPaymentReportDto> GetSupplierPaymentReportAsync(int supplierId, DateOnly startDate, DateOnly? endDate = null);
+		Task<ServiceResult> GetAllSuppliersPaymentReportAsync(DateOnly startDate, DateOnly? endDate = null);
+        Task<ServiceResult> GetTodayMealSchedulesAsync(DateOnly date, TimeOnly time);
 	}
 }
