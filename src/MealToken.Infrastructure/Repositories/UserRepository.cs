@@ -377,5 +377,12 @@ namespace MealToken.Infrastructure.Repositories
 			await _tenantContext.UserHistory.AddAsync(userHistory);
 			await _tenantContext.SaveChangesAsync();
 		}
+		public async Task<string?> GetDepartmentByIdAsync(int departmentId)
+		{
+			return await _platformContext.Department
+				.Where(d => d.DepartmnetId == departmentId)
+				.Select(d => d.Name)
+				.FirstOrDefaultAsync();
+		}
 	}
 }

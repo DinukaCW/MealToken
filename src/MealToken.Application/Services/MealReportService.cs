@@ -40,6 +40,128 @@ namespace MealToken.Application.Services
 			_reportRepository = reportRepository ?? throw new ArgumentNullException(nameof(reportRepository));
 			_businessData = businessData ?? throw new ArgumentNullException(nameof(businessData));
 		}
+		// This method assumes your DbContext is _context and has DbSet<UserHistory> and DbSet<User>
+		public async Task<ServiceResult> GetActivityLogsAsync(ActivityLogFilter logFilter)
+		{
+			try
+			{
+				var activityLogs = await _reportRepository.GetActivityLogsAsync(
+					logFilter.StartDateTime,
+					logFilter.EndDateTime,
+					logFilter.EntityTypes,
+					logFilter.ActionTypes,
+					logFilter.UserIds);
+
+				if (activityLogs == null || !activityLogs.Any())
+				{
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "No activity logs found for the specified filters."
+					};
+				}
+
+				var activityLogDtos = new List<ActivityLogDto>();
+
+				foreach (var log in activityLogs)
+				{
+					// Get user details
+					var user = await _reportRepository.GetUserByIdAsync(log.UserId);
+					var roleName = user != null
+						? await _reportRepository.GetUserRoleNameAsync(user.UserRoleId)
+						: "Unknown Role";
+
+					// Extract last part of the endpoint
+					string endpointName = string.Empty;
+					if (!string.IsNullOrEmpty(log.Endpoint))
+					{
+						endpointName = log.Endpoint.Trim('/');
+						var parts = endpointName.Split('/');
+						endpointName = parts.LastOrDefault() ?? string.Empty;
+					}
+
+					activityLogDtos.Add(new ActivityLogDto
+					{
+						Timestamp = log.Timestamp,
+						UserName = user?.FullName ?? "Unknown User",
+						UserRole = roleName,
+						Action = log.ActionType,
+						Entity = log.EntityType,
+						Details = endpointName,
+						IpAddress = log.IPAddress
+					});
+				}
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Activity logs retrieved successfully.",
+					Data = activityLogDtos
+				};
+			}
+			catch (Exception ex)
+			{
+				return new ServiceResult
+				{
+					Success = false,
+					Message = $"An error occurred while retrieving activity logs: {ex.Message}"
+				};
+			}
+		}
+
+		public async Task<ServiceResult> GetActivityFilterDataAsync()
+		{
+			try
+			{
+				// Fetch all users from repository
+				var users = await _reportRepository.GetAllUsersAsync();
+
+				// Static entity types and action types for filtering
+						var entityTypes = new List<string>
+				{
+					"User",
+					"Schedule & Request",
+					"Report",
+					"Admin",
+					"General"
+				};
+
+				var actionTypes = new List<string>
+				{
+					"Add",
+					"Update",
+					"View",
+					"Delete",
+					"Unknown"
+				};
+
+				// Prepare filter data object
+				var filterData = new ActivityLogFilterData
+				{
+					Users = users,
+					EntityTypes = entityTypes,
+					ActionTypes = actionTypes
+				};
+
+				// Return successful service result
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Activity filter data retrieved successfully.",
+					Data = filterData
+				};
+			}
+			catch (Exception ex)
+			{
+				// Return error result if something fails
+				return new ServiceResult
+				{
+					Success = false,
+					Message = $"An error occurred while retrieving activity filter data: {ex.Message}"
+				};
+			}
+		}
+
 
 		public async Task<ServiceResult<ReportDashBoard>> GetDashboardSummaryAsync()
 		{
@@ -614,9 +736,6 @@ namespace MealToken.Application.Services
 					return new MealDashboardDto(); 
 				}
 
-				// We can run these in parallel since they don't depend on each other.
-				// This is much faster than awaiting them one by one.
-
 				var totalMeals= await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, personIds);
 				var totalCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, personIds);
 				var specialRequests = await _reportRepository.GetSpecialRequestsAsync(startDate, endDate, personIds);
@@ -626,8 +745,6 @@ namespace MealToken.Application.Services
 				var previousMeals = await _reportRepository.GetTotalMealsServedAsync(previousStartDate, previousEndDate, personIds);
 				var previousCost= await _reportRepository.GetTotalCostAsync(previousStartDate, previousEndDate, personIds);
 
-
-				// --- 3. Calculation & Mapping ---
 				var mealChange = previousMeals > 0 ? ((decimal)(totalMeals - previousMeals) / previousMeals) * 100 : 0;
 				var costChange = previousCost > 0 ? totalCost - previousCost : 0;
 

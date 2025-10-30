@@ -1,4 +1,6 @@
-﻿using MealToken.Domain.Entities;
+﻿using Authentication.Models.DTOs;
+using Authentication.Models.Entities;
+using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
 using MealToken.Domain.Models.Reports;
@@ -12,6 +14,7 @@ namespace MealToken.Application.Interfaces
 {
 	public interface IReportRepository
 	{
+
 		Task<List<MealConsumptionWithDetails>> GetMealConsumptioninWeekAsync(DateOnly startDate, DateOnly endDate);
 		Task<int> GetMealsServedThisMonthAsync();
 		Task<int> GetMealsServedLastMonthAsync();
@@ -38,5 +41,9 @@ namespace MealToken.Application.Interfaces
 		Task<List<MealTypeRawData>> GetMealTypeRawDataAsync(DateOnly startDate, DateOnly endDate, List<int> personIds);
 		Task<decimal> GetTotalEmployeeCostAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
 		Task<List<int>> GetFilteredPersonIdsByTypeAsync(List<int> personIds, PersonType personType);
+		Task<List<UserHistory>> GetActivityLogsAsync(DateTime? startDateTime, DateTime? endDateTime, List<string>? entityType, List<string>? actionType, List<int>? userId);
+		Task<User> GetUserByIdAsync(int userId);
+		Task<string> GetUserRoleNameAsync(int userRoleId);
+		Task<List<UserDto>> GetAllUsersAsync();
 	}
 }

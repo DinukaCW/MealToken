@@ -1167,6 +1167,31 @@ namespace MealToken.Infrastructure.Persistence
 
 			});
 			
+				/*modelBuilder.Entity<RequestMealConsumption>(entity =>
+			{
+				entity.ToTable("RequestMealConsumption", _schema);
+				entity.HasKey(e => e.UserHistoryId);
+				entity.Property(e => e.TenantId).IsRequired();
+				entity.Property(e => e.UserId).IsRequired();
+				entity.Property(e => e.ActionType).IsRequired();
+				entity.Property(e => e.EntityType);
+				entity.Property(e => e.Endpoint);
+				entity.Property(e => e.Timestamp).IsRequired();
+				entity.Property(e => e.IPAddress);
+
+				entity.HasOne<User>()
+					  .WithMany()
+					  .HasForeignKey(e => e.UserId)
+					  .OnDelete(DeleteBehavior.NoAction);
+
+				entity.HasOne<TenantInfo>()
+					   .WithMany()
+					   .HasForeignKey(e => e.TenantId)
+					   .OnDelete(DeleteBehavior.NoAction);
+
+
+			});*/
+
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

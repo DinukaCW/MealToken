@@ -103,7 +103,7 @@ namespace MealToken.API.Helpers
 				return controllerName switch
 				{
 					"User" => "User",
-					"Business" => "Business",
+					"Business" => "Schedule & Request",
 					"Report" => "Report",
 					"Admin" => "Admin",
 					_ => "General"

@@ -445,23 +445,49 @@ namespace MealToken.Application.Services
 
 				var users = await _userData.GetAllUsersAsync();
 
-				// Handle null/empty case
 				if (users == null || !users.Any())
 				{
 					_logger.LogInformation("No users found in the database");
 					return new List<UserListDto>();
 				}
 
-				var userDtos = users.Select(u => new UserListDto
+				var userDtos = new List<UserListDto>();
+
+				foreach (var user in users)
 				{
-					UserID = u.UserID,
-					Username = _encryption.DecryptData(u.Username),
-					FullName = u.FullName,
-					Email = _encryption.DecryptData(u.Email),
-					PhoneNumber = _encryption.DecryptData(u.PhoneNumber),
-					IsActive = u.IsActive,
-					UserRoleId = u.UserRoleId
-				}).ToList();
+					// Decrypt sensitive fields
+					var decryptedUsername = _encryption.DecryptData(user.Username);
+					var decryptedEmail = _encryption.DecryptData(user.Email);
+					var decryptedPhone = _encryption.DecryptData(user.PhoneNumber);
+
+					// Get user's departments
+					var departments = await _userData.GetUserDepartmentsbyUserAsync(user.UserID);
+
+					// Build department list with names
+					var departmentDtos = new List<DepartmentDto>();
+					foreach (var dept in departments)
+					{
+						var departmentName = await _userData.GetDepartmentByIdAsync(dept.DepartmentId);
+						departmentDtos.Add(new DepartmentDto
+						{
+							DepartmentId = dept.DepartmentId,
+							DepartmentName = departmentName ?? "N/A"
+						});
+					}
+
+					// Build user DTO
+					userDtos.Add(new UserListDto
+					{
+						UserID = user.UserID,
+						Username = decryptedUsername,
+						FullName = user.FullName,
+						Email = decryptedEmail,
+						PhoneNumber = decryptedPhone,
+						IsActive = user.IsActive,
+						UserRoleId = user.UserRoleId,
+						Departments = departmentDtos
+					});
+				}
 
 				_logger.LogInformation("Retrieved {UserCount} users successfully", userDtos.Count);
 
@@ -470,11 +496,11 @@ namespace MealToken.Application.Services
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error retrieving users list");
-				// You can either return empty list or rethrow the exception
 				return new List<UserListDto>();
-				// OR rethrow: throw;
 			}
 		}
+
+
 
 		public async Task<UserListDto?> GetUserByIdAsync(int userId)
 		{
@@ -489,7 +515,17 @@ namespace MealToken.Application.Services
 					_logger.LogWarning("User not found with ID: {UserId}", userId);
 					return null;
 				}
-
+				var departments = await _userData.GetUserDepartmentsbyUserAsync(user.UserID);
+				var departmentDtos = new List<DepartmentDto>();
+				foreach (var dept in departments)
+				{
+					var departmentName = await _userData.GetDepartmentByIdAsync(dept.DepartmentId);
+					departmentDtos.Add(new DepartmentDto
+					{
+						DepartmentId = dept.DepartmentId,
+						DepartmentName = departmentName ?? "N/A"
+					});
+				}
 				var userDto = new UserListDto
 				{
 					UserID = user.UserID,
@@ -498,7 +534,8 @@ namespace MealToken.Application.Services
 					Email = _encryption.DecryptData(user.Email),
 					PhoneNumber = _encryption.DecryptData(user.PhoneNumber),
 					IsActive = user.IsActive,
-					UserRoleId = user.UserRoleId
+					UserRoleId = user.UserRoleId,
+					Departments = departmentDtos
 				};
 
 				_logger.LogInformation("User retrieved successfully: {UserId}", userId);

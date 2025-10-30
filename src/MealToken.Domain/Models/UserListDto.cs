@@ -15,5 +15,6 @@ namespace MealToken.Domain.Models
 		public string? PhoneNumber { get; set; }
 		public bool IsActive { get; set; }
 		public int UserRoleId { get; set; }
+		public List<DepartmentDto> Departments { get; set; } = new List<DepartmentDto>();
 	}
 }

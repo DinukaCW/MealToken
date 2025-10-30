@@ -1,4 +1,5 @@
-﻿using MealToken.Application.Interfaces;
+﻿using Authentication.Models.Entities;
+using MealToken.Application.Interfaces;
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
@@ -419,21 +420,29 @@ namespace MealToken.Infrastructure.Repositories
 							MealCount = g.Count(),
 							TotalCost = g.Sum(mc => mc.CompanyCost)
 						})
-						.OrderBy(x => x.Date)
 						.ToListAsync();
 
-					results = dailyData.Select(d => new GraphDataPoint
+					var dailyDataDict = dailyData.ToDictionary(d => d.Date);
+					var currentDate = startDate;
+
+					while (currentDate <= endDate)
 					{
-						Label = (timePeriod == TimePeriod.ThisWeek || timePeriod == TimePeriod.LastWeek)
-								? d.Date.ToString("ddd") // "Mon", "Tue"
-								: d.Date.ToString("MMM d"), // "Oct 29"
-						MealCount = d.MealCount,
-						TotalCost = d.TotalCost
-					}).ToList();
+						var hasData = dailyDataDict.TryGetValue(currentDate, out var data);
+
+						results.Add(new GraphDataPoint
+						{
+							Label = (timePeriod == TimePeriod.ThisWeek || timePeriod == TimePeriod.LastWeek)
+									? currentDate.ToString("ddd") // "Mon", "Tue"
+									: currentDate.ToString("MMM d"), // "Oct 29"
+							MealCount = hasData ? data.MealCount : 0,
+							TotalCost = hasData ? data.TotalCost : 0
+						});
+
+						currentDate = currentDate.AddDays(1);
+					}
 					break;
 
 				case GroupingLevel.ByWeek:
-					// ✅ FIXED: Use week of MONTH, not week of YEAR
 					var rawDataForWeek = await query
 						.Select(mc => new { mc.Date, mc.CompanyCost })
 						.ToListAsync();
@@ -442,52 +451,81 @@ namespace MealToken.Infrastructure.Repositories
 						.GroupBy(mc => new {
 							Year = mc.Date.Year,
 							Month = mc.Date.Month,
-							Week = GetWeekOfMonth(mc.Date) // ✅ Week within the month
+							Week = GetWeekOfMonth(mc.Date)
 						})
 						.Select(g => new {
 							Year = g.Key.Year,
 							Month = g.Key.Month,
 							WeekNumber = g.Key.Week,
-							StartDate = g.Min(x => x.Date),
 							MealCount = g.Count(),
 							TotalCost = g.Sum(mc => mc.CompanyCost)
 						})
-						.OrderBy(x => x.StartDate);
+						.ToList();
 
-					results = weeklyData.Select(w => new GraphDataPoint
+					var weeklyDataDict = weeklyData.ToDictionary(
+						w => (w.Year, w.Month, w.WeekNumber),
+						w => w
+					);
+
+					var weekPeriods = GetAllWeekPeriodsInRange(startDate, endDate);
+
+					foreach (var period in weekPeriods)
 					{
-						Label = $"Week {w.WeekNumber}",
-						MealCount = w.MealCount,
-						TotalCost = w.TotalCost
-					}).ToList();
+						var hasData = weeklyDataDict.TryGetValue(
+							(period.Year, period.Month, period.WeekNumber),
+							out var data
+						);
+
+						results.Add(new GraphDataPoint
+						{
+							Label = $"Week {period.WeekNumber}",
+							MealCount = hasData ? data.MealCount : 0,
+							TotalCost = hasData ? data.TotalCost : 0
+						});
+					}
 					break;
 
 				case GroupingLevel.ByMonth:
-					// ✅ FIXED: Group by Year AND Month, not just Month
 					var rawDataForMonth = await query
 						.Select(mc => new { mc.Date, mc.CompanyCost })
 						.ToListAsync();
 
 					var monthlyData = rawDataForMonth
-						.GroupBy(mc => new { mc.Date.Year, mc.Date.Month }) // ✅ Include Year
+						.GroupBy(mc => new { mc.Date.Year, mc.Date.Month })
 						.Select(g => new {
 							Year = g.Key.Year,
 							Month = g.Key.Month,
-							Date = new DateOnly(g.Key.Year, g.Key.Month, 1),
 							MealCount = g.Count(),
 							TotalCost = g.Sum(mc => mc.CompanyCost)
 						})
-						.OrderBy(x => x.Date);
+						.ToList();
 
-					results = monthlyData.Select(m => new GraphDataPoint
+					var monthlyDataDict = monthlyData.ToDictionary(
+						m => (m.Year, m.Month),
+						m => m
+					);
+
+					var currentMonth = new DateOnly(startDate.Year, startDate.Month, 1);
+					var endMonth = new DateOnly(endDate.Year, endDate.Month, 1);
+
+					while (currentMonth <= endMonth)
 					{
-						// Show year only for multi-year periods
-						Label = (timePeriod == TimePeriod.ThisYear || timePeriod == TimePeriod.LastYear)
-								? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m.Month) // "January"
-								: $"{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m.Month)} {m.Year}", // "Jan 2025"
-						MealCount = m.MealCount,
-						TotalCost = m.TotalCost
-					}).ToList();
+						var hasData = monthlyDataDict.TryGetValue(
+							(currentMonth.Year, currentMonth.Month),
+							out var data
+						);
+
+						results.Add(new GraphDataPoint
+						{
+							Label = (timePeriod == TimePeriod.ThisYear || timePeriod == TimePeriod.LastYear)
+									? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(currentMonth.Month)
+									: $"{CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(currentMonth.Month)} {currentMonth.Year}",
+							MealCount = hasData ? data.MealCount : 0,
+							TotalCost = hasData ? data.TotalCost : 0
+						});
+
+						currentMonth = currentMonth.AddMonths(1);
+					}
 					break;
 			}
 
@@ -640,7 +678,85 @@ namespace MealToken.Infrastructure.Repositories
 			int weekNumber = (date.Day + daysOffset - 1) / 7 + 1;
 			return weekNumber;
 		}
+		private List<(int Year, int Month, int WeekNumber)> GetAllWeekPeriodsInRange(
+		DateOnly startDate,
+		DateOnly endDate)
+		{
+			var periods = new HashSet<(int Year, int Month, int WeekNumber)>();
+			var currentDate = startDate;
 
+			while (currentDate <= endDate)
+			{
+				periods.Add((
+					currentDate.Year,
+					currentDate.Month,
+					GetWeekOfMonth(currentDate)
+				));
+				currentDate = currentDate.AddDays(1);
+			}
+
+			return periods.OrderBy(p => p.Year)
+						  .ThenBy(p => p.Month)
+						  .ThenBy(p => p.WeekNumber)
+						  .ToList();
+		}
+
+		public async Task<List<UserHistory>> GetActivityLogsAsync(
+	DateTime? startDateTime,
+	DateTime? endDateTime,
+	List<string>? entityType,
+	List<string>? actionType,
+	List<int>? userId)
+		{
+			var query = _tenantContext.UserHistory.AsQueryable();
+
+			// Filter by date range
+			if (startDateTime.HasValue)
+				query = query.Where(u => u.Timestamp >= startDateTime.Value);
+
+			if (endDateTime.HasValue)
+				query = query.Where(u => u.Timestamp <= endDateTime.Value);
+
+			// Filter by entity types (if provided)
+			if (entityType != null && entityType.Any())
+				query = query.Where(u => entityType.Contains(u.EntityType));
+
+			// Filter by action types (if provided)
+			if (actionType != null && actionType.Any())
+				query = query.Where(u => actionType.Contains(u.ActionType));
+
+			// Filter by user IDs (if provided)
+			if (userId != null && userId.Any())
+				query = query.Where(u => userId.Contains(u.UserId));
+
+			// Get results ordered by latest first
+			var result = await query
+				.OrderByDescending(u => u.Timestamp)
+				.ToListAsync();
+
+			return result;
+		}
+		public async Task<User> GetUserByIdAsync(int userId)
+		{
+			return await _tenantContext.Users.FindAsync(userId);
+		}
+		public async Task<string> GetUserRoleNameAsync(int userRoleId)
+		{
+			var userRole = await _platformContext.UserRole.FindAsync(userRoleId);
+			return userRole?.UserRoleName ?? "Unknown";
+		}
+		public async Task<List<UserDto>> GetAllUsersAsync()
+		{
+			return await _tenantContext.Users
+				.Where(u => u.IsActive)
+				.OrderBy(u => u.FullName)
+				.Select(u => new UserDto
+				{
+					UserID = u.UserID,
+					FullName = u.FullName
+				})
+				.ToListAsync();
+		}
 	}
-	
+
 }

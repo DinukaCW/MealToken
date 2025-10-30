@@ -1,6 +1,7 @@
 ﻿using MealToken.API.Helpers;
 using MealToken.Application.Interfaces;
 using MealToken.Domain.Enums;
+using MealToken.Domain.Models.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,52 @@ namespace MealToken.API.Controllers
 
         }
 
-        [HttpGet("reportDashboard")]
+
+		[HttpPost("GetActivityLogs")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashboardSummary([FromBody] ActivityLogFilter logFilter)
+		{
+			try
+			{
+				var result = await _reportService.GetActivityLogsAsync(logFilter);
+
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
+
+				return Ok(result.Data);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error:{ex.InnerException}");
+			}
+		}
+
+		[HttpGet("GetActivityLogsFilterData")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetActivityLogsFilterData()
+		{
+			try
+			{
+				var result = await _reportService.GetActivityFilterDataAsync();
+
+				if (!result.Success)
+				{
+					return BadRequest(result);
+				}
+
+				return Ok(result.Data);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error:{ex.InnerException}");
+			}
+		}
+
+		[HttpGet("reportDashboard")]
 		[Authorize]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashboardSummary()
@@ -437,7 +483,7 @@ namespace MealToken.API.Controllers
 				}
 
 				// Call the correct service method that matches the request
-				var result = await _reportService.GetMealsByCostAsync(
+				var result = await _reportService.GetMealsByPersonTypeAsync(
 					request.TimePeriod,
 					request.DepartmentIds,
 					parsedStartDate,
