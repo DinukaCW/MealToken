@@ -1,5 +1,6 @@
 ﻿using Authentication.Models.DTOs;
 using MealToken.Application.Services;
+using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
 using MealToken.Domain.Models.Reports;
 using System;
@@ -19,5 +20,11 @@ namespace MealToken.Application.Interfaces
         Task<SupplierPaymentReportDto> GetSupplierPaymentReportAsync(int supplierId, DateOnly startDate, DateOnly? endDate = null);
 		Task<ServiceResult> GetAllSuppliersPaymentReportAsync(DateOnly startDate, DateOnly? endDate = null);
         Task<ServiceResult> GetTodayMealSchedulesAsync(DateOnly date, TimeOnly time);
+        Task<MealDashboardDto> GetMealDashboardDataAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
+        Task<DashBoardDepartment> GetMealsByDepartmentAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
+        Task<DashboardSupplier> GetMealsBySupplierAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
+        Task<DashBoardMealType> GetMealsByMealTypeAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
+		Task<DashBoardCostAnalysis> GetMealsByCostAsync(TimePeriod timePeriod,List<int> departmentIds,DateOnly? customStartDate = null,DateOnly? customEndDate = null);
+
 	}
 }

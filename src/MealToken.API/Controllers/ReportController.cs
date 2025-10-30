@@ -1,5 +1,6 @@
 ﻿using MealToken.API.Helpers;
 using MealToken.Application.Interfaces;
+using MealToken.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -186,6 +187,280 @@ namespace MealToken.API.Controllers
 			{ return StatusCode(500, $"Internal server error:{ex.InnerException}"); }
 		}
 
+		[HttpPost("GetDashboardOverview")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
 
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealDashboardDataAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+
+		[HttpPost("GetDashBoardDepartmentData")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardDepartmentOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
+
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealsByDepartmentAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+		[HttpPost("GetDashboardSupplierData")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardSupplierOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
+
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealsBySupplierAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+		[HttpPost("GetDashboardMealTypeData")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardMealTypeOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
+
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealsByMealTypeAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+
+		[HttpPost("GetDashboardMealCostData")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardMealCostOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
+
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealsByCostAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+
+		[HttpPost("GetDashboardPersonTypeData")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardPersonTypesOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
+
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealsByCostAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+	}
+
+	public class DashBoardRequest
+	{
+		public TimePeriod TimePeriod { get; set; }
+		public List<int> DepartmentIds { get; set; }
+		public string? RangeStartDate { get; set; }
+		public string? RangeEndDate { get; set; }
 	}
 }

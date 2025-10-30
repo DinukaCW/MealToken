@@ -272,8 +272,9 @@ namespace MealToken.Application.Services
             // Night hours: 6 AM - 7 AM (only 1 hour window before day starts)
             bool isInNightHours = currentTime >= extendedDayEnd && currentTime < dayStart;
 
-            // Check meal history
-            bool hadDayShiftMeal = todaysMeals?.Any(m =>
+			var breakfast = new TimeOnly(9, 25);
+			// Check meal history
+			bool hadDayShiftMeal = todaysMeals?.Any(m =>
                 m.Time >= dayStart &&
                 m.Time < dayEnd &&
                 (m.ShiftName == Shift.DayShift ||
@@ -319,8 +320,12 @@ namespace MealToken.Application.Services
                 }
                 else if (deviceShift == DeviceShift.Night)
                 {
-                 
-                    if (hadEarlyMorningNightMeal ||
+
+					if (currentTime < breakfast)
+					{
+						detectedShift = Shift.NightShift;
+					}
+					else if (hadEarlyMorningNightMeal ||
                         hadNightShiftMeal ||
                         lastMealIn13Hours?.ShiftName == Shift.NightShift ||
                         lastMealIn13Hours?.ShiftName == Shift.NightandDayShift)
@@ -328,7 +333,6 @@ namespace MealToken.Application.Services
                         detectedShift = Shift.NightandDayShift;
                         return new ServiceResult { Success = true };
                     }
-
                     // No night meal history = WRONG DEVICE
                     return new ServiceResult
                     {
