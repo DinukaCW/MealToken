@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,7 +12,13 @@ namespace MealToken.Domain.Models
 	public class ApplicationSettings
 	{
 		public string? Currency { get; set; }
-		public bool? EnableNotifications { get; set; }
-		public bool? EnableFunctionKeys { get; set; }
+		public IFormFile? Image { get; set; }
+		public string? CompanyEmail { get; set; }
+	}
+	public class ApplicationSettingsReturn
+	{
+		public string? Currency { get; set; }
+		public string? Image { get; set; }
+		public string? CompanyEmail { get; set; }
 	}
 }

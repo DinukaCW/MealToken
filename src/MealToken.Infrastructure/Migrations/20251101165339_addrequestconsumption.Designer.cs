@@ -4,6 +4,7 @@ using MealToken.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealToken.Infrastructure.Migrations
 {
     [DbContext(typeof(MealTokenDbContext))]
-    partial class MealTokenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101165339_addrequestconsumption")]
+    partial class addrequestconsumption
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1346,12 +1349,6 @@ namespace MealToken.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CompanyEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("CompanyLogo")
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ConnectionString")
                         .IsRequired()

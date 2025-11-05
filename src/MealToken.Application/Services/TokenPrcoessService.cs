@@ -34,116 +34,137 @@ namespace MealToken.Application.Services
             _adminData = adminData ?? throw new ArgumentNullException(nameof(adminData));
         }
 
-        public async Task<MealTokenResponse> GetMealDistributionAsync(MealTokenRequest request)
-        {
-            try
-            {
-                _logger.LogInformation("Starting GetMealDistributionAsync for PersonId: {PersonId}, Date: {RequestDate}, Time: {RequestTime}",
-                    request.PersonId, request.RequestDate, request.RequestTime);
+		public async Task<MealTokenResponse> GetMealDistributionAsync(MealTokenRequest request)
+		{
+			try
+			{
+				_logger.LogInformation("Starting GetMealDistributionAsync for PersonId: {PersonId}, Date: {RequestDate}, Time: {RequestTime}",
+					request.PersonId, request.RequestDate, request.RequestTime);
 
-                // Validate input
-                if (request?.PersonId <= 0)
-                {
-                    _logger.LogWarning("Invalid PersonId: {PersonId}", request?.PersonId);
-                    return new MealTokenResponse { Success = false, Message = "Invalid person ID" };
-                }
+				// Early validation
+				if (request?.PersonId <= 0)
+				{
+					_logger.LogWarning("Invalid PersonId: {PersonId}", request?.PersonId);
+					return new MealTokenResponse { Success = false, Message = "Invalid person ID" };
+				}
 
-                // Execute database queries sequentially to avoid DBContext threading issues
-                var schedulesByPerson = await _businessData.GetListofShedulesforPersonAsync(request.PersonId);
-                var schedulesByDate = await _businessData.GetListofShedulesforDateAsync(request.RequestDate);
-                var scheduleMealsByTime = await _businessData.GetListofShedulesforTimeAsync(request.RequestTime);
+				// Execute database queries sequentially to avoid DbContext threading issues
+				var schedulesByPerson = await _businessData.GetListofShedulesforPersonAsync(request.PersonId);
 
-                // Validate all results
-                if (!schedulesByPerson.Any())
-                {
-                    _logger.LogWarning("No schedule assigned to PersonId: {PersonId}", request.PersonId);
-                    return new MealTokenResponse { Success = false, Message = "No schedule assigned to this person" };
-                }
+				// Early exit optimization - check person schedules first
+				if (!schedulesByPerson.Any())
+				{
+					_logger.LogWarning("No schedule assigned to PersonId: {PersonId}", request.PersonId);
+					return new MealTokenResponse { Success = false, Message = "No schedule assigned to this person" };
+				}
 
-                if (!schedulesByDate.Any())
-                {
-                    _logger.LogWarning("No schedules found on Date: {Date}", request.RequestDate);
-                    return new MealTokenResponse { Success = false, Message = "No schedules found for the requested date" };
-                }
+				// Create HashSet once for faster lookups
+				var personScheduleIds = schedulesByPerson.Select(s => s.SheduleId).ToHashSet();
 
-                if (!scheduleMealsByTime.Any())
-                {
-                    _logger.LogWarning("No meals available for Time: {Time}", request.RequestTime);
-                    return new MealTokenResponse { Success = false, Message = "No meals available for the requested time" };
-                }
+				var schedulesByDate = await _businessData.GetListofShedulesforDateAsync(request.RequestDate);
 
-                // Find matching schedule efficiently using a single intersection
-                var matchingScheduleIds = schedulesByPerson
-                    .Select(s => s.SheduleId)
-                    .Intersect(schedulesByDate.Select(s => s.SheduleId))
-                    .Intersect(scheduleMealsByTime.Select(s => s.SheduleId))
-                    .ToHashSet();
+				if (!schedulesByDate.Any())
+				{
+					_logger.LogWarning("No schedules found on Date: {Date}", request.RequestDate);
+					return new MealTokenResponse { Success = false, Message = "No schedules found for the requested date" };
+				}
 
-                if (!matchingScheduleIds.Any())
-                {
-                    _logger.LogWarning("No matching schedule found for PersonId: {PersonId}", request.PersonId);
-                    return new MealTokenResponse { Success = false, Message = "No matching schedule found for the person, date, and time combination" };
-                }
+				// Filter and create HashSet for date schedules
+				var dateScheduleIds = schedulesByDate
+					.Where(s => personScheduleIds.Contains(s.SheduleId))
+					.Select(s => s.SheduleId)
+					.ToHashSet();
 
-                // Select meal based on function key or default
-                var selectedMeal = SelectMealByFunctionKeyOrDefault(scheduleMealsByTime, matchingScheduleIds, request.FunctionKey);
-                if (selectedMeal == null)
-                {
-                    _logger.LogWarning("No available meal found for PersonId: {PersonId}", request.PersonId);
-                    return new MealTokenResponse { Success = false, Message = "Invalid function key or meal not available for the requested time" };
-                }
+				// Early exit if no intersection between person and date schedules
+				if (!dateScheduleIds.Any())
+				{
+					_logger.LogWarning("No matching schedule found for PersonId: {PersonId} and Date: {Date}",
+						request.PersonId, request.RequestDate);
+					return new MealTokenResponse { Success = false, Message = "No matching schedule found for the person and date combination" };
+				}
 
-                // Get schedule details
-                var selectedSchedule = await _businessData.GetScheduleByIdAsync(selectedMeal.SheduleId);
-                if (selectedSchedule == null)
-                {
-                    _logger.LogWarning("Selected schedule {ScheduleId} is not active", selectedMeal.SheduleId);
-                    return new MealTokenResponse { Success = false, Message = "Selected schedule is not active" };
-                }
+				var scheduleMealsByTime = await _businessData.GetListofShedulesforTimeAsync(request.RequestTime);
 
-                var mealTypeName = await _adminData.GetMealTypeNameAsync(selectedMeal.MealTypeId);
-                var addons = await _adminData.GetMealAddOnsAsync(selectedMeal.MealTypeId);
+				if (!scheduleMealsByTime.Any())
+				{
+					_logger.LogWarning("No meals available for Time: {Time}", request.RequestTime);
+					return new MealTokenResponse { Success = false, Message = "No meals available for the requested time" };
+				}
 
-                var mealSubTypeName = selectedMeal.MealSubTypeId.HasValue
-                    ? await _adminData.GetMealSubTypeNameAsync(selectedMeal.MealSubTypeId.Value)
-                    : null;
+				// Final intersection - only with time schedules
+				var matchingScheduleIds = scheduleMealsByTime
+					.Where(s => dateScheduleIds.Contains(s.SheduleId))
+					.Select(s => s.SheduleId)
+					.ToHashSet();
 
-                var addonMeals = await CreateAddOnsAsync(addons);
+				if (!matchingScheduleIds.Any())
+				{
+					_logger.LogWarning("No matching schedule found for PersonId: {PersonId}", request.PersonId);
+					return new MealTokenResponse { Success = false, Message = "No matching schedule found for the person, date, and time combination" };
+				}
 
-                _logger.LogInformation("Meal distribution found successfully for PersonId: {PersonId}, ScheduleId: {ScheduleId}",
-                    request.PersonId, selectedSchedule.SheduleId);
+				// Select meal based on function key or default
+				var selectedMeal = SelectMealByFunctionKeyOrDefault(scheduleMealsByTime, matchingScheduleIds, request.FunctionKey);
 
-                return new MealTokenResponse
-                {
-                    Success = true,
-                    Message = "Meal distribution found successfully",
-                    MealInfo = new MealDistributionInfo
-                    {
-                        ScheduleId = selectedSchedule.SheduleId,
-                        ScheduleName = selectedSchedule.SheduleName,
-                        MealTypeId = selectedMeal.MealTypeId,
-                        MealSubTypeId = selectedMeal.MealSubTypeId,
-                        MealTypeName = mealTypeName,
-                        MealSubTypeName = mealSubTypeName,
-                        SupplierId = selectedMeal.SupplierId,
-                        TokenIssueStartTime = selectedMeal.TokenIssueStartTime ?? TimeOnly.MinValue,
-                        TokenIssueEndTime = selectedMeal.TokenIssueEndTime ?? TimeOnly.MaxValue,
-                        MealAddOns = addonMeals
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred in GetMealDistributionAsync for PersonId: {PersonId}", request.PersonId);
-                return new MealTokenResponse
-                {
-                    Success = false,
-                    Message = "An error occurred while processing the meal distribution request"
-                };
-            }
-        }
+				if (selectedMeal == null)
+				{
+					_logger.LogWarning("No available meal found for PersonId: {PersonId}", request.PersonId);
+					return new MealTokenResponse { Success = false, Message = "Invalid function key or meal not available for the requested time" };
+				}
 
-        private ScheduleMeal? SelectMealByFunctionKeyOrDefault(IEnumerable<ScheduleMeal> scheduleMeals, HashSet<int> matchingScheduleIds, string? functionKey)
+				// Get schedule details
+				var selectedSchedule = await _businessData.GetScheduleByIdAsync(selectedMeal.SheduleId);
+
+				if (selectedSchedule == null)
+				{
+					_logger.LogWarning("Selected schedule {ScheduleId} is not active", selectedMeal.SheduleId);
+					return new MealTokenResponse { Success = false, Message = "Selected schedule is not active" };
+				}
+
+				// Batch related queries - still sequential but grouped logically
+				var mealTypeName = await _adminData.GetMealTypeNameAsync(selectedMeal.MealTypeId);
+
+				var mealSubTypeName = selectedMeal.MealSubTypeId.HasValue
+					? await _adminData.GetMealSubTypeNameAsync(selectedMeal.MealSubTypeId.Value)
+					: null;
+
+				var addons = await _adminData.GetMealAddOnsAsync(selectedMeal.MealTypeId);
+				var addonMeals = await CreateAddOnsAsync(addons);
+
+				_logger.LogInformation("Meal distribution found successfully for PersonId: {PersonId}, ScheduleId: {ScheduleId}",
+					request.PersonId, selectedSchedule.SheduleId);
+
+				return new MealTokenResponse
+				{
+					Success = true,
+					Message = "Meal distribution found successfully",
+					MealInfo = new MealDistributionInfo
+					{
+						ScheduleId = selectedSchedule.SheduleId,
+						ScheduleName = selectedSchedule.SheduleName,
+						MealTypeId = selectedMeal.MealTypeId,
+						MealSubTypeId = selectedMeal.MealSubTypeId,
+						MealTypeName = mealTypeName,
+						MealSubTypeName = mealSubTypeName,
+						SupplierId = selectedMeal.SupplierId,
+						TokenIssueStartTime = selectedMeal.TokenIssueStartTime ?? TimeOnly.MinValue,
+						TokenIssueEndTime = selectedMeal.TokenIssueEndTime ?? TimeOnly.MaxValue,
+						MealAddOns = addonMeals
+					}
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error occurred in GetMealDistributionAsync for PersonId: {PersonId}", request.PersonId);
+				return new MealTokenResponse
+				{
+					Success = false,
+					Message = "An error occurred while processing the meal distribution request"
+				};
+			}
+		}
+
+		private ScheduleMeal? SelectMealByFunctionKeyOrDefault(IEnumerable<ScheduleMeal> scheduleMeals, HashSet<int> matchingScheduleIds, string? functionKey)
         {
             var matchingMeals = scheduleMeals
                 .Where(sm => matchingScheduleIds.Contains(sm.SheduleId) && sm.IsAvailable)

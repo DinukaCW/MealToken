@@ -1,4 +1,5 @@
-﻿using MealToken.Application.Interfaces;
+﻿using Authentication.Models.Entities;
+using MealToken.Application.Interfaces;
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
@@ -423,6 +424,39 @@ namespace MealToken.Infrastructure.Repositories
 					ScheduleName = x.Schedule.SheduleName,
 					
 				})
+				.ToListAsync();
+		}
+		public async Task<bool> CheckIfConsumptionExistsAsync(int requestId, int mealTypeId, int? subTypeId)
+		{
+			return await _tenantContext.RequestMealConsumption
+				.AnyAsync(rmc => rmc.RequestId == requestId &&
+								 rmc.MealTypeId == mealTypeId &&
+								 rmc.SubTypeId == subTypeId);
+		}
+		public async Task CreateRequestMealConsumptionAsync(RequestMealConsumption consumption)
+		{
+			await _tenantContext.RequestMealConsumption.AddAsync(consumption);
+			await _tenantContext.SaveChangesAsync();
+			
+		}
+		public async Task CreateRequestMealConsumptionBulkAsync(List<RequestMealConsumption> consumptions)
+		{
+			await _tenantContext.RequestMealConsumption.AddRangeAsync(consumptions);
+			await _tenantContext.SaveChangesAsync();
+		}
+		public async Task<List<User>> GetUsersByDepartmentsAsync(List<int> departmentIds)
+		{
+			return await _tenantContext.UserDepartment
+				.Where(ud => departmentIds.Contains(ud.DepartmentId)
+							 && ud.RequestStatus == UserRequestStatus.Approved)
+				.Join(
+					_tenantContext.Users,
+					ud => ud.UserId,
+					u => u.UserID,
+					(ud, u) => u // Select only the User object
+				)
+				.Where(u => u.UserRoleId == 1 || u.UserRoleId == 2)
+				.Distinct()
 				.ToListAsync();
 		}
 

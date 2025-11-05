@@ -9,7 +9,7 @@ namespace MealToken.Domain.Models.Reports
 	public class DashboardSupplier
 	{
 		public int TotalMeals { get; set; }
-		public decimal TotalSupplierCost { get; set; }
+		public decimal TotalSupplierSellingPrice { get; set; }
 		public List<SupplierWiseMeals> SupplierWiseMeals { get; set; }
 	}
 	public class SupplierWiseMeals
@@ -18,6 +18,6 @@ namespace MealToken.Domain.Models.Reports
 		public string SupplierName { get; set; }
 		public int MealCount { get; set; }
 		public decimal Precentage { get; set; }
-		public decimal SupplierCost { get; set; }
+		public decimal SupplierSellingPrice { get; set; }
 	}
 }

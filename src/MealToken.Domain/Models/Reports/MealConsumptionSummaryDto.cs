@@ -27,7 +27,7 @@ namespace MealToken.Domain.Models.Reports
 		public int MaleCount { get; set; }
 		public int FemaleCount { get; set; }
 		public decimal TotalEmployeeContribution { get; set; }
-		public decimal TotalEmployerContribution { get; set; }
+		public decimal TotalCompanyContribution { get; set; }
 		public decimal TotalSupplierCost { get; set; }
 		public int TotalMealCount { get; set; }
 	}

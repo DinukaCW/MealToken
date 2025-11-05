@@ -548,7 +548,7 @@ namespace MealToken.Application.Services
 			}
 		}
 
-        public async Task<ServiceResult> UpdateUserAsync(int userId, UserDetails updateDto)
+        public async Task<ServiceResult> UpdateUserAsync(int userId, UserUpdateDetails updateDto)
         {
             try
             {
@@ -568,19 +568,59 @@ namespace MealToken.Application.Services
                 }
 
                 var encryptedNewEmail = _encryption.EncryptData(updateDto.Email);
+				var encryptedNewUsername = _encryption.EncryptData(updateDto.Username);
 
-                if (!string.Equals(existingUser.Email, encryptedNewEmail, StringComparison.OrdinalIgnoreCase))
-                {
-                    var userWithEmail = await _userData.CheckUserByUsernameOrEmailAsync(null, encryptedNewEmail);
-                    if (userWithEmail != null && userWithEmail.UserID != userId)
-                    {
-                        _logger.LogWarning("Email '{Email}' is already in use by another user.", updateDto.Email);
-                        return new ServiceResult { Success = false, Message = "Email address is already in use." };
-                    }
-                }
+				// Check if the email or username is being updated
+				bool isEmailChanged = !string.Equals(existingUser.Email, encryptedNewEmail, StringComparison.OrdinalIgnoreCase);
+				bool isUsernameChanged = !string.Equals(existingUser.Username, encryptedNewUsername, StringComparison.OrdinalIgnoreCase);
 
-                // 2. Update the primary user properties
-                existingUser.FullName = updateDto.FullName;
+				if (isEmailChanged || isUsernameChanged)
+				{
+					// Check if another user already uses the same username or email (excluding the current user)
+					var conflictingUser = await _userData.CheckUserByUsernameOrEmailExceptIdAsync(
+						userId,
+						encryptedNewUsername,
+						encryptedNewEmail
+					);
+
+					if (conflictingUser != null)
+					{
+						if (isEmailChanged && string.Equals(conflictingUser.Email, encryptedNewEmail, StringComparison.OrdinalIgnoreCase))
+						{
+							_logger.LogWarning(
+								"Attempt to update email failed: The email '{Email}' is already in use by another user (UserID: {OtherUserId}).",
+								updateDto.Email,
+								conflictingUser.UserID
+							);
+
+							return new ServiceResult
+							{
+								Success = false,
+								Message = "The provided email address is already associated with another user."
+							};
+						}
+
+						if (isUsernameChanged && string.Equals(conflictingUser.Username, encryptedNewUsername, StringComparison.OrdinalIgnoreCase))
+						{
+							_logger.LogWarning(
+								"Attempt to update username failed: The username '{Username}' is already in use by another user (UserID: {OtherUserId}).",
+								updateDto.Username,
+								conflictingUser.UserID
+							);
+
+							return new ServiceResult
+							{
+								Success = false,
+								Message = "The provided username is already taken by another user."
+							};
+						}
+					}
+				}
+
+
+				// Update the primary user properties
+				existingUser.Username = encryptedNewUsername;
+				existingUser.FullName = updateDto.FullName;
                 existingUser.UserRoleId = updateDto.UserRoleId;
                 existingUser.Email = _encryption.EncryptData(updateDto.Email);
                 existingUser.PhoneNumber = _encryption.EncryptData(updateDto.PhoneNumber);

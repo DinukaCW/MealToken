@@ -30,14 +30,14 @@ namespace MealToken.Domain.Models
 
     public class MealConsumptionDetail
     {
-        public int EmployeeNumber { get; set; }
+        public string EmployeeNumber { get; set; }
         public string Name { get; set; }
         public string Department { get; set; }
         public string Designation { get; set; }
         public string Gender { get; set; }
         public string Subtype { get; set; }
         public decimal EmployeeContribution { get; set; }
-        public decimal EmployerContribution { get; set; }
+        public decimal CompanyContribution { get; set; }
         public decimal TotalSupplierCost { get; set; }
     }
 
@@ -48,7 +48,7 @@ namespace MealToken.Domain.Models
         public int MaleCount { get; set; }
         public int FemaleCount { get; set; }
         public decimal TotalEmployeeContribution { get; set; }
-        public decimal TotalEmployerCost { get; set; }
+        public decimal TotalCompanyContribution{ get; set; }
         public decimal TotalSupplierCost { get; set; }
         public int TotalMealCount { get; set; }
     }
@@ -59,7 +59,7 @@ namespace MealToken.Domain.Models
         public int MaleCount { get; set; }
         public int FemaleCount { get; set; }
         public decimal TotalEmployeeContribution { get; set; }
-        public decimal TotalEmployerCost { get; set; }
+        public decimal TotalCompanyContribution { get; set; }
         public decimal TotalSupplierCost { get; set; }
         public int TotalMealCount { get; set; }
     }
@@ -68,7 +68,7 @@ namespace MealToken.Domain.Models
     {
         public int TotalMealTypeCount { get; set; }
         public decimal GrandTotalEmployeeContribution { get; set; }
-        public decimal GrandTotalEmployerCost { get; set; }
+        public decimal GrandTotalCompanyContribution { get; set; }
         public decimal GrandTotalSupplierCost { get; set; }
         public int GrandTotalMealCount { get; set; }
     }

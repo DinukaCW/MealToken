@@ -1,6 +1,8 @@
-﻿using Authentication.Interfaces;
+﻿using Authentication.Helpers;
+using Authentication.Interfaces;
 using Authentication.Models.DTOs;
 using Authentication.Models.Entities;
+using Authentication.Services.Notification;
 using MealToken.Application.Interfaces;
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
@@ -28,8 +30,10 @@ namespace MealToken.Application.Services
 		private readonly ICompanyBusinessLogic _companyBusinessLogic;
         private readonly IUserContext _userContext;
         private readonly IUserRepository _userData;
+        private readonly IMessageService _messageService;
+        private readonly IEmailNotification _emailNotification;
 
-        public BusinessService(
+		public BusinessService(
 			IEncryptionService encryptionService,
 			IBusinessRepository businessRepository,
 			ILogger<BusinessService> logger,
@@ -37,7 +41,9 @@ namespace MealToken.Application.Services
 			IAdminRepository adminData,
 			ICompanyBusinessLogic companyBusinessLogic,
             IUserContext userContext,
-            IUserRepository userData)
+            IUserRepository userData,
+            IMessageService messageService,
+            IEmailNotification emailNotification)
 		{
 			_encryption = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
 			_businessData = businessRepository ?? throw new ArgumentNullException(nameof(businessRepository));
@@ -47,8 +53,10 @@ namespace MealToken.Application.Services
 			_companyBusinessLogic = companyBusinessLogic;
             _userContext = userContext;
             _userData = userData;
+            _messageService = messageService;
+            _emailNotification = emailNotification;
 
-        }
+		}
 
 		public async Task<List<DeviceDto>> GetClientDeviceDetails(int clientId)
 		{
@@ -1389,15 +1397,16 @@ namespace MealToken.Application.Services
                         TenantId = _tenantContext.TenantId.Value,
 						RequestId = request.MealRequestId,
                         MealTypeId = meal.MealTypeId,
-                        SubTypeId = meal.SubTypeId.Value,
+                        SubTypeId = meal.SubTypeId,
                         MealCostId = meal.MealCostId,
                         Quantity = meal.Quantity
                     });
                 }
 
                 await _businessData.CreateRequestMealAsync(requestMeals);
+                await SendRequestSendEmailAsync(request);
 
-                return new ServiceResult
+				return new ServiceResult
                 {
                     Success = true,
                     Message = "Meal request created successfully",
@@ -1893,68 +1902,107 @@ namespace MealToken.Application.Services
                 };
             }
         }
-        public async Task<ServiceResult> UpdateRequestStatusAsync(int requestId, UserRequestStatus newStatus, int approverId)
-        {
-            try
-            {
-                _logger.LogInformation("Updating request status. RequestId: {RequestId}, NewStatus: {NewStatus}, ApproverId: {ApproverId}",
-                    requestId, newStatus, approverId);
+		public async Task<ServiceResult> UpdateRequestStatusAsync(int requestId, UserRequestStatus newStatus, int approverId, string? rejectReason)
+		{
+			try
+			{
+				_logger.LogInformation(
+					"Updating request status. RequestId: {RequestId}, NewStatus: {NewStatus}, ApproverId: {ApproverId}",
+					requestId, newStatus, approverId);
 
-                var request = await _businessData.GetRequestByIdAsync(requestId);
-                if (request == null)
-                {
-                    _logger.LogWarning("Request not found for status update. RequestId: {RequestId}", requestId);
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Request not found"
-                    };
-                }
+				var request = await _businessData.GetRequestByIdAsync(requestId);
+				if (request == null)
+				{
+					_logger.LogWarning("Request not found for status update. RequestId: {RequestId}", requestId);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "Request not found"
+					};
+				}
 
-                // Validate status transition
-                if (!IsValidStatusTransition(request.Status, newStatus))
-                {
-                    _logger.LogWarning("Invalid status transition attempted. RequestId: {RequestId}, CurrentStatus: {CurrentStatus}, NewStatus: {NewStatus}",
-                        requestId, request.Status, newStatus);
-                    return new ServiceResult
-                    {
-                        Success = false,
-                        Message = "Invalid status transition"
-                    };
-                }
+				// Validate status transition
+				if (!IsValidStatusTransition(request.Status, newStatus))
+				{
+					_logger.LogWarning(
+						"Invalid status transition attempted. RequestId: {RequestId}, CurrentStatus: {CurrentStatus}, NewStatus: {NewStatus}",
+						requestId, request.Status, newStatus);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "Invalid status transition"
+					};
+				}
 
-                if (request.Status != newStatus)
-                {
-                    request.Status = newStatus;
-                    request.ApproverOrRejectedId = approverId;
+				if (request.Status == newStatus)
+				{
+					_logger.LogInformation(
+						"Request already in desired status. RequestId: {RequestId}, Status: {Status}",
+						requestId, newStatus);
+					return new ServiceResult
+					{
+						Success = true,
+						Message = $"Request is already {newStatus}.",
+						ObjectId = requestId
+					};
+				}
 
-                    await _businessData.UpdateRequestAsync(request);
+				// Update status
+				request.Status = newStatus;
+				request.ApproverOrRejectedId = approverId;
 
-                    _logger.LogInformation("Request status updated successfully. RequestId: {RequestId}, NewStatus: {NewStatus}",
-                        requestId, newStatus);
-                }
+				await _businessData.UpdateRequestAsync(request);
 
-                return new ServiceResult
-                {
-                    Success = true,
-                    Message = "Request status updated successfully",
-                    ObjectId = requestId
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating request status. RequestId: {RequestId}, NewStatus: {NewStatus}, ErrorType: {ErrorType}",
-                    requestId, newStatus, ex.GetType().Name);
+				_logger.LogInformation(
+					"Request status updated successfully. RequestId: {RequestId}, NewStatus: {NewStatus}",
+					requestId, newStatus);
 
-                return new ServiceResult
-                {
-                    Success = false,
-                    Message = "An error occurred while updating the request status. Please contact support if this continues."
-                };
-            }
-        }
+				// Post-update actions
+				if (newStatus == UserRequestStatus.Approved)
+				{
+					await SendRequestApproveEmailAsync(request);
 
-        public async Task<ServiceResult> ProcessLogicAsync(int tenantId, MealDeviceRequest request)
+					var result = await CreateRequestMealConsumptionRecordsAsync(requestId);
+					if (!result.Success)
+					{
+						_logger.LogWarning(
+							"Failed to create meal consumption records after approval. RequestId: {RequestId}, Message: {Message}",
+							requestId, result.Message);
+
+						// Note: return a warning result but not rollback approval
+						return new ServiceResult
+						{
+							Success = true,
+							Message = $"Request approved but failed to create meal consumption records: {result.Message}",
+							ObjectId = requestId
+						};
+					}
+				}
+				else if (newStatus == UserRequestStatus.Rejected)
+				{
+					await SendRequestRejectEmailAsync(request, rejectReason);
+				}
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = $"Request status updated to {newStatus} successfully.",
+					ObjectId = requestId
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error updating request status. RequestId: {RequestId}", requestId);
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An error occurred while updating the request status."
+				};
+			}
+		}
+
+
+		public async Task<ServiceResult> ProcessLogicAsync(int tenantId, MealDeviceRequest request)
         {
             // It is generally better practice to use string identifiers (like "COMPANY_A") for tenants 
             // instead of hard-coded integers (like '1'), unless the 'tenantId' parameter is guaranteed 
@@ -2022,8 +2070,142 @@ namespace MealToken.Application.Services
                 };
             }
         }
+		private async Task<ServiceResult> CreateRequestMealConsumptionRecordsAsync(int requestId)
+		{
+			try
+			{
+				// 1. Validate and get request
+				var mealRequest = await _businessData.GetRequestByIdAsync(requestId);
+				if (mealRequest == null)
+				{
+					_logger.LogWarning("Request not found for consumption creation. RequestId: {RequestId}", requestId);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "Request not found"
+					};
+				}
 
-        private bool IsValidStatusTransition(UserRequestStatus currentStatus, UserRequestStatus newStatus)
+				// 2. Check if request is approved
+				if (mealRequest.Status != UserRequestStatus.Approved)
+				{
+					_logger.LogWarning("Cannot create consumption for non-approved request. RequestId: {RequestId}, Status: {Status}",
+						requestId, mealRequest.Status);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "Only approved requests can be converted to consumption records"
+					};
+				}
+
+				// 3. Get request meals
+				var requestMeals = await _businessData.GetRequestMealsAsync(requestId);
+				if (!requestMeals.Any())
+				{
+					_logger.LogWarning("No meals found for request. RequestId: {RequestId}", requestId);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "No meal items found for this request"
+					};
+				}
+
+				// 4. Get meal costs for all request meals
+				var mealCostIds = requestMeals.Select(rm => rm.MealCostId).Distinct().ToList();
+				var mealCosts = await _adminData.GetMealCostsByIdsAsync(mealCostIds);
+				var mealCostDict = mealCosts.ToDictionary(mc => mc.MealCostId);
+
+				// 5. Create consumption records
+				var consumptionRecords = new List<RequestMealConsumption>();
+				var skippedCount = 0;
+
+				foreach (var requestMeal in requestMeals)
+				{
+					// Check if consumption already exists
+					var exists = await _businessData.CheckIfConsumptionExistsAsync(
+						requestId,
+						requestMeal.MealTypeId,
+						requestMeal.SubTypeId
+					);
+
+					if (exists)
+					{
+						skippedCount++;
+						_logger.LogInformation("Consumption record already exists. RequestId: {RequestId}, MealTypeId: {MealTypeId}, SubTypeId: {SubTypeId}",
+							requestId, requestMeal.MealTypeId, requestMeal.SubTypeId);
+						continue; // Skip duplicates
+					}
+
+					// Get meal cost details
+					if (!mealCostDict.TryGetValue(requestMeal.MealCostId, out var mealCost))
+					{
+						_logger.LogWarning("Meal cost not found. MealCostId: {MealCostId}", requestMeal.MealCostId);
+						continue; // Skip if cost not found
+					}
+
+					// Calculate totals
+					var totalEmployeeContribution = mealCost.EmployeeCost * requestMeal.Quantity;
+					var totalCompanyContribution = mealCost.CompanyCost * requestMeal.Quantity;
+					var totalSupplierContribution = mealCost.SupplierCost * requestMeal.Quantity;
+					var totalSellingPrice = mealCost.SellingPrice * requestMeal.Quantity;
+
+					// Create consumption record
+					var consumption = new RequestMealConsumption
+					{
+						TenantId = requestMeal.TenantId,
+						RequestId = requestId,
+                        EventType = mealRequest.EventType,
+                        EventDescription = mealRequest.Description,
+						MealTypeId = requestMeal.MealTypeId,
+						SubTypeId = requestMeal.SubTypeId,
+						MealCostId = requestMeal.MealCostId,
+						EventDate = mealRequest.EventDate,
+						Quantity = (int)requestMeal.Quantity,
+						SupplierId = mealCost.SupplierId,
+						TotalEmployeeContribution = totalEmployeeContribution,
+						TotalCompanyContribution = totalCompanyContribution,
+						TotalSupplierCost = totalSupplierContribution,
+						TotalSellingPrice = totalSellingPrice
+					};
+
+					consumptionRecords.Add(consumption);
+				}
+
+				// 6. Check if any records to create
+				if (!consumptionRecords.Any())
+				{
+					_logger.LogInformation("All meal consumption records already exist. RequestId: {RequestId}", requestId);
+					return new ServiceResult
+					{
+						Success = false,
+						Message = skippedCount > 0
+							? $"All {skippedCount} meal consumption records already exist"
+							: "No meal consumption records to create"
+					};
+				}
+
+				// 7. Save all consumption records
+				await _businessData.CreateRequestMealConsumptionBulkAsync(consumptionRecords);
+
+				_logger.LogInformation("Successfully created consumption records. RequestId: {RequestId}",requestId);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = $"Successfully created consumption records"
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating consumption records for RequestId: {RequestId}", requestId);
+				return new ServiceResult
+				{
+					Success = false,
+					Message = $"Error creating consumption records: {ex.Message}"
+				};
+			}
+		}
+		private bool IsValidStatusTransition(UserRequestStatus currentStatus, UserRequestStatus newStatus)
         {
            
             // A status can never transition back to itself unless it is intentionally allowed, 
@@ -2059,7 +2241,169 @@ namespace MealToken.Application.Services
                     return false;
             }
         }
+		private async Task SendRequestSendEmailAsync(Request request)
+		{
+			try
+			{
+				if (request == null)
+				{
+					_logger.LogWarning("Request object is null. Cannot send request notification email.");
+					return;
+				}
 
-    }
-	
+				// Get all approvers (Admins + Department Heads)
+				var approvers = await _businessData.GetUsersByDepartmentsAsync(_userContext.DepartmentIds);
+
+				if (approvers == null || !approvers.Any())
+				{
+					_logger.LogWarning("No approvers found for departments {Departments}", string.Join(", ", _userContext.DepartmentIds));
+					return;
+				}
+
+				// Collect approver emails
+				var approverEmails = approvers
+					.Select(u => _encryption.DecryptData(u.Email))
+					.Where(email => !string.IsNullOrEmpty(email))
+					.Distinct()
+					.ToList();
+
+				if (!approverEmails.Any())
+				{
+					_logger.LogWarning("No valid approver emails found for request {RequestId}", request.MealRequestId);
+					return;
+				}
+
+				var requester = await _adminData.GetUserByIdAsync(request.RequesterId);
+				var requesterEmail = _encryption.DecryptData(requester.Email);
+				var requesterName = requester.FullName;
+
+				// Subject and message for approvers
+				var subject = $"New Request Pending Approval - {requesterName}";
+				var message = _messageService.GenerateMealRequestMessage(requesterEmail, requesterName, request);
+
+				var notificationRequest = new NotificationRequest
+				{
+					Emails = approverEmails,
+					Subject = subject,
+					Message = message,
+					NotificationTypes = new List<NotificationRequest.NotificationType>
+			        {
+				        NotificationRequest.NotificationType.Email
+			        }
+				};
+
+				var emailResult = await _emailNotification.SendEmail(notificationRequest);
+
+				if (emailResult.IsSuccess)
+				{
+					_logger.LogInformation("Request notification email sent successfully for Meal request {RequestId}", request.MealRequestId);
+				}
+				else
+				{
+					_logger.LogWarning("Failed to send request notification email for meal request {RequestId}: {Error}",
+						request.MealRequestId, string.Join(", ", emailResult.ErrorMessages));
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error sending request notification email for meal request {RequestId}", request.MealRequestId);
+			}
+		}
+
+		private async Task SendRequestApproveEmailAsync(Request request)
+		{
+			try
+			{
+				if (request == null)
+				{
+					_logger.LogWarning("Request object is null. Cannot send  notification email.");
+					return;
+				}
+
+				var requester = await _adminData.GetUserByIdAsync(request.RequesterId);
+				var requesterEmail = _encryption.DecryptData(requester.Email);
+				var requesterName = requester.FullName;
+
+				// Subject and message for approvers
+				var subject = $"Meal Request Approved - {requesterName}";
+				var message = _messageService.GenerateMealRequestApprovedMessage(request);
+                var emails = new List<string> { requesterEmail };
+				var notificationRequest = new NotificationRequest
+				{
+					Emails = emails,
+					Subject = subject,
+					Message = message,
+					NotificationTypes = new List<NotificationRequest.NotificationType>
+					{
+						NotificationRequest.NotificationType.Email
+					}
+				};
+
+				var emailResult = await _emailNotification.SendEmail(notificationRequest);
+
+				if (emailResult.IsSuccess)
+				{
+					_logger.LogInformation("Approve notification email sent successfully for Meal request {RequestId}", request.MealRequestId);
+				}
+				else
+				{
+					_logger.LogWarning("Failed to send approve notification email for meal request {RequestId}: {Error}",
+						request.MealRequestId, string.Join(", ", emailResult.ErrorMessages));
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error sending aprrove notification email for meal request {RequestId}", request.MealRequestId);
+			}
+		}
+
+		private async Task SendRequestRejectEmailAsync(Request request, string? rejectReason)
+		{
+			try
+			{
+				if (request == null)
+				{
+					_logger.LogWarning("Request object is null. Cannot send notification email.");
+					return;
+				}
+
+				var requester = await _adminData.GetUserByIdAsync(request.RequesterId);
+				var requesterEmail = _encryption.DecryptData(requester.Email);
+				var requesterName = requester.FullName;
+
+				// Subject and message for approvers
+				var subject = $"Meal Request Rejected - {requesterName}";
+				var message = _messageService.GenerateMealRequestRejectedMessage(request,rejectReason);
+				var emails = new List<string> { requesterEmail };
+				var notificationRequest = new NotificationRequest
+				{
+					Emails = emails,
+					Subject = subject,
+					Message = message,
+					NotificationTypes = new List<NotificationRequest.NotificationType>
+					{
+						NotificationRequest.NotificationType.Email
+					}
+				};
+
+				var emailResult = await _emailNotification.SendEmail(notificationRequest);
+
+				if (emailResult.IsSuccess)
+				{
+					_logger.LogInformation("Reject notification email sent successfully for Meal request {RequestId}", request.MealRequestId);
+				}
+				else
+				{
+					_logger.LogWarning("Failed to send reject notification email for meal request {RequestId}: {Error}",
+						request.MealRequestId, string.Join(", ", emailResult.ErrorMessages));
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error sending reject notification email for meal request {RequestId}", request.MealRequestId);
+			}
+		}
+
+	}
+
 }

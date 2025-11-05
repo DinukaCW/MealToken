@@ -285,7 +285,7 @@ namespace MealToken.API.Controllers
 		[HttpPut("UpdateUser")]
 		[Authorize]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> UpdateUserInfo(int userId, [FromBody] UserDetails userDetails)
+		public async Task<IActionResult> UpdateUserInfo(int userId, [FromBody] UserUpdateDetails userDetails)
 		{
 			try
 			{

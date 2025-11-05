@@ -91,9 +91,11 @@ namespace MealToken.API.Controllers
         }
 
         [HttpGet("weekly")]
-		[Authorize(Roles = "Admin,DepartmentHead")]
+		//[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> GetWeeklyReport( [FromQuery] string startDate, [FromQuery] string endDate)
+		public async Task<IActionResult> GetWeeklyReport( [FromQuery] string startDate, [FromQuery] string endDate ,
+			[FromQuery] string? startTime = null,
+			[FromQuery] string? endTime = null)
         {
 			try
 			{
@@ -102,8 +104,25 @@ namespace MealToken.API.Controllers
 				{
 					return BadRequest("Invalid date format");
 				}
+				TimeOnly? parsedStartTime = null;
+				TimeOnly? parsedEndTime = null;
 
-				var result = await _reportService.GenerateWeeklyReportAsync(start, end);
+				if (!string.IsNullOrWhiteSpace(startTime))
+				{
+					if (TimeOnly.TryParse(startTime, out var st))
+						parsedStartTime = st;
+					else
+						return BadRequest("Invalid start time format. Expected format: HH:mm");
+				}
+
+				if (!string.IsNullOrWhiteSpace(endTime))
+				{
+					if (TimeOnly.TryParse(endTime, out var et))
+						parsedEndTime = et;
+					else
+						return BadRequest("Invalid end time format. Expected format: HH:mm");
+				}
+				var result = await _reportService.GenerateWeeklyReportAsync(start, end,parsedStartTime,parsedEndTime);
 
 				if (!result.Success)
 				{
@@ -123,11 +142,29 @@ namespace MealToken.API.Controllers
         [HttpGet("current-week")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> GetCurrentWeekReport()
+		public async Task<IActionResult> GetCurrentWeekReport([FromQuery] string? startTime = null,[FromQuery] string? endTime = null)
 		{
 			try
 			{
-				var result = await _reportService.GenerateCurrentWeekReportAsync();
+				TimeOnly? parsedStartTime = null;
+				TimeOnly? parsedEndTime = null;
+
+				if (!string.IsNullOrWhiteSpace(startTime))
+				{
+					if (TimeOnly.TryParse(startTime, out var st))
+						parsedStartTime = st;
+					else
+						return BadRequest("Invalid start time format. Expected format: HH:mm");
+				}
+
+				if (!string.IsNullOrWhiteSpace(endTime))
+				{
+					if (TimeOnly.TryParse(endTime, out var et))
+						parsedEndTime = et;
+					else
+						return BadRequest("Invalid end time format. Expected format: HH:mm");
+				}
+				var result = await _reportService.GenerateCurrentWeekReportAsync(parsedStartTime,parsedEndTime);
 
 				if (!result.Success)
 				{
@@ -145,7 +182,9 @@ namespace MealToken.API.Controllers
 		[HttpGet("MealConsumptionSummary")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> MealConsumptionSummaryReport([FromQuery] string startDate, [FromQuery] string endDate)
+		public async Task<IActionResult> MealConsumptionSummaryReport([FromQuery] string startDate, [FromQuery] string endDate,
+			[FromQuery] string? startTime = null,
+			[FromQuery] string? endTime = null)
 		{
 			try
 			{
@@ -154,8 +193,26 @@ namespace MealToken.API.Controllers
 				{
 					return BadRequest("Invalid date format");
 				}
+				TimeOnly? parsedStartTime = null;
+				TimeOnly? parsedEndTime = null;
 
-				var result = await _reportService.GetMealConsumptionSummaryAsync(start, end);
+				if (!string.IsNullOrWhiteSpace(startTime))
+				{
+					if (TimeOnly.TryParse(startTime, out var st))
+						parsedStartTime = st;
+					else
+						return BadRequest("Invalid start time format. Expected format: HH:mm");
+				}
+
+				if (!string.IsNullOrWhiteSpace(endTime))
+				{
+					if (TimeOnly.TryParse(endTime, out var et))
+						parsedEndTime = et;
+					else
+						return BadRequest("Invalid end time format. Expected format: HH:mm");
+				}
+
+				var result = await _reportService.GetMealConsumptionSummaryAsync(start, end,parsedStartTime,parsedEndTime);
 
 				if (!result.Success)
 				{
@@ -484,6 +541,51 @@ namespace MealToken.API.Controllers
 
 				// Call the correct service method that matches the request
 				var result = await _reportService.GetMealsByPersonTypeAsync(
+					request.TimePeriod,
+					request.DepartmentIds,
+					parsedStartDate,
+					parsedEndDate);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				// Log the full exception with context
+				_logger.LogError(ex, "Error occurred in GetDashBoardOverView for TimePeriod {TimePeriod}", request.TimePeriod);
+
+				// Return a generic, safe error message
+				return StatusCode(500, new { Success = false, Message = "An internal server error occurred." });
+			}
+		}
+
+		[HttpPost("GetDashboardRequestData")]
+		[Authorize]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetDashBoardMealRequestOverView([FromBody] DashBoardRequest request)
+		{
+			try
+			{
+				DateOnly? parsedStartDate = null;
+				DateOnly? parsedEndDate = null;
+
+				// Date parsing logic is now inside the method
+				if (request.TimePeriod == TimePeriod.CustomRange)
+				{
+					if (!DateOnly.TryParse(request.RangeStartDate, out var startDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeStartDate format. Please use YYYY-MM-DD." });
+					}
+					if (!DateOnly.TryParse(request.RangeEndDate, out var endDate))
+					{
+						return BadRequest(new { Success = false, Message = "Invalid RangeEndDate format. Please use YYYY-MM-DD." });
+					}
+
+					parsedStartDate = startDate;
+					parsedEndDate = endDate;
+				}
+
+				// Call the correct service method that matches the request
+				var result = await _reportService.GetMealsInRequestsAsync(
 					request.TimePeriod,
 					request.DepartmentIds,
 					parsedStartDate,

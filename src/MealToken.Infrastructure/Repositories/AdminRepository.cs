@@ -515,5 +515,11 @@ namespace MealToken.Infrastructure.Repositories
 				.Where(m => m.Id == tenantId)
 				.FirstOrDefaultAsync();
 		}
+		public async Task<List<MealCost>> GetMealCostsByIdsAsync(List<int> mealCostIds)
+		{
+			return await _tenantContext.MealCost
+				.Where(mc => mealCostIds.Contains(mc.MealCostId))
+				.ToListAsync();
+		}
 	}
 }

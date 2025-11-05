@@ -21,6 +21,8 @@ namespace MealToken.Domain.Entities
 		public string? Currency { get; set; } = "LKR";
 		public bool? EnableNotifications { get; set; }= true;
 		public bool? EnableFunctionKeys { get; set; }= true;
+		public byte[]? CompanyLogo { get; set; }
+		public string? CompanyEmail { get; set; }
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 	}
 }

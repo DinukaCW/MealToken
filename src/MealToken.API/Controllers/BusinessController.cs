@@ -523,7 +523,7 @@ namespace MealToken.API.Controllers
         [HttpPut("UpdateRequestStatus")]
 		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> UpdateRequestStatus(int requestId, UserRequestStatus status)
+		public async Task<IActionResult> UpdateRequestStatus(int requestId, UserRequestStatus status, string? rejectReason)
         {
             try
             {
@@ -538,7 +538,7 @@ namespace MealToken.API.Controllers
                     return BadRequest(new { success = false, message = "Invalid request ID" });
                 }
 				int userId = GetCurrentUserId();
-                var result = await _businessService.UpdateRequestStatusAsync(requestId,status,userId);
+                var result = await _businessService.UpdateRequestStatusAsync(requestId,status,userId, rejectReason);
 
                 if (!result.Success)
                 {

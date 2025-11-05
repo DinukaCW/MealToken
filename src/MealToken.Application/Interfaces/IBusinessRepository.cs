@@ -1,4 +1,5 @@
 ﻿using Authentication.Models.DTOs;
+using Authentication.Models.Entities;
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Models;
@@ -65,6 +66,10 @@ namespace MealToken.Application.Interfaces
 		Task<IEnumerable<RequestMeal>> GetRequestMealsByRequestIdsAsync(IEnumerable<int> requestIds);
 		Task<List<int>> GetScheduleByDateAsync(DateOnly date);
 		Task<List<TodayScheduleDto>> GetMealsByScheduleIdsAsync(IEnumerable<int> scheduleIds);
+		Task<bool> CheckIfConsumptionExistsAsync(int requestId, int mealTypeId, int? subTypeId);
+		Task CreateRequestMealConsumptionAsync(RequestMealConsumption consumption);
+		Task CreateRequestMealConsumptionBulkAsync(List<RequestMealConsumption> consumptions);
+		Task<List<User>> GetUsersByDepartmentsAsync(List<int> departmentIds);
 
 	}
 }

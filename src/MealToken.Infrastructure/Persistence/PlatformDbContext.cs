@@ -66,7 +66,9 @@ namespace MealToken.Infrastructure.Persistence
 				entity.Property(e => e.CreatedAt)
 					  .IsRequired()
 					  .HasDefaultValueSql("GETUTCDATE()");
-
+				entity.Property(e => e.CompanyLogo);
+				entity.Property(e => e.CompanyEmail)
+					  .HasMaxLength(255);
 				// Indexes
 				entity.HasIndex(e => e.Subdomain).IsUnique();
 				entity.HasIndex(e => e.SchemaName).IsUnique();

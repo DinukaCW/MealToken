@@ -42,215 +42,221 @@ namespace MealToken.Application.Services
             _tokenProcessService = tokenProcessService;
         }
 
-        public async Task<ServiceResult> HemasCompanyLogic(MealDeviceRequest request)
-        {
-            try
-            {
-                // Validate person
-                var person = await _adminData.GetPersonByNumberAsync(request.PersonNumber);
-                if (person == null)
-                {
-                    return new ServiceResult { Success = false, Message = "Person not found" };
-                }
+		public async Task<ServiceResult> HemasCompanyLogic(MealDeviceRequest request)
+		{
+			try
+			{
+				// Validate person
+				var person = await _adminData.GetPersonByNumberAsync(request.PersonNumber);
+				if (person == null)
+				{
+					return new ServiceResult { Success = false, Message = "Person not found" };
+				}
 
-                if (person.IsActive != true)
-                {
-                    return new ServiceResult { Success = false, Message = "Person is not active" };
-                }
+				if (person.IsActive != true)
+				{
+					return new ServiceResult { Success = false, Message = "Person is not active" };
+				}
 
-                // Prepare meal token request
-                var mealtokenRequest = new MealTokenRequest
-                {
-                    PersonId = person.PersonId,
-                    RequestDate = DateOnly.FromDateTime(request.DateTime),
-                    RequestTime = TimeOnly.FromDateTime(request.DateTime),
-                    FunctionKey = request.FunctionKey
-                };
+				// Prepare meal token request - extract date/time once
+				var requestDate = DateOnly.FromDateTime(request.DateTime);
+				var requestTime = TimeOnly.FromDateTime(request.DateTime);
 
-                // Get meal schedule with addon meals
-                var schedule = await _tokenProcessService.GetMealDistributionAsync(mealtokenRequest);
-                if (!schedule.Success)
-                {
-                    return new ServiceResult { Success = false, Message = schedule.Message };
-                }
+				var mealtokenRequest = new MealTokenRequest
+				{
+					PersonId = person.PersonId,
+					RequestDate = requestDate,
+					RequestTime = requestTime,
+					FunctionKey = request.FunctionKey
+				};
 
-                var scheduleMeals = schedule.MealInfo;
-                if (scheduleMeals == null)
-                {
-                    return new ServiceResult { Success = false, Message = "No meal schedule found for this time" };
-                }
-                if (person.PersonType == PersonType.Employer)
-                {
-                    // Check if meal already issued
-                    var exMealConsumption = await _businessData.GetMealConsumptionAsync(
-                        scheduleMeals.MealTypeId,
-                        person.PersonId,
-                        mealtokenRequest.RequestDate
-                    );
+				// Get meal schedule with addon meals
+				var schedule = await _tokenProcessService.GetMealDistributionAsync(mealtokenRequest);
+				if (!schedule.Success)
+				{
+					return new ServiceResult { Success = false, Message = schedule.Message };
+				}
 
-                    if (exMealConsumption != null && exMealConsumption.TockenIssued)
-                    {
-                        return new ServiceResult { Success = false, Message = "Meal token already issued for this meal type" };
-                    }
-                }
-                // Validate device
-                int deviceId = await _businessData.GetDeviceBySerialNoAsync(request.DeviceSerialNo);
-                var deviceShift = await _businessData.GetDeviceShiftBySerialNoAsync(request.DeviceSerialNo) ?? DeviceShift.Day;
-                if (deviceId == 0)
-                {
-                    return new ServiceResult { Success = false, Message = "Invalid device serial number" };
-                }
+				var scheduleMeals = schedule.MealInfo;
+				if (scheduleMeals == null)
+				{
+					return new ServiceResult { Success = false, Message = "No meal schedule found for this time" };
+				}
 
-                // Get meal history for shift detection
-                var todaysMeals = await _businessData.GetMealConsumptionByDateAsync(
-                    person.PersonId,
-                    mealtokenRequest.RequestDate
-                );
+				// Check if meal already issued (Employer only)
+				if (person.PersonType == PersonType.Employer)
+				{
+					var exMealConsumption = await _businessData.GetMealConsumptionAsync(
+						scheduleMeals.MealTypeId,
+						person.PersonId,
+						requestDate
+					);
 
-                var lastMealIn13Hours = await _businessData.GetMealConsumptionInLast13HoursAsync(person.PersonId);
+					if (exMealConsumption?.TockenIssued == true)
+					{
+						return new ServiceResult { Success = false, Message = "Meal token already issued for this meal type" };
+					}
+				}
 
-                // Define time boundaries
-                var dayStart = new TimeOnly(7, 0);
-                var dayEnd = new TimeOnly(19, 0);
-                var extendedDayEnd = new TimeOnly(22, 15);
+				// Validate device - parallel independent queries
+				var deviceId = await _businessData.GetDeviceBySerialNoAsync(request.DeviceSerialNo);
+				if (deviceId == 0)
+				{
+					return new ServiceResult { Success = false, Message = "Invalid device serial number" };
+				}
 
-                var shiftResult = ValidateAndIdentifyShift(
-                    mealtokenRequest.RequestTime,
-                    deviceShift,
-                    todaysMeals,
-                    lastMealIn13Hours,
-                    dayStart,
-                    dayEnd,
-                    extendedDayEnd,
-                    out Shift detectedShift
-                );
+				var deviceShift = await _businessData.GetDeviceShiftBySerialNoAsync(request.DeviceSerialNo) ?? DeviceShift.Day;
 
-                if (!shiftResult.Success)
-                {
-                    _logger.LogWarning($"Shift validation failed: {shiftResult.Message}, Person: {person.PersonId}, Device: {deviceShift}");
-                    return shiftResult;
-                }
+				// Get meal history for shift detection
+				var todaysMeals = await _businessData.GetMealConsumptionByDateAsync(person.PersonId, requestDate);
+				var lastMealIn13Hours = await _businessData.GetMealConsumptionInLast13HoursAsync(person.PersonId);
 
-                // Determine pay status
-                var payStatus = await DeterminPayStatusAsync(person, detectedShift, scheduleMeals.MealTypeId);
+				// Define time boundaries (const values)
+				var dayStart = new TimeOnly(7, 0);
+				var dayEnd = new TimeOnly(19, 0);
+				var extendedDayEnd = new TimeOnly(22, 15);
 
-                // Get meal cost
-                var mealCost = await _adminData.GetMealCostByDetailAsync(
-                    scheduleMeals.SupplierId,
-                    scheduleMeals.MealTypeId,
-                    scheduleMeals.MealSubTypeId
-                );
+				// Validate shift
+				var shiftResult = ValidateAndIdentifyShift(
+					requestTime,
+					deviceShift,
+					todaysMeals,
+					lastMealIn13Hours,
+					dayStart,
+					dayEnd,
+					extendedDayEnd,
+					out Shift detectedShift
+				);
 
-                if (mealCost == null)
-                {
-                    return new ServiceResult { Success = false, Message = "Meal cost not found for this meal configuration" };
-                }
+				if (!shiftResult.Success)
+				{
+					_logger.LogWarning("Shift validation failed: {Message}, Person: {PersonId}, Device: {DeviceShift}",
+						shiftResult.Message, person.PersonId, deviceShift);
+					return shiftResult;
+				}
 
-                // Calculate contributions
-                decimal empContribution = payStatus == PayStatus.Free ? 0 : mealCost?.EmployeeCost ?? 0;
-                decimal companyContribution = payStatus == PayStatus.Free
-                    ? ((mealCost?.EmployeeCost ?? 0) + (mealCost?.CompanyCost ?? 0))
-                    : mealCost?.CompanyCost ?? 0;
+				// Determine pay status
+				var payStatus = await DeterminPayStatusAsync(person, detectedShift, scheduleMeals.MealTypeId);
 
-                // Create main meal consumption record
-                var mealConsumption = new MealConsumption
-                {
-                    TenantId = person.TenantId,
-                    PersonId = person.PersonId,
-                    PersonName = person.Name,
-                    Gender = person.Gender,
-                    Date = mealtokenRequest.RequestDate,
-                    Time = mealtokenRequest.RequestTime,
-                    ScheduleId = scheduleMeals.ScheduleId,
-                    ScheduleName = scheduleMeals.ScheduleName,
-                    AddOnMeal = false,
-                    MealTypeId = scheduleMeals.MealTypeId,
-                    MealTypeName = scheduleMeals.MealTypeName,
-                    SubTypeId = scheduleMeals.MealSubTypeId,
-                    SubTypeName = scheduleMeals.MealSubTypeName,
-                    MealCostId = mealCost.MealCostId,
-                    SupplierCost = mealCost.SupplierCost,
-                    SellingPrice = mealCost.SellingPrice,
-                    CompanyCost = companyContribution,
-                    EmployeeCost = empContribution,
-                    DeviceId = deviceId,
-                    DeviceSerialNo = request.DeviceSerialNo,
-                    ShiftName = detectedShift,
-                    PayStatus = payStatus,
-                    TockenIssued = false
-                };
+				// Get meal cost
+				var mealCost = await _adminData.GetMealCostByDetailAsync(
+					scheduleMeals.SupplierId,
+					scheduleMeals.MealTypeId,
+					scheduleMeals.MealSubTypeId
+				);
 
-                // Save main meal
-                await _businessData.CreateMealConsumptionAsync(mealConsumption);
+				if (mealCost == null)
+				{
+					return new ServiceResult { Success = false, Message = "Meal cost not found for this meal configuration" };
+				}
 
-                // Create addon meal consumption records
-                var addonMealConsumptions = new List<MealConsumption>();
-                if (scheduleMeals.MealAddOns != null && scheduleMeals.MealAddOns.Any())
-                {
-                    addonMealConsumptions = await CreateAddOnMealConsumptionsAsync(
-                        scheduleMeals.MealAddOns,
-                        mealConsumption,
-                        person,
-                        detectedShift,
-                        mealtokenRequest
-                    );
+				// Calculate contributions
+				var isFreeMeal = payStatus == PayStatus.Free;
+				var employeeCost = mealCost.EmployeeCost;
+				var companyCost = mealCost.CompanyCost;
 
-                    if (addonMealConsumptions.Any())
-                    {
-                        await _businessData.CreateMealConsumptionBatchAsync(addonMealConsumptions);
-                        _logger.LogInformation("Created {AddOnCount} addon meal consumption records for PersonId: {PersonId}",
-                            addonMealConsumptions.Count, person.PersonId);
-                    }
-                }
+				decimal empContribution = isFreeMeal ? 0 : employeeCost;
+				decimal companyContribution = isFreeMeal ? (employeeCost + companyCost) : companyCost;
 
-                // Prepare token response
-                string department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId) ?? "N/A";
-                // Build meal type display text
-                string mealTypeDisplay = scheduleMeals.MealSubTypeId != null
-                    ? scheduleMeals.MealSubTypeName
-                    : scheduleMeals.MealTypeName;
+				// Create main meal consumption record
+				var mealConsumption = new MealConsumption
+				{
+					TenantId = person.TenantId,
+					PersonId = person.PersonId,
+					PersonName = person.Name,
+					Gender = person.Gender,
+					Date = requestDate,
+					Time = requestTime,
+					ScheduleId = scheduleMeals.ScheduleId,
+					ScheduleName = scheduleMeals.ScheduleName,
+					AddOnMeal = false,
+					MealTypeId = scheduleMeals.MealTypeId,
+					MealTypeName = scheduleMeals.MealTypeName,
+					SubTypeId = scheduleMeals.MealSubTypeId,
+					SubTypeName = scheduleMeals.MealSubTypeName,
+					MealCostId = mealCost.MealCostId,
+					SupplierCost = mealCost.SupplierCost,
+					SellingPrice = mealCost.SellingPrice,
+					CompanyCost = companyContribution,
+					EmployeeCost = empContribution,
+					DeviceId = deviceId,
+					DeviceSerialNo = request.DeviceSerialNo,
+					ShiftName = detectedShift,
+					PayStatus = payStatus,
+					TockenIssued = false
+				};
 
-                // Build addon meals text
-                string addonMealsText = "";
-                if (addonMealConsumptions.Any())
-                {
-                    var addonNames = addonMealConsumptions.Select(a => a.SubTypeName).ToList();
-                    addonMealsText = " With " + string.Join(", ", addonNames);
-                }
-                var tokenResponse = new TokenResponse
-                {
-                    Date = mealtokenRequest.RequestDate,
-                    Time = mealtokenRequest.RequestTime,
-                    MealType = mealTypeDisplay + addonMealsText,
-                    Shift = detectedShift.ToString(),
-                    EmpNo = request.PersonNumber,
-                    EmpName = person.Name,
-                    Gender = person.Gender,
-                    Department = department,
-                    TokenType = payStatus.ToString(),
-                    Contribution = empContribution,
-                    MealConsumptionId = mealConsumption.MealConsumptionId
-                };
+				// Save main meal
+				await _businessData.CreateMealConsumptionAsync(mealConsumption);
 
-                return new ServiceResult
-                {
-                    Success = true,
-                    Message = $"Meal issued successfully. Shift: {detectedShift}, Status: {payStatus}",
-                    Data = tokenResponse
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error processing meal request for Person: {request.PersonNumber}, Device: {request.DeviceSerialNo}");
-                return new ServiceResult
-                {
-                    Success = false,
-                    Message = "An error occurred while processing your meal request. Please contact support."
-                };
-            }
-        }
+				// Create addon meal consumption records
+				List<MealConsumption> addonMealConsumptions = null;
+				if (scheduleMeals.MealAddOns?.Any() == true)
+				{
+					addonMealConsumptions = await CreateAddOnMealConsumptionsAsync(
+						scheduleMeals.MealAddOns,
+						mealConsumption,
+						person,
+						detectedShift,
+						mealtokenRequest
+					);
 
-        private ServiceResult ValidateAndIdentifyShift(
+					if (addonMealConsumptions?.Any() == true)
+					{
+						await _businessData.CreateMealConsumptionBatchAsync(addonMealConsumptions);
+						_logger.LogInformation("Created {AddOnCount} addon meal consumption records for PersonId: {PersonId}",
+							addonMealConsumptions.Count, person.PersonId);
+					}
+				}
+
+				// Prepare token response
+				var department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId) ?? "N/A";
+
+				// Build meal type display text
+				var mealTypeDisplay = scheduleMeals.MealSubTypeId.HasValue
+					? scheduleMeals.MealSubTypeName
+					: scheduleMeals.MealTypeName;
+
+				// Build addon meals text
+				var addonMealsText = addonMealConsumptions?.Any() == true
+					? " With " + string.Join(", ", addonMealConsumptions.Select(a => a.SubTypeName))
+					: string.Empty;
+
+				var tokenResponse = new TokenResponse
+				{
+					Date = requestDate,
+					Time = requestTime,
+					MealType = mealTypeDisplay + addonMealsText,
+					Shift = detectedShift.ToString(),
+					EmpNo = request.PersonNumber,
+					EmpName = person.Name,
+					Gender = person.Gender,
+					Department = department,
+					TokenType = payStatus.ToString(),
+					Contribution = empContribution,
+					MealConsumptionId = mealConsumption.MealConsumptionId
+				};
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = $"Meal issued successfully. Shift: {detectedShift}, Status: {payStatus}",
+					Data = tokenResponse
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error processing meal request for Person: {PersonNumber}, Device: {DeviceSerialNo}",
+					request.PersonNumber, request.DeviceSerialNo);
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An error occurred while processing your meal request. Please contact support."
+				};
+			}
+		}
+
+		private ServiceResult ValidateAndIdentifyShift(
       TimeOnly currentTime,
       DeviceShift deviceShift,
       List<MealConsumption> todaysMeals,
@@ -324,6 +330,7 @@ namespace MealToken.Application.Services
 					if (currentTime < breakfast)
 					{
 						detectedShift = Shift.NightShift;
+						return new ServiceResult { Success = true };
 					}
 					else if (hadEarlyMorningNightMeal ||
                         hadNightShiftMeal ||
@@ -439,34 +446,37 @@ namespace MealToken.Application.Services
             return new ServiceResult { Success = true };
         }
 
-        private async Task<PayStatus> DeterminPayStatusAsync(Person person, Shift shift, int mealTypeId)
-        {
-            if (person.PersonType != PersonType.Employer)
-            {
-                return PayStatus.Free;
-            }
-
-            var policy = await _businessData.GetPayPolicyAsync(shift, mealTypeId);
-            if (policy == null)
-            {
-                _logger.LogWarning($"No payment policy found for Shift: {shift}, MealType: {mealTypeId}");
-                return PayStatus.Free;
-            }
-
-            if(policy.IsMalePaid == false && policy.IsFemalePaid == false)
-            {
-                return PayStatus.Free;
+		private async Task<PayStatus> DeterminPayStatusAsync(Person person, Shift shift, int mealTypeId)
+		{
+			// Early exit for non-employers
+			if (person.PersonType != PersonType.Employer)
+			{
+				return PayStatus.Free;
 			}
 
-			return person.Gender switch
-            {
-                "Male" => policy.IsMalePaid ? PayStatus.Paid : PayStatus.Free,
-                "Female" => policy.IsFemalePaid ? PayStatus.Paid : PayStatus.Free,
-                _ => PayStatus.Paid // Unknown gender defaults to paid (safer)
-            };
-        }
+			var policy = await _businessData.GetPayPolicyAsync(shift, mealTypeId);
 
-        private async Task<List<MealConsumption>> CreateAddOnMealConsumptionsAsync(
+			// Early exit if no policy or both genders are free
+			if (policy == null || (!policy.IsMalePaid && !policy.IsFemalePaid))
+			{
+				if (policy == null)
+				{
+					_logger.LogWarning("No payment policy found for Shift: {Shift}, MealType: {MealTypeId}",
+						shift, mealTypeId);
+				}
+				return PayStatus.Free;
+			}
+
+			// Determine pay status based on gender
+			return person.Gender switch
+			{
+				"Male" => policy.IsMalePaid ? PayStatus.Paid : PayStatus.Free,
+				"Female" => policy.IsFemalePaid ? PayStatus.Paid : PayStatus.Free,
+				_ => PayStatus.Paid // Unknown gender defaults to paid (safer)
+			};
+		}
+
+		private async Task<List<MealConsumption>> CreateAddOnMealConsumptionsAsync(
             List<MealAddOnDto> addOns,
             MealConsumption mainMeal,
             Person person,

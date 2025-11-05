@@ -18,7 +18,7 @@ namespace MealToken.Application.Interfaces
 		Task<UserRequest> GetUserRequestByIdAsync(int requestId);
 		Task<List<UserListDto>> GetUsersListAsync();
 		Task<UserListDto?> GetUserByIdAsync(int userId);
-		Task<ServiceResult> UpdateUserAsync(int userId, UserDetails updateDto);
+		Task<ServiceResult> UpdateUserAsync(int userId, UserUpdateDetails updateDto);
 		Task<List<UserRoleDto>> GetUserRolesAsync();
 		Task<List<DepartmentD>> GetListofDepartmentsAsync();
 

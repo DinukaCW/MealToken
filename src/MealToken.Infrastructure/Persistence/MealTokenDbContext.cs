@@ -52,6 +52,7 @@ namespace MealToken.Infrastructure.Persistence
         public DbSet<PayStatusByShift> PayStatusByShiftPolicy { get; set; }
         public DbSet<UserDepartment> UserDepartment { get; set; }
 		public DbSet<UserHistory> UserHistory { get; set; }
+		public DbSet<RequestMealConsumption> RequestMealConsumption { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -1166,31 +1167,60 @@ namespace MealToken.Infrastructure.Persistence
 
 
 			});
-			
-				/*modelBuilder.Entity<RequestMealConsumption>(entity =>
+			modelBuilder.Entity<RequestMealConsumption>(entity =>
 			{
 				entity.ToTable("RequestMealConsumption", _schema);
-				entity.HasKey(e => e.UserHistoryId);
+				entity.HasKey(e => e.RequestMealConsumptionId);
 				entity.Property(e => e.TenantId).IsRequired();
-				entity.Property(e => e.UserId).IsRequired();
-				entity.Property(e => e.ActionType).IsRequired();
-				entity.Property(e => e.EntityType);
-				entity.Property(e => e.Endpoint);
-				entity.Property(e => e.Timestamp).IsRequired();
-				entity.Property(e => e.IPAddress);
-
-				entity.HasOne<User>()
+				entity.Property(e => e.RequestId).IsRequired();
+				entity.Property(e => e.EventType);
+				entity.Property(e => e.EventDescription);
+				entity.Property(e => e.MealTypeId).IsRequired();
+				entity.Property(e => e.SubTypeId);
+				entity.Property(e => e.MealCostId).IsRequired();
+				entity.Property(e => e.EventDate).IsRequired();
+				entity.Property(e => e.Quantity).IsRequired();
+				entity.Property(e => e.SupplierId).IsRequired();
+				entity.Property(e => e.TotalEmployeeContribution)
+					  .HasColumnType("decimal(18,2)")
+					  .IsRequired();
+				entity.Property(e => e.TotalCompanyContribution)
+					  .HasColumnType("decimal(18,2)")
+					  .IsRequired();
+				entity.Property(e => e.TotalSupplierCost)
+					  .HasColumnType("decimal(18,2)")
+					  .IsRequired();
+				entity.Property(e => e.TotalSellingPrice)
+					  .HasColumnType("decimal(18,2)")
+					  .IsRequired();
+				
+				entity.HasOne<TenantInfo>()
 					  .WithMany()
-					  .HasForeignKey(e => e.UserId)
+					  .HasForeignKey(e => e.TenantId)
 					  .OnDelete(DeleteBehavior.NoAction);
 
-				entity.HasOne<TenantInfo>()
-					   .WithMany()
-					   .HasForeignKey(e => e.TenantId)
-					   .OnDelete(DeleteBehavior.NoAction);
+				entity.HasOne<Supplier>()
+					  .WithMany()
+					  .HasForeignKey(e => e.SupplierId)
+					  .OnDelete(DeleteBehavior.NoAction);
 
+				entity.HasOne<MealType>()
+					  .WithMany()
+					  .HasForeignKey(e => e.MealTypeId)
+					  .OnDelete(DeleteBehavior.NoAction);
 
-			});*/
+				entity.HasOne<MealCost>()
+					  .WithMany()
+					  .HasForeignKey(e => e.MealCostId)
+					  .OnDelete(DeleteBehavior.NoAction);
+
+				// Optional SubType relationship
+				entity.HasOne<MealSubType>()
+					  .WithMany()
+					  .HasForeignKey(e => e.SubTypeId)
+					  .OnDelete(DeleteBehavior.NoAction);
+			});
+
 
 		}
 

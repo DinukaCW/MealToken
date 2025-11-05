@@ -15,10 +15,11 @@ namespace MealToken.Application.Interfaces
     {
 		Task<ServiceResult> GetActivityFilterDataAsync();
 		Task<ServiceResult> GetActivityLogsAsync(ActivityLogFilter logFilter);
-		Task<ServiceResult<MealConsumptionReportDTO>> GenerateWeeklyReportAsync(DateOnly startDate, DateOnly endDate);
-        Task<ServiceResult<MealConsumptionReportDTO>> GenerateCurrentWeekReportAsync();
+		Task<ServiceResult<MealConsumptionReportDTO>> GenerateWeeklyReportAsync(
+			DateOnly startDate, DateOnly endDate, TimeOnly? startTime, TimeOnly? endTime);
+		Task<ServiceResult<MealConsumptionReportDTO>> GenerateCurrentWeekReportAsync(TimeOnly? startTime, TimeOnly? endTime);
         Task<ServiceResult<ReportDashBoard>> GetDashboardSummaryAsync();
-        Task<ServiceResult> GetMealConsumptionSummaryAsync(DateOnly startDate, DateOnly? endDate = null);
+		Task<ServiceResult> GetMealConsumptionSummaryAsync(DateOnly startDate, DateOnly? endDate, TimeOnly? startTime, TimeOnly? endTime);
         Task<SupplierPaymentReportDto> GetSupplierPaymentReportAsync(int supplierId, DateOnly startDate, DateOnly? endDate = null);
 		Task<ServiceResult> GetAllSuppliersPaymentReportAsync(DateOnly startDate, DateOnly? endDate = null);
         Task<ServiceResult> GetTodayMealSchedulesAsync(DateOnly date, TimeOnly time);
@@ -28,5 +29,6 @@ namespace MealToken.Application.Interfaces
         Task<DashBoardMealType> GetMealsByMealTypeAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
 		Task<DashBoardCostAnalysis> GetMealsByCostAsync(TimePeriod timePeriod,List<int> departmentIds,DateOnly? customStartDate = null,DateOnly? customEndDate = null);
         Task<DashBoardPersonType> GetMealsByPersonTypeAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
+        Task<DashBoardMealRequest> GetMealsInRequestsAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null);
 	}
 }

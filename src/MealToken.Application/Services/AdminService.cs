@@ -1,10 +1,12 @@
 ﻿using Authentication.Interfaces;
 using Authentication.Models.DTOs;
+using Authentication.Models.Entities;
 using MealToken.Application.Interfaces;
 using MealToken.Domain.Entities;
 using MealToken.Domain.Enums;
 using MealToken.Domain.Interfaces;
 using MealToken.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -1628,11 +1630,11 @@ namespace MealToken.Application.Services
 						Message = "Tenant does not exist."
 					};
 				}
+				var imageData = await ImageStore(updatedSettings.Image);
 
-				// ✅ Update existing tenant settings
 				existingTenant.Currency = updatedSettings.Currency;
-				existingTenant.EnableNotifications = updatedSettings.EnableNotifications;
-				existingTenant.EnableFunctionKeys = updatedSettings.EnableFunctionKeys;
+				existingTenant.CompanyLogo = imageData;
+				existingTenant.CompanyEmail = _encryption.EncryptData(updatedSettings.CompanyEmail);
 
 				await _adminData.UpdateTenantSettingsAsync(existingTenant);
 
@@ -1679,12 +1681,15 @@ namespace MealToken.Application.Services
 					};
 				}
 
-				var applicationSettings = new ApplicationSettings
+				var applicationSettings = new ApplicationSettingsReturn
 				{
 					Currency = tenantInfo.Currency,
-					EnableNotifications = tenantInfo.EnableNotifications,
-					EnableFunctionKeys = tenantInfo.EnableFunctionKeys
+					Image = tenantInfo.CompanyLogo != null
+						? Convert.ToBase64String(tenantInfo.CompanyLogo)
+						: null,
+					CompanyEmail = _encryption.DecryptData(tenantInfo.CompanyEmail)
 				};
+
 
 				_logger.LogInformation("Application settings retrieved successfully for tenant ID: {TenantId}", tenantId);
 
@@ -1707,6 +1712,33 @@ namespace MealToken.Application.Services
 				};
 			}
 		}
+		private async Task<byte[]> ImageStore(IFormFile?  image)
+		{
+			if (image == null || image.Length == 0)
+			{
+				_logger.LogError("No image provided.");
+				throw new ArgumentException("Image cannot be null or empty.");
+			}
 
+			// Validate file type
+			if (image.ContentType != "image/png" && image.ContentType != "image/jpeg")
+			{
+				_logger.LogError("Invalid image type: {ContentType}", image.ContentType);
+				throw new ArgumentException("Only PNG and JPEG images are allowed.");
+			}
+
+			// Validate file size (max 2MB)
+			if (image.Length > 2 * 1024 * 1024) // 2 MB
+			{
+				_logger.LogError("Image size exceeds the limit: {Size} bytes", image.Length);
+				throw new ArgumentException("File size must not exceed 2 MB.");
+			}
+
+			using (var ms = new MemoryStream())
+			{
+				await image.CopyToAsync(ms); // Copy image data to memory stream
+				return ms.ToArray(); // Convert to byte array and return
+			}
+		}
 	}
 }

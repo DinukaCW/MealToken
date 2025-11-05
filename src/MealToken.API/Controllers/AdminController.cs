@@ -542,7 +542,7 @@ namespace MealToken.API.Controllers
 		[HttpPut("UpdateSettings")]
 		[Authorize(Roles = "Admin")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> UpdateSettings([FromBody] ApplicationSettings settings)
+		public async Task<IActionResult> UpdateSettings([FromForm] ApplicationSettings settings)
 		{
 			try
 			{

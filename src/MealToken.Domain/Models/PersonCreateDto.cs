@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace MealToken.Domain.Models
 {
-    public class PersonCreateDto
-    {
+    public class PersonCreateDto : IValidatableObject
+	{
         public PersonType PersonType { get; set; }
 
         [Required(ErrorMessage = "Person number/Card number is required.")]
@@ -36,6 +36,7 @@ namespace MealToken.Domain.Models
         [StringLength(50, ErrorMessage = "Person sub-type cannot exceed 50 characters.")]
         public string PersonSubType { get; set; } // EmployeeType or VisitorType]
 
+       // [Required(ErrorMessage = "Gender Should Provide.")]
         [StringLength(10, ErrorMessage = "Gender cannot exceed 10 characters.")]
         [RegularExpression("^(Male|Female|Other)$", ErrorMessage = "Gender must be Male, Female, or Other.")]
 
@@ -59,6 +60,14 @@ namespace MealToken.Domain.Models
         [StringLength(500, ErrorMessage = "Special note cannot exceed 500 characters.")]
         public string? SpecialNote { get; set; }
 
-        
-    }
+		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+		{
+			if (PersonType == PersonType.Employer && string.IsNullOrWhiteSpace(Gender))
+			{
+				yield return new ValidationResult("Gender is required for employees.", new[] { nameof(Gender) });
+			}
+
+			// Example: you can also add other conditional checks here
+		}
+	}
 }

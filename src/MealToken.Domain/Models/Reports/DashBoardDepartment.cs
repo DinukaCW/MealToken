@@ -19,11 +19,17 @@ namespace MealToken.Domain.Models.Reports
 		public int MealCount { get; set; }
 		public decimal Precentage { get; set; }
 		public decimal MealCosts { get; set; }
+		public int EmployeeMealCount { get; set; }
+		public int VisitorMealCount { get; set; }
+		public decimal EmployeeMealCosts { get; set; }
+		public decimal VisitorMealCosts { get; set; }
 	}
 	public class DepartmentPersonGroupDto
 	{
 		public int DepartmentId { get; set; }
 		public string DepartmentName { get; set; } = string.Empty;
 		public List<int> Persons { get; set; } = new();
+		public List<int> Employees { get; set; } = new();
+		public List<int> Visitors { get; set; } = new();
 	}
 }

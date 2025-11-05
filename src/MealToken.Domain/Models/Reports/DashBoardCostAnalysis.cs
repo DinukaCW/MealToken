@@ -10,6 +10,7 @@ namespace MealToken.Domain.Models.Reports
 	{
 		public decimal EmployeesCost { get; set; }
 		public decimal CompanyCost { get; set; }
+		public decimal SellingPrice { get; set; }
 		public decimal SupplierCost { get; set; }
 	}
 }

@@ -213,12 +213,12 @@ namespace MealToken.Application.Services
 		}
 
 		public async Task<ServiceResult<MealConsumptionReportDTO>> GenerateWeeklyReportAsync(
-			DateOnly startDate, DateOnly endDate)
+			DateOnly startDate, DateOnly endDate,TimeOnly? startTime, TimeOnly? endTime)
 		{
 			try
 			{
 				// Fetch data for the date range with all related data in ONE query
-				var mealConsumptions = await _reportRepository.GetMealConsumptioninWeekAsync(startDate, endDate);
+				var mealConsumptions = await _reportRepository.GetMealConsumptioninWeekAsync(startDate, endDate,startTime,endTime);
 
 				if (!mealConsumptions.Any())
 				{
@@ -231,7 +231,7 @@ namespace MealToken.Application.Services
 						});
 				}
 
-				var report = BuildWeeklyReport(mealConsumptions, startDate, endDate);
+				var report = await   BuildWeeklyReport(mealConsumptions, startDate, endDate);
 
 				return ServiceResult<MealConsumptionReportDTO>.SuccessResult(report);
 			}
@@ -244,13 +244,13 @@ namespace MealToken.Application.Services
 			}
 		}
 
-		public async Task<ServiceResult<MealConsumptionReportDTO>> GenerateCurrentWeekReportAsync()
+		public async Task<ServiceResult<MealConsumptionReportDTO>> GenerateCurrentWeekReportAsync(TimeOnly? startTime, TimeOnly? endTime)
 		{
 			var (startOfWeek, endOfWeek) = GetCurrentWeekRange();
-			return await GenerateWeeklyReportAsync(startOfWeek, endOfWeek);
+			return await GenerateWeeklyReportAsync(startOfWeek, endOfWeek,startTime,endTime);
 		}
 
-		public async Task<ServiceResult> GetMealConsumptionSummaryAsync(DateOnly startDate, DateOnly? endDate = null)
+		public async Task<ServiceResult> GetMealConsumptionSummaryAsync(DateOnly startDate, DateOnly? endDate, TimeOnly? startTime, TimeOnly? endTime)
 		{
 			_logger.LogInformation("Meal consumption summary request started. StartDate: {StartDate}, EndDate: {EndDate}", startDate, endDate);
 
@@ -273,7 +273,7 @@ namespace MealToken.Application.Services
 				_logger.LogInformation("Fetching meal consumption data between {StartDate} and {EndDate}", startDate, reportEndDate);
 
 				// Get all data for the requested range
-				var allData = await _reportRepository.GetMealConsumptionSummaryByDateRangeAsync(startDate, reportEndDate);
+				var allData = await _reportRepository.GetMealConsumptionSummaryByDateRangeAsync(startDate, reportEndDate, startTime,endTime);
 
 				if (allData == null || !allData.Any())
 				{
@@ -296,7 +296,7 @@ namespace MealToken.Application.Services
 						TotalMealServed = g.Sum(x => x.TotalMealCount),
 						TotalEmployeesContribution = g.Sum(x => x.TotalEmployeeContribution),
 						TotalSupplierContribution = g.Sum(x => x.TotalSupplierCost),
-						TotalCompanyContribution = g.Sum(x => x.TotalEmployerContribution)
+						TotalCompanyContribution = g.Sum(x => x.TotalCompanyContribution)
 					})
 					.OrderBy(x => x.MealConsumptionDetails.First().Date)
 					.ToList();
@@ -360,13 +360,29 @@ namespace MealToken.Application.Services
 				reportEndDate
 			);
 
+			var requestDetails = await _reportRepository.GetRequestBySupplierAsync(
+				supplierId,
+				startDate,
+				reportEndDate
+			);
+			var requestCosts = await _reportRepository.GetSupplierRequestCostDetailsAsync(
+				supplierId,
+				startDate,
+				reportEndDate
+			);
+			summary.TotalEmployeeContribution += requestCosts.TotalEmployeeContribution;
+			summary.TotalCompanyContribution += requestCosts.TotalCompanyContribution;
+			summary.TotalSupplierCost += requestCosts.TotalSupplierCost;
+			summary.TotalSellingPrice += requestCosts.TotalSellingPrice;
+
 			return new SupplierPaymentReportDto
 			{
 				SupplierName = supplierInfo.SupplierName,
 				ContactNumber = _encryption.DecryptData(supplierInfo.ContactNumber),
 				Address = _encryption.DecryptData(supplierInfo.Address),
 				MealDetails = mealDetails,
-				Summary = summary
+				RequestDetails = requestDetails,
+				Summary = summary,
 			};
 		}
 		public async Task<ServiceResult> GetAllSuppliersPaymentReportAsync(DateOnly startDate, DateOnly? endDate = null)
@@ -560,7 +576,7 @@ namespace MealToken.Application.Services
 			return (startOfWeek, endOfWeek);
 		}
 
-		private MealConsumptionReportDTO BuildWeeklyReport(
+		private async Task<MealConsumptionReportDTO> BuildWeeklyReport(
 			IEnumerable<MealConsumptionWithDetails> mealConsumptions,
 			DateOnly startDate,
 			DateOnly endDate)
@@ -576,14 +592,14 @@ namespace MealToken.Application.Services
 
 			foreach (var dateGroup in groupedByDate)
 			{
-				var dailyReport = BuildDailyReport(dateGroup);
+				var dailyReport = await BuildDailyReport(dateGroup);
 				report.DailyReports.Add(dailyReport);
 			}
 
 			return report;
 		}
 
-		private DailyMealReport BuildDailyReport(IGrouping<DateOnly, MealConsumptionWithDetails> dateGroup)
+		private async Task<DailyMealReport> BuildDailyReport(IGrouping<DateOnly, MealConsumptionWithDetails> dateGroup)
 		{
 			var dailyReport = new DailyMealReport
 			{
@@ -595,7 +611,7 @@ namespace MealToken.Application.Services
 
 			foreach (var mealTypeGroup in groupedByMealType)
 			{
-				var mealTypeData = BuildMealTypeGroup(mealTypeGroup);
+				var mealTypeData = await BuildMealTypeGroup(mealTypeGroup);
 				dailyReport.MealTypeGroups.Add(mealTypeData);
 			}
 
@@ -604,7 +620,7 @@ namespace MealToken.Application.Services
 			return dailyReport;
 		}
 
-		private MealTypeGroup BuildMealTypeGroup(IGrouping<string, MealConsumptionWithDetails> mealTypeGroup)
+		private async Task<MealTypeGroup> BuildMealTypeGroup(IGrouping<string, MealConsumptionWithDetails> mealTypeGroup)
 		{
 			var mealTypeData = new MealTypeGroup
 			{
@@ -618,14 +634,14 @@ namespace MealToken.Application.Services
 			{
 				mealTypeData.Details.Add(new MealConsumptionDetail
 				{
-					EmployeeNumber = consumption.PersonId,
+					EmployeeNumber =  await _reportRepository.GetPersonNumberByIdsync(consumption.PersonId),
 					Name = consumption.PersonName,
 					Department = consumption.DepartmentName ?? "N/A",
 					Designation = consumption.DesignationName ?? "N/A",
 					Gender = consumption.Gender ?? "N/A",
 					Subtype = consumption.SubTypeName ?? "",
 					EmployeeContribution = consumption.EmployeeCost,
-					EmployerContribution = consumption.CompanyCost,
+					CompanyContribution = consumption.CompanyCost,
 					TotalSupplierCost = consumption.SupplierCost
 				});
 			}
@@ -667,7 +683,7 @@ namespace MealToken.Application.Services
 				MaleCount = maleCount,
 				FemaleCount = femaleCount,
 				TotalEmployeeContribution = subTypeGroup.Sum(m => m.EmployeeCost),
-				TotalEmployerCost = subTypeGroup.Sum(m => m.CompanyCost),
+				TotalCompanyContribution = subTypeGroup.Sum(m => m.CompanyCost),
 				TotalSupplierCost = subTypeGroup.Sum(m => m.SupplierCost),
 				TotalMealCount = subTypeGroup.Count()
 			};
@@ -698,7 +714,7 @@ namespace MealToken.Application.Services
 
 				// Sums are still calculated from the original group, which contains all meal records.
 				TotalEmployeeContribution = mealTypeGroup.Sum(m => m.EmployeeCost),
-				TotalEmployerCost = mealTypeGroup.Sum(m => m.CompanyCost),
+				TotalCompanyContribution = mealTypeGroup.Sum(m => m.CompanyCost),
 				TotalSupplierCost = mealTypeGroup.Sum(m => m.SupplierCost),
 				TotalMealCount = mealTypeGroup.Count()
 			};
@@ -710,7 +726,7 @@ namespace MealToken.Application.Services
 			{
 				TotalMealTypeCount = mealTypeGroups.Count,
 				GrandTotalEmployeeContribution = mealTypeGroups.Sum(m => m.MealTypeTotal.TotalEmployeeContribution),
-				GrandTotalEmployerCost = mealTypeGroups.Sum(m => m.MealTypeTotal.TotalEmployerCost),
+				GrandTotalCompanyContribution = mealTypeGroups.Sum(m => m.MealTypeTotal.TotalCompanyContribution),
 				GrandTotalSupplierCost = mealTypeGroups.Sum(m => m.MealTypeTotal.TotalSupplierCost),
 				GrandTotalMealCount = mealTypeGroups.Sum(m => m.MealTypeTotal.TotalMealCount)
 			};
@@ -736,13 +752,13 @@ namespace MealToken.Application.Services
 					return new MealDashboardDto(); 
 				}
 
-				var totalMeals= await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, personIds);
+				var totalMeals= await _reportRepository.GetTotalMealsServedWithRequestsAsync(startDate, endDate, personIds);
 				var totalCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, personIds);
 				var specialRequests = await _reportRepository.GetSpecialRequestsAsync(startDate, endDate, personIds);
 				var mealDistribution = await _reportRepository.GetMealDistributionByTypeAsync(startDate, endDate, personIds);
 				var mealCostDistribution = await GetMealConsumptionGraphData(timePeriod, personIds, startDate, endDate);
 
-				var previousMeals = await _reportRepository.GetTotalMealsServedAsync(previousStartDate, previousEndDate, personIds);
+				var previousMeals = await _reportRepository.GetTotalMealsServedWithRequestsAsync(previousStartDate, previousEndDate, personIds);
 				var previousCost= await _reportRepository.GetTotalCostAsync(previousStartDate, previousEndDate, personIds);
 
 				var mealChange = previousMeals > 0 ? ((decimal)(totalMeals - previousMeals) / previousMeals) * 100 : 0;
@@ -822,13 +838,20 @@ namespace MealToken.Application.Services
 					// Await each call one by one inside the loop
 					var mealCount = await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, dept.Persons);
 					var mealCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, dept.Persons);
-
+					var employeeMealCount = await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, dept.Employees);
+					var visitorMealCount = await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, dept.Visitors);
+					var employeeMealCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, dept.Employees);
+					var visitorMealCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, dept.Visitors);
 					departmentMeals.Add(new DepartmentWiseMeal
 					{
 						DepartmentID = dept.DepartmentId,
 						DepartmentName = dept.DepartmentName,
 						MealCount = mealCount,
-						MealCosts = mealCost
+						MealCosts = mealCost,
+						EmployeeMealCount = employeeMealCount,
+						VisitorMealCount = visitorMealCount,
+						EmployeeMealCosts = employeeMealCost,
+						VisitorMealCosts = visitorMealCost
 					});
 				}
 				// --- End of change ---
@@ -922,7 +945,7 @@ namespace MealToken.Application.Services
 				return new DashboardSupplier
 				{
 					TotalMeals = totalMeals,
-					TotalSupplierCost = totalCost,
+					TotalSupplierSellingPrice = totalCost,
 					SupplierWiseMeals = supplierMeals.OrderByDescending(s => s.MealCount).ToList()
 				};
 			}
@@ -1049,16 +1072,17 @@ namespace MealToken.Application.Services
 				var employeeCost = await _reportRepository.GetTotalEmployeeCostAsync(startDate, endDate, personIds);
 
 				// Get Company Cost (Uses existing method)
-				var companyCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, personIds);
-
+				var companyCost = await _reportRepository.GetTotalCompanyCostAsync(startDate, endDate, personIds);
+				var sellingPrice = await _reportRepository.GetTotalSellingPriceAsync(startDate, endDate, personIds);
 				// Get Supplier Cost (Uses existing method)
-				var supplierCost = await _reportRepository.GetTotalSupplierCostAsync(startDate, endDate, personIds);
+				var supplierCost = await _reportRepository.GetTotalSupplierMealCostAsync(startDate, endDate, personIds);
 
 				// --- Return the final DTO ---
 				return new DashBoardCostAnalysis
 				{
 					EmployeesCost = employeeCost,
 					CompanyCost = companyCost,
+					SellingPrice = sellingPrice,
 					SupplierCost = supplierCost
 				};
 			}
@@ -1145,7 +1169,71 @@ namespace MealToken.Application.Services
 				throw;
 			}
 		}
-			
+
+		public async Task<DashBoardMealRequest> GetMealsInRequestsAsync(
+	TimePeriod timePeriod,
+	List<int> departmentIds,
+	DateOnly? customStartDate = null,
+	DateOnly? customEndDate = null)
+		{
+			try
+			{
+				_logger.LogInformation(
+					"Starting {MethodName} with parameters: TimePeriod={TimePeriod}, CustomStart={CustomStartDate}, CustomEnd={CustomEndDate}",
+					nameof(GetMealConsumptionGraphData),
+					timePeriod,
+					customStartDate,
+					customEndDate);
+
+				var (startDate, endDate) = GetDateRange(timePeriod, customStartDate, customEndDate);
+				GroupingLevel grouping = DetermineGroupingLevel(timePeriod, startDate, endDate);
+
+				// Fetch aggregated request consumption data
+				var requestsCosts = await _reportRepository.GetAggregatedRequestConsumptionDataAsync(
+					startDate, endDate, grouping, timePeriod);
+
+				// Fetch meal request type distribution
+				var requestMeals = await _reportRepository.GetRequestMealDistributionByTypeAsync(
+					startDate, endDate);
+
+				if (requestsCosts == null && (requestMeals == null || !requestMeals.Any()))
+				{
+					_logger.LogWarning(
+						"No data found in {MethodName} for the given date range ({StartDate} to {EndDate}). Returning empty dashboard.",
+						nameof(GetMealConsumptionGraphData),
+						startDate,
+						endDate);
+
+					return new DashBoardMealRequest();
+				}
+
+				var result = new DashBoardMealRequest
+				{
+					MealRequestCostDetails = requestsCosts ?? new List<GraphDataPoint>(),
+					RequestMealTypesDetails = requestMeals ?? new List<MealTypeDistributionDto>()
+				};
+
+				_logger.LogInformation(
+					"Successfully completed {MethodName}. Retrieved {CostCount} cost records and {TypeCount} meal type records.",
+					nameof(GetMealConsumptionGraphData),
+					result.MealRequestCostDetails?.Count ?? 0,
+					result.RequestMealTypesDetails?.Count ?? 0);
+
+				return result;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex,
+					"An error occurred in {MethodName}. Parameters: TimePeriod={TimePeriod}, CustomStart={CustomStartDate}, CustomEnd={CustomEndDate}",
+					nameof(GetMealConsumptionGraphData),
+					timePeriod,
+					customStartDate,
+					customEndDate);
+
+				throw; // Re-throw after logging
+			}
+		}
+
 		private async Task<List<GraphDataPoint>> GetMealConsumptionGraphData(
 			TimePeriod timePeriod,
 			List<int> personIds, 
