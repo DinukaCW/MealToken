@@ -345,11 +345,8 @@ namespace MealToken.Infrastructure.Repositories
 			{
 				query = query.Where(m => personIds.Contains(m.PersonId));
 			}
-			var requestCost = await _tenantContext.RequestMealConsumption
-				.Where(rmc => rmc.EventDate >= startDate &&
-							  rmc.EventDate <= endDate)
-				.SumAsync(rmc => rmc.TotalSellingPrice);
-			return await query.SumAsync(m => m.SellingPrice) + requestCost;
+			
+			return await query.SumAsync(m => m.SellingPrice);
 		}
 		public async Task<List<MealTypeDistributionDto>> GetMealDistributionByTypeAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
 		{
@@ -542,58 +539,49 @@ namespace MealToken.Infrastructure.Repositories
 			return results;
 		}
 
-		public async Task<List<DepartmentPersonGroupDto>> GetPersonsGroupedByDepartmentAsync(IEnumerable<int>? departmentIds)
+		
+		// Add this method to your ReportRepository
+		public async Task<List<InternalDepartmentMealStats>> GetAggregatedMealStatsAsync(
+			DateOnly startDate, DateOnly endDate, List<int> departmentIds)
 		{
-			// Step 1: Get departments from platform context
-			var departmentsQuery = _platformContext.Department.AsQueryable();
+			// This query joins MealConsumption and Person (both in _tenantContext)
+			var query = from c in _tenantContext.MealConsumption
+						join p in _tenantContext.Person on c.PersonId equals p.PersonId
+						where c.Date >= startDate
+						   && c.Date <= endDate
+						   && c.TockenIssued
+						   && departmentIds.Contains(p.DepartmentId)
+						group new { c, p } by p.DepartmentId into g
+						select new InternalDepartmentMealStats
+						{
+							DepartmentId = g.Key,
+							TotalCount = g.Count(),
+							TotalCost = g.Sum(x => x.c.SellingPrice),
 
-			if (departmentIds != null && departmentIds.Any())
+							EmployeeCount = g.Count(x => x.p.PersonType == PersonType.Employer),
+							EmployeeCost = g.Where(x => x.p.PersonType == PersonType.Employer)
+											.Sum(x => x.c.SellingPrice),
+
+							VisitorCount = g.Count(x => x.p.PersonType == PersonType.Visitor),
+							VisitorCost = g.Where(x => x.p.PersonType == PersonType.Visitor)
+										   .Sum(x => x.c.SellingPrice)
+						};
+
+			return await query.ToListAsync();
+		}
+		// Add this method to your ReportRepository
+		public async Task<Dictionary<int, string>> GetDepartmentNamesAsync(List<int> departmentIds)
+		{
+			var query = _platformContext.Department.AsQueryable();
+
+			if (departmentIds?.Any() == true)
 			{
-				departmentsQuery = departmentsQuery.Where(d => departmentIds.Contains(d.DepartmnetId));
+				query = query.Where(d => departmentIds.Contains(d.DepartmnetId));
 			}
 
-			var departments = await departmentsQuery
-				.Select(d => new { d.DepartmnetId, d.Name })
-				.ToListAsync();
-
-			// Step 2: Get persons from tenant context (filter by those department IDs)
-			var departmentIdsList = departments.Select(d => d.DepartmnetId).ToList();
-
-			var persons = await _tenantContext.Person
-				.Where(p => departmentIdsList.Contains(p.DepartmentId))
-				.Select(p => new { p.PersonId, p.DepartmentId })
-				.ToListAsync();
-
-			// Step 3: Combine results in memory
-			var result = departments
-				.Select(d => new DepartmentPersonGroupDto
-				{
-					DepartmentId = d.DepartmnetId,
-					DepartmentName = d.Name,
-					Persons = persons
-						.Where(p => p.DepartmentId == d.DepartmnetId)
-						.Select(p => p.PersonId)
-						.ToList(),
-					Employees = persons
-						.Where(p => p.DepartmentId == d.DepartmnetId && 
-									_tenantContext.Person
-										.Any(person => person.PersonId == p.PersonId && person.PersonType == PersonType.Employer))
-						.Select(p => p.PersonId)
-						.ToList(),
-					Visitors = persons
-						.Where(p => p.DepartmentId == d.DepartmnetId &&
-									_tenantContext.Person
-										.Any(person => person.PersonId == p.PersonId && person.PersonType == PersonType.Visitor))
-						.Select(p => p.PersonId)
-						.ToList()
-
-				})
-				.ToList();
-
-			return result;
+			return await query
+				.ToDictionaryAsync(d => d.DepartmnetId, d => d.Name);
 		}
-
-
 		public async Task<decimal> GetTotalSupplierCostAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
 		{
 			var query = _tenantContext.MealConsumption
@@ -872,30 +860,25 @@ namespace MealToken.Infrastructure.Repositories
 
 			return summary;
 		}
-		public async Task<int> GetTotalMealsServedWithRequestsAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
+		public async Task<int> GetTotalRequestMealssAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
 		{
-			var mealQuery = _tenantContext.MealConsumption
-			.Where(m => m.Date >= startDate &&
-						m.Date <= endDate &&
-						m.TockenIssued);
-
-			// Filter by person IDs if provided
-			if (personIds != null && personIds.Any())
-			{
-				mealQuery = mealQuery.Where(m => personIds.Contains(m.PersonId));
-			}
-
-			// Count normal meals
-			var normalMealCount = await mealQuery.CountAsync();
-
-			// Sum requested meals
+			
 			var requestMealCount = await _tenantContext.RequestMealConsumption
 				.Where(rmc => rmc.EventDate >= startDate &&
 							  rmc.EventDate <= endDate)
 				.SumAsync(rmc => rmc.Quantity);
 
-			var totalMeals = normalMealCount + requestMealCount;
+			var totalMeals = requestMealCount;
 			return totalMeals;
+		}
+		public async Task<decimal> GetTotalRequestsCostAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
+		{
+			
+			var requestCost = await _tenantContext.RequestMealConsumption
+				.Where(rmc => rmc.EventDate >= startDate &&
+							  rmc.EventDate <= endDate)
+				.SumAsync(rmc => rmc.TotalSellingPrice);
+			return requestCost;
 		}
 		public async Task<string> GetPersonNumberByIdsync(int personId)
 		{
@@ -906,8 +889,13 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<List<GraphDataPoint>> GetAggregatedRequestConsumptionDataAsync(DateOnly startDate,DateOnly endDate,GroupingLevel grouping,TimePeriod timePeriod)
 		{
 			// Base query with filters
+			var current = DateOnly.FromDateTime(DateTime.Now);
+
 			var query = _tenantContext.RequestMealConsumption
-				.Where(rmc => rmc.EventDate >= startDate && rmc.EventDate <= endDate);
+				.Where(rmc =>
+					rmc.EventDate >= startDate &&
+					rmc.EventDate <= endDate &&
+					rmc.EventDate <= current);
 
 			var results = new List<GraphDataPoint>();
 
@@ -1036,9 +1024,13 @@ namespace MealToken.Infrastructure.Repositories
 		}
 		public async Task<List<MealTypeDistributionDto>> GetRequestMealDistributionByTypeAsync(DateOnly startDate, DateOnly endDate)
 		{
+			var currentDate = DateOnly.FromDateTime(DateTime.Now);
+
 			var query = _tenantContext.RequestMealConsumption
-				.Where(m => m.EventDate >= startDate &&
-							m.EventDate <= endDate);
+				.Where(rmc =>
+					rmc.EventDate >= startDate &&
+					rmc.EventDate <= endDate &&
+					rmc.EventDate <= currentDate);
 
 			var distribution = await query
 				.GroupBy(m => m.MealTypeId)

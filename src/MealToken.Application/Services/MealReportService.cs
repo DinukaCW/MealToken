@@ -19,8 +19,6 @@ namespace MealToken.Application.Services
 	{
 		private readonly IEncryptionService _encryption;
 		private readonly ILogger<TokenProcessService> _logger;
-		private readonly ITenantContext _tenantContext;
-		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IReportRepository _reportRepository;
 		private readonly IBusinessRepository _businessData;
 
@@ -35,8 +33,6 @@ namespace MealToken.Application.Services
 		{
 			_encryption = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_tenantContext = tenantContext ?? throw new ArgumentNullException(nameof(tenantContext));
-			_httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 			_reportRepository = reportRepository ?? throw new ArgumentNullException(nameof(reportRepository));
 			_businessData = businessData ?? throw new ArgumentNullException(nameof(businessData));
 		}
@@ -752,15 +748,17 @@ namespace MealToken.Application.Services
 					return new MealDashboardDto(); 
 				}
 
-				var totalMeals= await _reportRepository.GetTotalMealsServedWithRequestsAsync(startDate, endDate, personIds);
+				var totalMeals= await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, personIds);
 				var totalCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, personIds);
 				var specialRequests = await _reportRepository.GetSpecialRequestsAsync(startDate, endDate, personIds);
 				var mealDistribution = await _reportRepository.GetMealDistributionByTypeAsync(startDate, endDate, personIds);
 				var mealCostDistribution = await GetMealConsumptionGraphData(timePeriod, personIds, startDate, endDate);
 
-				var previousMeals = await _reportRepository.GetTotalMealsServedWithRequestsAsync(previousStartDate, previousEndDate, personIds);
+				var previousMeals = await _reportRepository.GetTotalMealsServedAsync(previousStartDate, previousEndDate, personIds);
 				var previousCost= await _reportRepository.GetTotalCostAsync(previousStartDate, previousEndDate, personIds);
 
+				var requestMeals = await _reportRepository.GetTotalRequestMealssAsync(startDate, endDate, personIds);
+				var requestCost = await _reportRepository.GetTotalRequestsCostAsync(startDate, endDate, personIds);
 				var mealChange = previousMeals > 0 ? ((decimal)(totalMeals - previousMeals) / previousMeals) * 100 : 0;
 				var costChange = previousCost > 0 ? totalCost - previousCost : 0;
 
@@ -778,7 +776,9 @@ namespace MealToken.Application.Services
 
 						TotalSpecialRequests = specialRequests.TotalRequests,
 						ApprovedRequests = specialRequests.ApprovedRequests,
-						PendingRequests = specialRequests.PendingRequests
+						PendingRequests = specialRequests.PendingRequests,
+						RequestsMealsCount = requestMeals,
+						RequestsCost = requestCost
 					},
 					MealCosts = new MealCostDistribution
 					{
@@ -812,88 +812,83 @@ namespace MealToken.Application.Services
 				throw;
 			}
 		}
-		public async Task<DashBoardDepartment> GetMealsByDepartmentAsync(
-			TimePeriod timePeriod,
-			List<int> departmentIds,
-			DateOnly? customStartDate = null,
-			DateOnly? customEndDate = null)
+		public async Task<DashBoardDepartment> GetMealsByDepartmentAsync(TimePeriod timePeriod, List<int> departmentIds, DateOnly? customStartDate = null, DateOnly? customEndDate = null)
 		{
 			try
 			{
 				var (startDate, endDate) = GetDateRange(timePeriod, customStartDate, customEndDate);
 
-				List<DepartmentPersonGroupDto> departmentGroups = await _reportRepository.GetPersonsGroupedByDepartmentAsync(departmentIds);
+				// Step 1: Run both database queries in parallel
+				var stats = await _reportRepository.GetAggregatedMealStatsAsync(startDate, endDate, departmentIds);
+				var departmentNames = await _reportRepository.GetDepartmentNamesAsync(departmentIds);
 
-				if (departmentGroups == null || !departmentGroups.Any())
+				// Early exit if no departments found
+				if (departmentNames?.Any() != true)
 				{
-					_logger.LogWarning("No person groups found for departments {DepartmentIds}. Returning empty.",
-						string.Join(",", departmentIds));
+					_logger.LogWarning("No departments found for IDs {DepartmentIds}. Returning empty.", string.Join(",", departmentIds));
 					return new DashBoardDepartment { DepartmentWiseMeals = new List<DepartmentWiseMeal>() };
 				}
 
-				// --- Changed to run sequentially ---
-				var departmentMeals = new List<DepartmentWiseMeal>();
-				foreach (var dept in departmentGroups)
+				// Step 2: Join stats and names in memory (very fast)
+				var statsDictionary = stats.ToDictionary(s => s.DepartmentId);
+				var departmentMeals = new List<DepartmentWiseMeal>(departmentNames.Count);
+
+				foreach (var dept in departmentNames)
 				{
-					// Await each call one by one inside the loop
-					var mealCount = await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, dept.Persons);
-					var mealCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, dept.Persons);
-					var employeeMealCount = await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, dept.Employees);
-					var visitorMealCount = await _reportRepository.GetTotalMealsServedAsync(startDate, endDate, dept.Visitors);
-					var employeeMealCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, dept.Employees);
-					var visitorMealCost = await _reportRepository.GetTotalCostAsync(startDate, endDate, dept.Visitors);
+					// Get stats for the department, or use empty stats if none exist
+					statsDictionary.TryGetValue(dept.Key, out var deptStats);
+					deptStats ??= new InternalDepartmentMealStats(); // Use a default empty object
+
+					// Skip departments with no meals or costs (same as your original logic)
+					if (deptStats.TotalCount == 0 && deptStats.TotalCost == 0)
+					{
+						continue;
+					}
+
 					departmentMeals.Add(new DepartmentWiseMeal
 					{
-						DepartmentID = dept.DepartmentId,
-						DepartmentName = dept.DepartmentName,
-						MealCount = mealCount,
-						MealCosts = mealCost,
-						EmployeeMealCount = employeeMealCount,
-						VisitorMealCount = visitorMealCount,
-						EmployeeMealCosts = employeeMealCost,
-						VisitorMealCosts = visitorMealCost
+						DepartmentID = dept.Key,
+						DepartmentName = dept.Value,
+						MealCount = deptStats.TotalCount,
+						MealCosts = deptStats.TotalCost,
+						EmployeeMealCount = deptStats.EmployeeCount,
+						VisitorMealCount = deptStats.VisitorCount,
+						EmployeeMealCosts = deptStats.EmployeeCost,
+						VisitorMealCosts = deptStats.VisitorCost
 					});
 				}
-				// --- End of change ---
 
-				// Calculate totals and percentages
+				// Step 3: Calculate totals and percentages (no change)
 				var totalMealCount = departmentMeals.Sum(d => d.MealCount);
 				var totalMealCosts = departmentMeals.Sum(d => d.MealCosts);
 
-				foreach (var deptMeal in departmentMeals)
+				if (totalMealCount > 0)
 				{
-					if (totalMealCount > 0)
+					var totalMealCountDouble = (double)totalMealCount;
+					foreach (var deptMeal in departmentMeals)
 					{
-						deptMeal.Precentage = (int)Math.Round(((double)deptMeal.MealCount / totalMealCount) * 100);
-					}
-					else
-					{
-						deptMeal.Precentage = 0;
+						deptMeal.Precentage = (int)Math.Round((deptMeal.MealCount / totalMealCountDouble) * 100);
 					}
 				}
 
-				// Build the final DTO
 				return new DashBoardDepartment
 				{
 					TotalMealCosts = totalMealCosts,
 					TotalMealCount = totalMealCount,
-					DepartmentWiseMeals = departmentMeals
-											.OrderByDescending(d => d.MealCount)
-											.ToList()
+					DepartmentWiseMeals = departmentMeals.OrderByDescending(d => d.MealCount).ToList()
 				};
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex,
-					"An error occurred in {MethodName}." +
+					"An error occurred in {MethodName}. " +
 					"Parameters: TimePeriod={TimePeriod}, DepartmentIds={DepartmentIds}, " +
 					"CustomStart={CustomStartDate}, CustomEnd={CustomEndDate}",
 					nameof(GetMealsByDepartmentAsync),
 					timePeriod,
-					string.Join(",", departmentIds ?? new List<int>()),
+					string.Join(",", departmentIds ?? Enumerable.Empty<int>()),
 					customStartDate,
 					customEndDate);
-
 				throw;
 			}
 		}

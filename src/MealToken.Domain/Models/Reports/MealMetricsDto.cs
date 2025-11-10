@@ -19,5 +19,7 @@ namespace MealToken.Domain.Models.Reports
 		public int TotalSpecialRequests { get; set; }
 		public int ApprovedRequests { get; set; }
 		public int PendingRequests { get; set; }
+		public decimal RequestsMealsCount	{ get; set; }
+		public decimal RequestsCost { get; set; }
 	}
 }

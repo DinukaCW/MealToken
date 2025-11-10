@@ -109,7 +109,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpGet("GetPendingRequests")]
-		[Authorize(Roles = "Admin,DepartmentHead")] // Require admin or reviewer role
+		[Authorize(Roles = "Admin")] // Require admin or reviewer role
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetPendingUserRequests()
 		{
@@ -131,7 +131,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("ApproveRequest")]
-		[Authorize(Roles = "Admin,DepartmentHead")]
+		[Authorize(Roles = "Admin")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> ApproveUserRequest([FromBody] ApproveRequestModel model)
 		{
@@ -170,7 +170,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("RejectRequest")]
-		[Authorize(Roles = "Admin,DepartmentHead")]
+		[Authorize(Roles = "Admin")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> RejectUserRequest([FromBody] RejectRequestModel model)
 		{
@@ -207,7 +207,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpGet("GetRequestById")]
-		[Authorize(Roles = "Admin,DepartmentHead")]
+		[Authorize(Roles = "Admin")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetUserRequestById(int requestId)
 		{
@@ -232,7 +232,7 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpGet("GetAllUsers")]
-		[Authorize(Roles = "Admin,DepartmentHead")]
+		[Authorize(Roles = "Admin")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetAllUsers()
 		{

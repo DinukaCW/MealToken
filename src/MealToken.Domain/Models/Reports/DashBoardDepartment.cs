@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MealToken.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,5 +32,22 @@ namespace MealToken.Domain.Models.Reports
 		public List<int> Persons { get; set; } = new();
 		public List<int> Employees { get; set; } = new();
 		public List<int> Visitors { get; set; } = new();
+	}
+	public class PersonInfo
+	{
+		public int PersonId { get; set; }
+		public int DepartmentId { get; set; }
+		public PersonType PersonType { get; set; }
+	}
+	// DTO to hold the raw stats from the new repository method
+	public class InternalDepartmentMealStats
+	{
+		public int DepartmentId { get; set; }
+		public int TotalCount { get; set; }
+		public decimal TotalCost { get; set; }
+		public int EmployeeCount { get; set; }
+		public decimal EmployeeCost { get; set; }
+		public int VisitorCount { get; set; }
+		public decimal VisitorCost { get; set; }
 	}
 }

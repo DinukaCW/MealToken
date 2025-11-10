@@ -35,7 +35,8 @@ namespace MealToken.Application.Interfaces
 		Task<List<MealTypeDistributionDto>> GetMealDistributionByTypeAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
 		Task<MealRequestsDto> GetSpecialRequestsAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
 		Task<List<GraphDataPoint>> GetAggregatedConsumptionDataAsync(DateOnly startDate, DateOnly endDate, GroupingLevel grouping, TimePeriod timePeriod, List<int> personIds = null);
-		Task<List<DepartmentPersonGroupDto>> GetPersonsGroupedByDepartmentAsync(IEnumerable<int>? departmentIds);
+		Task<List<InternalDepartmentMealStats>> GetAggregatedMealStatsAsync(DateOnly startDate, DateOnly endDate, List<int> departmentIds);
+		Task<Dictionary<int, string>> GetDepartmentNamesAsync(List<int> departmentIds);
 		Task<decimal> GetTotalSupplierCostAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
 		Task<List<SupplierWiseMeals>> GetSupplierBreakdownAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
 		Task<List<MealTypeRawData>> GetMealTypeRawDataAsync(DateOnly startDate, DateOnly endDate, List<int> personIds);
@@ -50,7 +51,8 @@ namespace MealToken.Application.Interfaces
 		Task<List<UserDto>> GetAllUsersAsync();
 		Task<List<SupplierRequestDetailDto>> GetRequestBySupplierAsync(int supplierId, DateOnly startDate, DateOnly endDate);
 		Task<SupplierRequestCosts> GetSupplierRequestCostDetailsAsync(int supplierId, DateOnly startDate, DateOnly endDate);
-		Task<int> GetTotalMealsServedWithRequestsAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
+		Task<int> GetTotalRequestMealssAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
+		Task<decimal> GetTotalRequestsCostAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null);
 		Task<string> GetPersonNumberByIdsync(int personId);
 		Task<List<GraphDataPoint>> GetAggregatedRequestConsumptionDataAsync(DateOnly startDate, DateOnly endDate, GroupingLevel grouping, TimePeriod timePeriod);
 		Task<List<MealTypeDistributionDto>> GetRequestMealDistributionByTypeAsync(DateOnly startDate, DateOnly endDate);

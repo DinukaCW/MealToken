@@ -69,7 +69,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpGet("reportDashboard")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashboardSummary()
 		{
@@ -91,7 +91,7 @@ namespace MealToken.API.Controllers
         }
 
         [HttpGet("weekly")]
-		//[Authorize(Roles = "Admin,DepartmentHead")]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetWeeklyReport( [FromQuery] string startDate, [FromQuery] string endDate ,
 			[FromQuery] string? startTime = null,
@@ -291,7 +291,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("GetDashboardOverview")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardOverView([FromBody] DashBoardRequest request)
 		{
@@ -336,7 +336,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("GetDashBoardDepartmentData")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardDepartmentOverView([FromBody] DashBoardRequest request)
 		{
@@ -380,7 +380,7 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpPost("GetDashboardSupplierData")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardSupplierOverView([FromBody] DashBoardRequest request)
 		{
@@ -424,7 +424,7 @@ namespace MealToken.API.Controllers
 			}
 		}
 		[HttpPost("GetDashboardMealTypeData")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardMealTypeOverView([FromBody] DashBoardRequest request)
 		{
@@ -469,7 +469,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("GetDashboardMealCostData")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardMealCostOverView([FromBody] DashBoardRequest request)
 		{
@@ -514,7 +514,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("GetDashboardPersonTypeData")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardPersonTypesOverView([FromBody] DashBoardRequest request)
 		{
@@ -559,7 +559,7 @@ namespace MealToken.API.Controllers
 		}
 
 		[HttpPost("GetDashboardRequestData")]
-		[Authorize]
+		[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> GetDashBoardMealRequestOverView([FromBody] DashBoardRequest request)
 		{
