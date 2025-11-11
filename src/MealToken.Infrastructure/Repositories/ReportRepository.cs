@@ -346,7 +346,7 @@ namespace MealToken.Infrastructure.Repositories
 				query = query.Where(m => personIds.Contains(m.PersonId));
 			}
 			
-			return await query.SumAsync(m => m.SellingPrice);
+			return await query.SumAsync(m => m.SupplierCost);
 		}
 		public async Task<List<MealTypeDistributionDto>> GetMealDistributionByTypeAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
 		{
@@ -425,7 +425,7 @@ namespace MealToken.Infrastructure.Repositories
 						.Select(g => new {
 							Date = g.Key,
 							MealCount = g.Count(),
-							TotalCost = g.Sum(mc => mc.SellingPrice)
+							TotalCost = g.Sum(mc => mc.SupplierCost)
 						})
 						.ToListAsync();
 
@@ -451,7 +451,7 @@ namespace MealToken.Infrastructure.Repositories
 
 				case GroupingLevel.ByWeek:
 					var rawDataForWeek = await query
-						.Select(mc => new { mc.Date, mc.SellingPrice })
+						.Select(mc => new { mc.Date, mc.SupplierCost })
 						.ToListAsync();
 
 					var weeklyData = rawDataForWeek
@@ -465,7 +465,7 @@ namespace MealToken.Infrastructure.Repositories
 							Month = g.Key.Month,
 							WeekNumber = g.Key.Week,
 							MealCount = g.Count(),
-							TotalCost = g.Sum(mc => mc.SellingPrice)
+							TotalCost = g.Sum(mc => mc.SupplierCost)
 						})
 						.ToList();
 
@@ -494,7 +494,7 @@ namespace MealToken.Infrastructure.Repositories
 
 				case GroupingLevel.ByMonth:
 					var rawDataForMonth = await query
-						.Select(mc => new { mc.Date, mc.SellingPrice })
+						.Select(mc => new { mc.Date, mc.SupplierCost })
 						.ToListAsync();
 
 					var monthlyData = rawDataForMonth
@@ -503,7 +503,7 @@ namespace MealToken.Infrastructure.Repositories
 							Year = g.Key.Year,
 							Month = g.Key.Month,
 							MealCount = g.Count(),
-							TotalCost = g.Sum(mc => mc.SellingPrice)
+							TotalCost = g.Sum(mc => mc.SupplierCost)
 						})
 						.ToList();
 
@@ -556,15 +556,15 @@ namespace MealToken.Infrastructure.Repositories
 						{
 							DepartmentId = g.Key,
 							TotalCount = g.Count(),
-							TotalCost = g.Sum(x => x.c.SellingPrice),
+							TotalCost = g.Sum(x => x.c.SupplierCost),
 
 							EmployeeCount = g.Count(x => x.p.PersonType == PersonType.Employer),
 							EmployeeCost = g.Where(x => x.p.PersonType == PersonType.Employer)
-											.Sum(x => x.c.SellingPrice),
+											.Sum(x => x.c.SupplierCost),
 
 							VisitorCount = g.Count(x => x.p.PersonType == PersonType.Visitor),
 							VisitorCost = g.Where(x => x.p.PersonType == PersonType.Visitor)
-										   .Sum(x => x.c.SellingPrice)
+										   .Sum(x => x.c.SupplierCost)
 						};
 
 			return await query.ToListAsync();
@@ -593,7 +593,7 @@ namespace MealToken.Infrastructure.Repositories
 			{
 				query = query.Where(m => personIds.Contains(m.PersonId));
 			}
-			return await query.SumAsync(m => m.SellingPrice);
+			return await query.SumAsync(m => m.SupplierCost);
 		}
 
 		public async Task<List<SupplierWiseMeals>> GetSupplierBreakdownAsync(DateOnly startDate, DateOnly endDate, List<int> personIds = null)
@@ -835,7 +835,7 @@ namespace MealToken.Infrastructure.Repositories
 				MealType = mealType.TypeName,
 				SubMealType = subType != null ? subType.SubTypeName : null,
 				Quantity = request.Quantity,
-				SellingPrice = request.TotalSellingPrice
+				SellingPrice = request.TotalSupplierCost
 			}
 			).ToListAsync();
 
@@ -877,7 +877,7 @@ namespace MealToken.Infrastructure.Repositories
 			var requestCost = await _tenantContext.RequestMealConsumption
 				.Where(rmc => rmc.EventDate >= startDate &&
 							  rmc.EventDate <= endDate)
-				.SumAsync(rmc => rmc.TotalSellingPrice);
+				.SumAsync(rmc => rmc.TotalSupplierCost);
 			return requestCost;
 		}
 		public async Task<string> GetPersonNumberByIdsync(int personId)
@@ -907,7 +907,7 @@ namespace MealToken.Infrastructure.Repositories
 						.Select(g => new {
 							Date = g.Key,
 							MealCount = g.Sum(x => x.Quantity), // ✅ Sum of quantities
-							TotalCost = g.Sum(rmc => rmc.TotalSellingPrice)
+							TotalCost = g.Sum(rmc => rmc.TotalSupplierCost)
 						})
 						.ToListAsync();
 
@@ -934,7 +934,7 @@ namespace MealToken.Infrastructure.Repositories
 				case GroupingLevel.ByWeek:
 					// Fetch raw data
 					var rawDataForWeek = await query
-						.Select(rmc => new { rmc.EventDate, rmc.Quantity, rmc.TotalSellingPrice })
+						.Select(rmc => new { rmc.EventDate, rmc.Quantity, rmc.TotalSupplierCost })
 						.ToListAsync();
 
 					var weeklyData = rawDataForWeek
@@ -948,7 +948,7 @@ namespace MealToken.Infrastructure.Repositories
 							Month = g.Key.Month,
 							WeekNumber = g.Key.Week,
 							MealCount = g.Sum(x => x.Quantity), // ✅ Sum of quantities
-							TotalCost = g.Sum(rmc => rmc.TotalSellingPrice)
+							TotalCost = g.Sum(rmc => rmc.TotalSupplierCost)
 						})
 						.ToList();
 
@@ -978,7 +978,7 @@ namespace MealToken.Infrastructure.Repositories
 				case GroupingLevel.ByMonth:
 					// Fetch raw data
 					var rawDataForMonth = await query
-						.Select(rmc => new { rmc.EventDate, rmc.Quantity, rmc.TotalSellingPrice })
+						.Select(rmc => new { rmc.EventDate, rmc.Quantity, rmc.TotalSupplierCost })
 						.ToListAsync();
 
 					var monthlyData = rawDataForMonth
@@ -987,7 +987,7 @@ namespace MealToken.Infrastructure.Repositories
 							Year = g.Key.Year,
 							Month = g.Key.Month,
 							MealCount = g.Sum(x => x.Quantity), // ✅ Sum of quantities
-							TotalCost = g.Sum(rmc => rmc.TotalSellingPrice)
+							TotalCost = g.Sum(rmc => rmc.TotalSupplierCost)
 						})
 						.ToList();
 

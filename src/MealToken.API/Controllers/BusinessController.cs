@@ -19,13 +19,15 @@ namespace MealToken.API.Controllers
 		private readonly IConfiguration _configuration;
 		private readonly IBusinessService _businessService;
 		private readonly ScheduleDateGeneratorService _dateGenerator;
+		private readonly ICompanyBusinessLogic _companyBusinessLogic;
 
-		public BusinessController(ILogger<BusinessController> logger, IConfiguration configuration, IBusinessService businessService,ScheduleDateGeneratorService dateGenerator)
+		public BusinessController(ILogger<BusinessController> logger, IConfiguration configuration, IBusinessService businessService,ScheduleDateGeneratorService dateGenerator, ICompanyBusinessLogic companyBusinessLogic)
 		{
 			_logger = logger;
 			_configuration = configuration;
 			_businessService = businessService;
 			_dateGenerator = dateGenerator;
+			_companyBusinessLogic = companyBusinessLogic;
 		}
 		[HttpGet("GetDevicesList")]
 		public async Task<IActionResult> GetClientDevice()
@@ -627,7 +629,81 @@ namespace MealToken.API.Controllers
                 return StatusCode(500, new { message = "An unexpected error occurred during consumption update." });
             }
         }
-        private int GetCurrentUserId()
+
+		[HttpPost("CreateManualTokenLost")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> CreateManualTokenInLost([FromQuery]int personId)
+		{
+			try
+			{
+				
+				var result = await _companyBusinessLogic.ManualPrintTokenLostAsync(personId);
+
+				if (!result.Success)
+				{
+					return BadRequest(new { success = false, message = result.Message });
+				}
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error occurred while creating manual token for lost token. PersonId: {PersonId}", personId);
+				return StatusCode(500, new { success = false, message = "Internal server error occurred while creating manual token for lost token." });
+			}
+		}
+
+		[HttpPost("CreateManualTokenOther")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> CreateManualTokenInOther([FromBody]ManualPrintRequest printRequest)
+		{
+			try
+			{
+
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}
+				var result = await _companyBusinessLogic.ManualPrintTokenOtherAsync(printRequest);
+
+				if (!result.Success)
+				{
+					return BadRequest(new { success = false, message = result.Message });
+				}
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error occurred while creating manual token for other reason token. PersonId: {PersonId}", printRequest.PersonId);
+				return StatusCode(500, new { success = false, message = "Internal server error occurred while creating manual token for other reason token." });
+			}
+		}
+		[HttpGet("GetManualTokenCreationDetails")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetMeanulTokenCreationDetails()
+		{
+			try
+			{
+				var result = await _businessService.GetManualTokenDetailsAsync();
+
+				if (!result.Success)
+				{
+					return BadRequest(new { success = false, message = result.Message });
+				}
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error in Getting Manual Token Creation Details.");
+				return StatusCode(500, new { success = false, message = "Internal server error occurred while retrieving Manual Token Creation Details." });
+			}
+		}
+		private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim))

@@ -53,6 +53,7 @@ namespace MealToken.Infrastructure.Persistence
         public DbSet<UserDepartment> UserDepartment { get; set; }
 		public DbSet<UserHistory> UserHistory { get; set; }
 		public DbSet<RequestMealConsumption> RequestMealConsumption { get; set; }
+		public DbSet<ManualTokenPrinted> ManualTokenPrinted { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -1219,6 +1220,33 @@ namespace MealToken.Infrastructure.Persistence
 					  .WithMany()
 					  .HasForeignKey(e => e.SubTypeId)
 					  .OnDelete(DeleteBehavior.NoAction);
+			});
+			modelBuilder.Entity<ManualTokenPrinted>(entity =>
+			{
+				entity.ToTable("ManualTokenPrinted", _schema);
+				entity.HasKey(e => e.ManualTokenPrintedId);
+				entity.Property(e => e.TenantId).IsRequired();
+				entity.Property(e => e.PersonId).IsRequired();
+				entity.Property(e => e.PrintedDate);
+				entity.Property(e => e.MealConsumptionId);
+				entity.Property(e => e.Reason).IsRequired();
+				entity.Property(e => e.TokenIssued);
+
+				entity.HasOne<TenantInfo>()
+					  .WithMany()
+					  .HasForeignKey(e => e.TenantId)
+					  .OnDelete(DeleteBehavior.NoAction);
+
+				entity.HasOne<Person>()
+					  .WithMany()
+					  .HasForeignKey(e => e.PersonId)
+					  .OnDelete(DeleteBehavior.NoAction);
+
+				entity.HasOne<MealConsumption>()
+					  .WithMany()
+					  .HasForeignKey(e => e.MealConsumptionId)
+					  .OnDelete(DeleteBehavior.NoAction);
+
 			});
 
 

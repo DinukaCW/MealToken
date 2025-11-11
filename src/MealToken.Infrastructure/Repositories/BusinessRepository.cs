@@ -459,7 +459,27 @@ namespace MealToken.Infrastructure.Repositories
 				.Distinct()
 				.ToListAsync();
 		}
-
-
+		public async Task CreateManulTokenPrintAsync(ManualTokenPrinted manualToken)
+		{
+			await _tenantContext.ManualTokenPrinted.AddAsync(manualToken);
+			await _tenantContext.SaveChangesAsync();
+		}
+		public async Task<Schedule> GetScheduleByNameAsync(string scheduleName)
+		{
+			return await _tenantContext.Schedule
+				.Where(p => p.SheduleName == scheduleName)
+				.FirstOrDefaultAsync();
+		}
+		public async Task<ManualTokenPrinted> GetManualTokenPrintedByConsumptionIdAsync(int consumptionId)
+		{
+			return await _tenantContext.ManualTokenPrinted
+				.Where(p => p.ManualTokenPrintedId == consumptionId)
+				.FirstOrDefaultAsync();
+		}
+		public async Task UpdateManualTokenPrintedAsync(ManualTokenPrinted manualToken)
+		{
+			_tenantContext.ManualTokenPrinted.Update(manualToken);
+			await _tenantContext.SaveChangesAsync();
+		}
 	}
 }

@@ -7,11 +7,13 @@ using MealToken.Domain.Interfaces;
 using MealToken.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Cmp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UAParser;
 
 namespace MealToken.Application.Services
 {
@@ -255,6 +257,258 @@ namespace MealToken.Application.Services
 				};
 			}
 		}
+
+		public async Task<ServiceResult> ManualPrintTokenLostAsync(int personId)
+		{
+			_logger.LogInformation("ManualPrintTokenLost process started for PersonId: {PersonId}", personId);
+
+			try
+			{
+				var person = await _adminData.GetPersonByIdAsync(personId);
+				if (person == null)
+				{
+					_logger.LogWarning("ManualPrintTokenLost failed - Person not found. PersonId: {PersonId}", personId);
+					return new ServiceResult { Success = false, Message = "Person not found." };
+				}
+
+				var requestDate = DateOnly.FromDateTime(DateTime.UtcNow);
+				var requestTime = TimeOnly.FromDateTime(DateTime.UtcNow);
+				_logger.LogInformation("Request date and time prepared for PersonId: {PersonId}", personId);
+
+				var mealtokenRequest = new MealTokenRequest
+				{
+					PersonId = personId,
+					RequestDate = requestDate,
+					RequestTime = requestTime,
+					FunctionKey = null
+				};
+
+				_logger.LogInformation("Fetching meal distribution for PersonId: {PersonId}", personId);
+				var schedule = await _tokenProcessService.GetMealDistributionAsync(mealtokenRequest);
+
+				if (!schedule.Success)
+				{
+					_logger.LogWarning("Meal distribution retrieval failed for PersonId: {PersonId}. Message: {Message}", personId, schedule.Message);
+					return new ServiceResult { Success = false, Message = schedule.Message };
+				}
+
+				_logger.LogInformation("Fetching existing meal consumption for PersonId: {PersonId}, MealTypeId: {MealTypeId}, Date: {Date}",
+					personId, schedule.MealInfo.MealTypeId, requestDate);
+
+				var exConsumption = await _businessData.GetMealConsumptionAsync(
+					schedule.MealInfo.MealTypeId,
+					person.PersonId,
+					requestDate
+				);
+
+				if (exConsumption == null)
+				{
+					_logger.LogWarning("No existing meal consumption found for PersonId: {PersonId}, MealTypeId: {MealTypeId}, Date: {Date}",
+						personId, schedule.MealInfo.MealTypeId, requestDate);
+
+					return new ServiceResult
+					{
+						Success = false,
+						Message = "No existing meal consumption found for this person within this meal type."
+					};
+				}
+
+				_logger.LogInformation("Meal consumption found. Preparing token response for PersonId: {PersonId}", personId);
+
+				var tokenResponse = new TokenResponse
+				{
+					Date = requestDate,
+					Time = requestTime,
+					MealType = exConsumption.MealTypeName,
+					Shift = exConsumption.ShiftName.ToString(),
+					EmpNo = person.PersonNumber,
+					EmpName = person.Name,
+					Gender = person.Gender,
+					Department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId),
+					TokenType = exConsumption.PayStatus.ToString(),
+					Contribution = exConsumption.EmployeeCost,
+					MealConsumptionId = exConsumption.MealConsumptionId
+				};
+				var manualToken = new ManualTokenPrinted
+				{
+					TenantId = person.TenantId,
+					PersonId = person.PersonId,
+					PrintedDate = DateTime.UtcNow,
+					MealConsumptionId = exConsumption.MealConsumptionId,
+					Reason = "Lost Token",
+					TokenIssued = false,
+				};
+
+				await _businessData.CreateManulTokenPrintAsync(manualToken);
+				_logger.LogInformation("Meal token retrieved successfully for PersonId: {PersonId}", personId);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Meal token retrieved successfully.",
+					Data = tokenResponse
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occurred in ManualPrintTokenLost for PersonId: {PersonId}. Message: {Message}", personId, ex.Message);
+
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An unexpected error occurred while processing the token retrieval."
+				};
+			}
+		}
+		public async Task<ServiceResult> ManualPrintTokenOtherAsync(ManualPrintRequest printRequest)
+		{
+			_logger.LogInformation("ManualPrintTokenOther process started for PersonId: {PersonId}", printRequest.PersonId);
+
+			try
+			{
+				// Validate Person
+				var person = await _adminData.GetPersonByIdAsync(printRequest.PersonId);
+				if (person == null)
+				{
+					_logger.LogWarning("ManualPrintTokenOther failed - Person not found. PersonId: {PersonId}", printRequest.PersonId);
+					return new ServiceResult { Success = false, Message = "Person not found." };
+				}
+
+				// Validate Supplier
+				var supplier = await _adminData.GetSupplierByIdAsync(printRequest.SupplierId);
+				if (supplier == null)
+				{
+					_logger.LogWarning("ManualPrintTokenOther failed - Supplier not found. SupplierId: {SupplierId}", printRequest.SupplierId);
+					return new ServiceResult { Success = false, Message = "Supplier not found." };
+				}
+
+				// Validate Meal Type
+				var mealType = await _adminData.GetMealTypeByIdAsync(printRequest.MealTypeId);
+				if (mealType == null)
+				{
+					_logger.LogWarning("ManualPrintTokenOther failed - MealType not found. MealTypeId: {MealTypeId}", printRequest.MealTypeId);
+					return new ServiceResult { Success = false, Message = "Meal type not found." };
+				}
+
+				// Validate SubType if provided
+				MealSubType subType = null;
+				if (printRequest.MealSubTypeId.HasValue)
+				{
+					subType = await _adminData.GetMealSubTypesByIdAsync(printRequest.MealSubTypeId.Value);
+					if (subType == null)
+					{
+						_logger.LogWarning("ManualPrintTokenOther failed - MealSubType not found. MealSubTypeId: {MealSubTypeId}", printRequest.MealSubTypeId);
+						return new ServiceResult { Success = false, Message = "Meal subtype not found." };
+					}
+				}
+
+				// Prepare request date/time once
+				var requestDate = DateOnly.FromDateTime(DateTime.UtcNow);
+				var requestTime = TimeOnly.FromDateTime(DateTime.UtcNow);
+
+				// Get related data
+				var mealCost = await _adminData.GetMealCostByDetailAsync(printRequest.SupplierId, printRequest.MealTypeId, printRequest.MealSubTypeId);
+				if (mealCost == null)
+				{
+					_logger.LogWarning("ManualPrintTokenOther failed - Meal cost details not found for SupplierId: {SupplierId}, MealTypeId: {MealTypeId}",
+						printRequest.SupplierId, printRequest.MealTypeId);
+					return new ServiceResult { Success = false, Message = "Meal cost details not found." };
+				}
+
+				var payStatus = await DeterminPayStatusAsync(person, printRequest.Shift, printRequest.MealTypeId);
+				var schedule = await _businessData.GetScheduleByNameAsync("Default");
+
+				// Calculate contribution
+				bool isFreeMeal = payStatus == PayStatus.Free;
+				decimal empContribution = isFreeMeal ? 0 : mealCost.EmployeeCost;
+				decimal companyContribution = isFreeMeal ? (mealCost.EmployeeCost + mealCost.CompanyCost) : mealCost.CompanyCost;
+
+				// Build meal consumption record
+				var mealConsumption = new MealConsumption
+				{
+					TenantId = person.TenantId,
+					PersonId = person.PersonId,
+					PersonName = person.Name,
+					Gender = person.Gender,
+					Date = requestDate,
+					Time = requestTime,
+					ScheduleId = schedule.SheduleId,
+					ScheduleName = schedule.SheduleName,
+					AddOnMeal = false,
+					MealTypeId = mealType.MealTypeId,
+					MealTypeName = mealType.TypeName,
+					SubTypeId = subType?.MealSubTypeId,
+					SubTypeName = subType?.SubTypeName,
+					MealCostId = mealCost.MealCostId,
+					SupplierCost = mealCost.SupplierCost,
+					SellingPrice = mealCost.SellingPrice,
+					CompanyCost = companyContribution,
+					EmployeeCost = empContribution,
+					DeviceId = 1,
+					DeviceSerialNo = string.Empty,
+					ShiftName = printRequest.Shift,
+					PayStatus = payStatus,
+					TockenIssued = false
+				};
+
+				await _businessData.CreateMealConsumptionAsync(mealConsumption);
+
+				var manualToken = new ManualTokenPrinted
+				{
+					TenantId = person.TenantId,
+					PersonId = person.PersonId,
+					PrintedDate = DateTime.UtcNow,
+					MealConsumptionId = mealConsumption.MealConsumptionId,
+					Reason = printRequest.Reason,
+					TokenIssued = false,
+				};
+
+				await _businessData.CreateManulTokenPrintAsync(manualToken);
+				// Build response
+				var department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId);
+				var tokenResponse = new TokenResponse
+				{
+					Date = requestDate,
+					Time = requestTime,
+					MealType = mealType.TypeName,
+					Shift = printRequest.Shift.ToString(),
+					EmpNo = person.PersonNumber,
+					EmpName = person.Name,
+					Gender = person.Gender,
+					Department = department,
+					TokenType = payStatus.ToString(),
+					Contribution = empContribution,
+					MealConsumptionId = mealConsumption.MealConsumptionId
+				};
+
+				_logger.LogInformation("ManualPrintTokenOther succeeded for PersonId: {PersonId}, MealConsumptionId: {MealConsumptionId}",
+					printRequest.PersonId, mealConsumption.MealConsumptionId);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Meal token retrieved successfully.",
+					Data = tokenResponse
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "An error occurred in ManualPrintTokenOther for PersonId: {PersonId}. Message: {Message}",
+					printRequest.PersonId, ex.Message);
+
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An unexpected error occurred while processing the meal token."
+				};
+			}
+			finally
+			{
+				_logger.LogInformation("ManualPrintTokenOther process completed for PersonId: {PersonId}", printRequest.PersonId);
+			}
+		}
+
+
 
 		private ServiceResult ValidateAndIdentifyShift(
       TimeOnly currentTime,

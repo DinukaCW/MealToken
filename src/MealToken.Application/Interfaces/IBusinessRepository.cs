@@ -70,6 +70,9 @@ namespace MealToken.Application.Interfaces
 		Task CreateRequestMealConsumptionAsync(RequestMealConsumption consumption);
 		Task CreateRequestMealConsumptionBulkAsync(List<RequestMealConsumption> consumptions);
 		Task<List<User>> GetUsersByDepartmentsAsync(List<int> departmentIds);
-
+		Task CreateManulTokenPrintAsync(ManualTokenPrinted manualToken);
+		Task<Schedule> GetScheduleByNameAsync(string scheduleName);
+		Task<ManualTokenPrinted> GetManualTokenPrintedByConsumptionIdAsync(int consumptionId);
+		Task UpdateManualTokenPrintedAsync(ManualTokenPrinted manualToken);
 	}
 }

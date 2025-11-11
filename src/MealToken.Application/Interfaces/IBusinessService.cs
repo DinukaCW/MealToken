@@ -29,6 +29,8 @@ namespace MealToken.Application.Interfaces
 		Task<ServiceResult> UpdateRequestStatusAsync(int requestId, UserRequestStatus newStatus, int approverId, string? rejectReason);
 		Task<ServiceResult> ProcessLogicAsync(int tenantId, MealDeviceRequest request);
 		Task<ServiceResult> UpdateMealConsumption(int mealConsumptionId, bool status, string jobStatus);
+		Task<ServiceResult> GetManualTokenDetailsAsync();
 
-    }
+
+	}
 }

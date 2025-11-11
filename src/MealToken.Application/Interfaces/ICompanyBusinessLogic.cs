@@ -11,5 +11,8 @@ namespace MealToken.Application.Interfaces
    public interface ICompanyBusinessLogic
     {
         Task<ServiceResult> HemasCompanyLogic(MealDeviceRequest mealDeviceRequest);
-    }
+		Task<ServiceResult> ManualPrintTokenLostAsync(int personId);
+		Task<ServiceResult> ManualPrintTokenOtherAsync(ManualPrintRequest printRequest);
+
+	}
 }

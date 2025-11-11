@@ -12,5 +12,6 @@ namespace MealToken.Domain.Models.Reports
 		public decimal CompanyCost { get; set; }
 		public decimal SellingPrice { get; set; }
 		public decimal SupplierCost { get; set; }
+		public decimal ProfitAmount { get; set; }
 	}
 }

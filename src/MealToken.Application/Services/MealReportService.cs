@@ -1078,7 +1078,8 @@ namespace MealToken.Application.Services
 					EmployeesCost = employeeCost,
 					CompanyCost = companyCost,
 					SellingPrice = sellingPrice,
-					SupplierCost = supplierCost
+					SupplierCost = supplierCost,
+					ProfitAmount = sellingPrice - supplierCost
 				};
 			}
 			catch (Exception ex)

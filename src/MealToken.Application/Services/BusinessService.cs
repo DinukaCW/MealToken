@@ -2048,6 +2048,13 @@ namespace MealToken.Application.Services
             consumptionRecord.TockenIssued = status;
 			consumptionRecord.JobStatus = jobStatus;
 
+			var manualToken = await _businessData.GetManualTokenPrintedByConsumptionIdAsync(mealConsumptionId);
+			if(manualToken != null)
+			{
+				manualToken.TokenIssued = status;
+				await _businessData.UpdateManualTokenPrintedAsync(manualToken);
+			}
+
             try
             {
 
@@ -2401,6 +2408,86 @@ namespace MealToken.Application.Services
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error sending reject notification email for meal request {RequestId}", request.MealRequestId);
+			}
+		}
+
+
+		public async Task<ServiceResult> GetManualTokenDetailsAsync()
+		{
+			try
+			{
+				_logger.LogInformation("Starting to retrieve manual token details");
+
+				// Fetch all required data
+				var persons = await _adminData.GetPersonsByDepartmentsAsync(_userContext.DepartmentIds);
+				var mealTypes = await _adminData.GetMealTypesAsync();
+				var suppliers = await _adminData.GetAllSupplierAsync();
+				var subMealTypes = await _adminData.GetMealSubTypesListAsync();
+
+				// Build response model
+				var manualTokenDetails = new ManualTokenDetails
+				{
+					Persons = persons?.Select(p => new PeopleReturn
+					{
+						PersonId = p.PersonId,
+						PersonType = p.PersonType,
+						Name = p.Name
+					}).ToList() ?? new List<PeopleReturn>(),
+
+					MealTypes = mealTypes?.Select(mt => new MealTypeReturn
+					{
+						MealTypeId = mt.MealTypeId,
+						MealTypeName = mt.MealTypeName,
+						SubTypes = subMealTypes?
+							.Where(st => st.MealTypeId == mt.MealTypeId)
+							.Select(st => new SubMealTypeReturn
+							{
+								MealSubTypeId = st.MealSubTypeId,
+								MealSubTypeName = st.SubTypeName
+							})
+							.ToList() ?? new List<SubMealTypeReturn>()
+					}).ToList() ?? new List<MealTypeReturn>(),
+
+					Suppliers = suppliers?.Select(s => new SupplierD
+					{
+						SupplierId = s.SupplierId,
+						SupplierName = s.SupplierName
+					}).ToList() ?? new List<SupplierD>(),
+
+					Shifts = Enum.GetValues(typeof(Shift))
+						.Cast<Shift>()
+						.Select(s => new ShiftReturn
+						{
+							Id = (int)s,
+							Name = s.ToString()
+						})
+						.ToList()
+				};
+			
+
+				_logger.LogInformation(
+					"Successfully retrieved manual token details. Persons: {PersonCount}, MealTypes: {MealTypeCount}, Suppliers: {SupplierCount}, Shifts: {ShiftCount}",
+					manualTokenDetails.Persons.Count,
+					manualTokenDetails.MealTypes.Count,
+					manualTokenDetails.Suppliers.Count,
+					manualTokenDetails.Shifts.Count
+				);
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Manual token details retrieved successfully.",
+					Data = manualTokenDetails
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error retrieving manual token details");
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An error occurred while retrieving manual token details."
+				};
 			}
 		}
 
