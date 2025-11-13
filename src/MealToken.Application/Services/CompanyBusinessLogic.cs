@@ -313,8 +313,8 @@ namespace MealToken.Application.Services
 					};
 				}
 
-				_logger.LogInformation("Meal consumption found. Preparing token response for PersonId: {PersonId}", personId);
-
+				exConsumption.TockenIssued = false;
+				await _businessData.UpdateMealConsumptionAsync(exConsumption);
 				var tokenResponse = new TokenResponse
 				{
 					Date = requestDate,
