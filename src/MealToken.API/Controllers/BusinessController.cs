@@ -633,12 +633,12 @@ namespace MealToken.API.Controllers
 		[HttpPost("CreateManualTokenLost")]
 		[Authorize(Roles = "Admin")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
-		public async Task<IActionResult> CreateManualTokenInLost([FromQuery]int personId)
+		public async Task<IActionResult> CreateManualTokenInLost([FromQuery]int personId, [FromQuery] DateTime requestDateTime)
 		{
 			try
 			{
 				
-				var result = await _companyBusinessLogic.ManualPrintTokenLostAsync(personId);
+				var result = await _companyBusinessLogic.ManualPrintTokenLostAsync(personId, requestDateTime);
 
 				if (!result.Success)
 				{

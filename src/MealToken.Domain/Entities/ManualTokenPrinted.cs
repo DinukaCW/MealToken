@@ -21,6 +21,6 @@ namespace MealToken.Domain.Entities
 		public string Reason { get; set; }
 		public bool TokenIssued { get; set; }
 
-	}
+	} 
 
 }

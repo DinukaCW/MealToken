@@ -521,5 +521,30 @@ namespace MealToken.Infrastructure.Repositories
 				.Where(mc => mealCostIds.Contains(mc.MealCostId))
 				.ToListAsync();
 		}
+		public async Task<List<ManualTokenDto>> GetManualTokensListAsync()
+		{
+			var manualTokens = await
+				(from mt in _tenantContext.ManualTokenPrinted.AsNoTracking()
+				 join con in _tenantContext.MealConsumption.AsNoTracking()
+					 on mt.MealConsumptionId equals con.MealConsumptionId
+				 join p in _tenantContext.Person.AsNoTracking()
+					 on mt.PersonId equals p.PersonId
+				 where mt.TokenIssued == true
+				 select new ManualTokenDto
+				 {
+					 PersonId = mt.PersonId,
+					 PersonName = p.Name,
+					 PrintedDate = DateOnly.FromDateTime(mt.PrintedDate),
+					 PrintedTime = TimeOnly.FromDateTime(mt.PrintedDate),
+					 MealType = con.MealTypeName,
+					 SubMealType = con.SubTypeName,
+					 Reason = mt.Reason
+				 })
+				.ToListAsync();
+
+			return manualTokens;
+		}
+
+
 	}
 }

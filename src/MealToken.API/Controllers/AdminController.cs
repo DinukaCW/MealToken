@@ -581,5 +581,25 @@ namespace MealToken.API.Controllers
 				return StatusCode(500, new { Success = false, Message = $"Internal server error: {ex.Message}" });
 			}
 		}
+		[HttpGet("GetManualPrintedTokens")]
+		[Authorize(Roles = "Admin")]
+		[ServiceFilter(typeof(UserHistoryActionFilter))]
+		public async Task<IActionResult> GetManualPrintedTokens()
+		{
+			try
+			{
+				var tokens = await _adminService.GetManualPrintedTokensAsync();
+
+				if (tokens == null)
+					return NotFound(new { Success = false, Message = "Tokens not found" });
+
+				return Ok(tokens);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error retrieving manual printed tokens");
+				return StatusCode(500, new { Success = false, Message = $"Internal server error: {ex.Message}" });
+			}
+		}
 	}
 }

@@ -32,7 +32,7 @@ namespace MealToken.Domain.Entities
         public decimal SellingPrice { get; set; } 
         public decimal CompanyCost { get; set; } 
         public decimal EmployeeCost { get; set; } 
-        public int DeviceId { get; set; }
+        public int? DeviceId { get; set; }
         public string DeviceSerialNo { get; set; }
         public Shift ShiftName { get; set; }
         public PayStatus PayStatus { get; set; } // free or paid

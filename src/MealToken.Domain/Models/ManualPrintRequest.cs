@@ -10,6 +10,7 @@ namespace MealToken.Domain.Models
 	public class ManualPrintRequest
 	{
 		public int PersonId { get; set; }
+		public DateTime RequestDate { get; set; }
 		public int MealTypeId { get; set; }
 		public int? MealSubTypeId { get; set; }
 		public int SupplierId { get; set; }

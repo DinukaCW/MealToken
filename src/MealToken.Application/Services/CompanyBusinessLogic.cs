@@ -158,7 +158,7 @@ namespace MealToken.Application.Services
 				var companyCost = mealCost.CompanyCost;
 
 				decimal empContribution = isFreeMeal ? 0 : employeeCost;
-				decimal companyContribution = isFreeMeal ? (employeeCost + companyCost) : companyCost;
+				decimal companyContribution = isFreeMeal ? (mealCost.SupplierCost) : companyCost;
 
 				// Create main meal consumption record
 				var mealConsumption = new MealConsumption
@@ -258,7 +258,7 @@ namespace MealToken.Application.Services
 			}
 		}
 
-		public async Task<ServiceResult> ManualPrintTokenLostAsync(int personId)
+		public async Task<ServiceResult> ManualPrintTokenLostAsync(int personId,DateTime reqDateTime)
 		{
 			_logger.LogInformation("ManualPrintTokenLost process started for PersonId: {PersonId}", personId);
 
@@ -270,11 +270,10 @@ namespace MealToken.Application.Services
 					_logger.LogWarning("ManualPrintTokenLost failed - Person not found. PersonId: {PersonId}", personId);
 					return new ServiceResult { Success = false, Message = "Person not found." };
 				}
-
-				var requestDate = DateOnly.FromDateTime(DateTime.UtcNow);
-				var requestTime = TimeOnly.FromDateTime(DateTime.UtcNow);
 				_logger.LogInformation("Request date and time prepared for PersonId: {PersonId}", personId);
 
+				var requestDate = DateOnly.FromDateTime(reqDateTime);
+				var requestTime = TimeOnly.FromDateTime(reqDateTime);
 				var mealtokenRequest = new MealTokenRequest
 				{
 					PersonId = personId,
@@ -295,6 +294,7 @@ namespace MealToken.Application.Services
 				_logger.LogInformation("Fetching existing meal consumption for PersonId: {PersonId}, MealTypeId: {MealTypeId}, Date: {Date}",
 					personId, schedule.MealInfo.MealTypeId, requestDate);
 
+
 				var exConsumption = await _businessData.GetMealConsumptionAsync(
 					schedule.MealInfo.MealTypeId,
 					person.PersonId,
@@ -312,14 +312,25 @@ namespace MealToken.Application.Services
 						Message = "No existing meal consumption found for this person within this meal type."
 					};
 				}
+				var scheduleMeals = schedule.MealInfo;
+
+				var mealTypeDisplay = scheduleMeals.MealSubTypeId.HasValue
+					? scheduleMeals.MealSubTypeName
+					: scheduleMeals.MealTypeName;
+
+				var addonMealsText = scheduleMeals.MealAddOns.Any() == true
+					? " With " + string.Join(", ", scheduleMeals.MealAddOns.Select(a => a.AddOnName))
+					: string.Empty;
 
 				exConsumption.TockenIssued = false;
+				
+
 				await _businessData.UpdateMealConsumptionAsync(exConsumption);
 				var tokenResponse = new TokenResponse
 				{
 					Date = requestDate,
 					Time = requestTime,
-					MealType = exConsumption.MealTypeName,
+					MealType = mealTypeDisplay + addonMealsText,
 					Shift = exConsumption.ShiftName.ToString(),
 					EmpNo = person.PersonNumber,
 					EmpName = person.Name,
@@ -403,8 +414,8 @@ namespace MealToken.Application.Services
 				}
 
 				// Prepare request date/time once
-				var requestDate = DateOnly.FromDateTime(DateTime.UtcNow);
-				var requestTime = TimeOnly.FromDateTime(DateTime.UtcNow);
+				var requestDate = DateOnly.FromDateTime(printRequest.RequestDate);
+				var requestTime = TimeOnly.FromDateTime(printRequest.RequestDate);
 
 				// Get related data
 				var mealCost = await _adminData.GetMealCostByDetailAsync(printRequest.SupplierId, printRequest.MealTypeId, printRequest.MealSubTypeId);
@@ -421,7 +432,7 @@ namespace MealToken.Application.Services
 				// Calculate contribution
 				bool isFreeMeal = payStatus == PayStatus.Free;
 				decimal empContribution = isFreeMeal ? 0 : mealCost.EmployeeCost;
-				decimal companyContribution = isFreeMeal ? (mealCost.EmployeeCost + mealCost.CompanyCost) : mealCost.CompanyCost;
+				decimal companyContribution = isFreeMeal ? (mealCost.SupplierCost) : mealCost.CompanyCost;
 
 				// Build meal consumption record
 				var mealConsumption = new MealConsumption
@@ -444,7 +455,7 @@ namespace MealToken.Application.Services
 					SellingPrice = mealCost.SellingPrice,
 					CompanyCost = companyContribution,
 					EmployeeCost = empContribution,
-					DeviceId = 1,
+					DeviceId = null,
 					DeviceSerialNo = string.Empty,
 					ShiftName = printRequest.Shift,
 					PayStatus = payStatus,
@@ -466,11 +477,15 @@ namespace MealToken.Application.Services
 				await _businessData.CreateManulTokenPrintAsync(manualToken);
 				// Build response
 				var department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId);
+				var mealTypeDisplay = mealConsumption.SubTypeId.HasValue
+					? mealConsumption.SubTypeName
+					: mealConsumption.MealTypeName;
+
 				var tokenResponse = new TokenResponse
 				{
 					Date = requestDate,
 					Time = requestTime,
-					MealType = mealType.TypeName,
+					MealType = mealTypeDisplay,
 					Shift = printRequest.Shift.ToString(),
 					EmpNo = person.PersonNumber,
 					EmpName = person.Name,
@@ -773,7 +788,7 @@ namespace MealToken.Application.Services
                     MealCostId = addonMealCost.MealCostId,
                     SupplierCost = addonMealCost.SupplierCost,
                     SellingPrice = addonMealCost.SellingPrice,
-                    CompanyCost = addonMealCost.EmployeeCost + addonMealCost.CompanyCost, // Company pays full cost for addons
+                    CompanyCost = addonMealCost.SupplierCost, // Company pays full cost for addons
                     EmployeeCost = 0, // Employee pays nothing for addon meals
                     DeviceId = mainMeal.DeviceId,
                     DeviceSerialNo = mainMeal.DeviceSerialNo,

@@ -75,6 +75,6 @@ namespace MealToken.Domain.Interfaces
 		Task UpdateTenantSettingsAsync(TenantInfo tenant);
 		Task<TenantInfo> GetTenantInfoByIdAsync(int tenantId);
 		Task<List<MealCost>> GetMealCostsByIdsAsync(List<int> mealCostIds);
-
+		Task<List<ManualTokenDto>> GetManualTokensListAsync();
 	}
 }

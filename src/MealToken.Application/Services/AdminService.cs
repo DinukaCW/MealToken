@@ -1712,6 +1712,72 @@ namespace MealToken.Application.Services
 				};
 			}
 		}
+
+		public async Task<ServiceResult> GetManualPrintedTokensAsync()
+		{
+			try
+			{
+				_logger.LogInformation("Retrieving manual printed tokens");
+
+				// Validate department access
+				if (_userContext.DepartmentIds == null || !_userContext.DepartmentIds.Any())
+				{
+					_logger.LogInformation("User has no department access");
+					return new ServiceResult
+					{
+						Success = true,
+						Message = "No department access.",
+						Data = new List<ManualTokenDto>()
+					};
+				}
+
+				// Get persons in allowed departments
+				var persons = await _adminData.GetPersonsByDepartmentsAsync(_userContext.DepartmentIds);
+
+				if (persons == null || !persons.Any())
+				{
+					_logger.LogInformation("No persons found for given departments");
+					return new ServiceResult
+					{
+						Success = true,
+						Message = "No persons found.",
+						Data = new List<ManualTokenDto>()
+					};
+				}
+
+				// Get manual tokens
+				var manualTokens = await _adminData.GetManualTokensListAsync();
+
+				// Filter manual tokens by the persons retrieved
+				var personIds = persons.Select(p => p.PersonId).ToHashSet();
+
+				var filteredTokens = manualTokens
+					.Where(mt => personIds.Contains(mt.PersonId))
+					.ToList();
+
+				_logger.LogInformation("Manual printed tokens retrieved successfully");
+
+				return new ServiceResult
+				{
+					Success = true,
+					Message = "Manual printed tokens retrieved successfully.",
+					Data = filteredTokens
+				};
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error retrieving manual printed tokens");
+
+				return new ServiceResult
+				{
+					Success = false,
+					Message = "An error occurred while retrieving manual printed tokens. Please try again later.",
+					Data = null
+				};
+			}
+		}
+
+
 		private async Task<byte[]> ImageStore(IFormFile?  image)
 		{
 			if (image == null || image.Length == 0)

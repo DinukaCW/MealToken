@@ -1029,7 +1029,7 @@ namespace MealToken.Infrastructure.Persistence
 
                 // Device info
                 entity.Property(e => e.DeviceId)
-                      .IsRequired();
+                      .IsRequired(false);
 
                 entity.Property(e => e.DeviceSerialNo)
                       .HasMaxLength(100)
