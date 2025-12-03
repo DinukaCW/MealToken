@@ -1,6 +1,7 @@
 ﻿using Authentication.Extensions;
 using Authentication.Interfaces;
 using Authentication.Services;
+using MealToken.API.BackgroundServices;
 using MealToken.API.Helpers;
 using MealToken.API.Middlewear;
 using MealToken.Application.Interfaces;
@@ -9,11 +10,12 @@ using MealToken.Domain.Interfaces;
 using MealToken.Infrastructure.Persistence;
 using MealToken.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 /*
 using System.Security.Cryptography;
 
@@ -32,6 +34,9 @@ Console.WriteLine(securedKey);
 var (key, iv) = EncryptionKeyGenerator.GenerateAesKeyAndIv();
 Console.WriteLine($"Key: {key}");
 Console.WriteLine($"IV: {iv}");*/
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -130,6 +135,13 @@ builder.Services.AddRateLimiter(options =>
 			}));
 });
 
+Log.Logger = new LoggerConfiguration()
+	.ReadFrom.Configuration(builder.Configuration)
+	.Enrich.FromLogContext()
+	.WriteTo.Console()
+	.CreateLogger();
+
+builder.Host.UseSerilog();
 // Add CORS policy
 /*builder.Services.AddCors(options =>
 {
@@ -142,6 +154,9 @@ builder.Services.AddRateLimiter(options =>
 	});
 });
 */
+
+builder.Services.AddHostedService<LogCleanupService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -151,6 +166,8 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -174,7 +191,7 @@ app.UseAuthorization();
 
 app.UseMiddleware<TenantMiddleware>();
 app.UseMiddleware<UserContextMiddleware>();
-
+app.UseSerilogRequestLogging();
 app.MapControllers();
 
 app.Run();

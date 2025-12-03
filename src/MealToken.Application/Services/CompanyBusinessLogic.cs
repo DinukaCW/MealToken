@@ -323,7 +323,7 @@ namespace MealToken.Application.Services
 					: string.Empty;
 
 				exConsumption.TockenIssued = false;
-				
+				var device = await _businessData.GetDeviceByIdAsync(exConsumption.DeviceId.Value);
 
 				await _businessData.UpdateMealConsumptionAsync(exConsumption);
 				var tokenResponse = new TokenResponse
@@ -338,6 +338,7 @@ namespace MealToken.Application.Services
 					Department = await _adminData.GetDepartmentByIdAsync(person.DepartmentId),
 					TokenType = exConsumption.PayStatus.ToString(),
 					Contribution = exConsumption.EmployeeCost,
+					DeviceSerialNo = device.SerialNo,
 					MealConsumptionId = exConsumption.MealConsumptionId
 				};
 				var manualToken = new ManualTokenPrinted
@@ -401,6 +402,12 @@ namespace MealToken.Application.Services
 					return new ServiceResult { Success = false, Message = "Meal type not found." };
 				}
 
+				var device = await _businessData.GetDeviceByIdAsync(printRequest.DeviceId);
+				if (device == null)
+				{
+					_logger.LogWarning("ManualPrintTokenOther failed - Device not found. DeviceId: {DeviceId}", printRequest.DeviceId);
+					return new ServiceResult { Success = false, Message = "Device not found." };
+				}
 				// Validate SubType if provided
 				MealSubType subType = null;
 				if (printRequest.MealSubTypeId.HasValue)
@@ -455,8 +462,8 @@ namespace MealToken.Application.Services
 					SellingPrice = mealCost.SellingPrice,
 					CompanyCost = companyContribution,
 					EmployeeCost = empContribution,
-					DeviceId = null,
-					DeviceSerialNo = string.Empty,
+					DeviceId = printRequest.DeviceId,
+					DeviceSerialNo = device.SerialNo,
 					ShiftName = printRequest.Shift,
 					PayStatus = payStatus,
 					TockenIssued = false
@@ -493,7 +500,9 @@ namespace MealToken.Application.Services
 					Department = department,
 					TokenType = payStatus.ToString(),
 					Contribution = empContribution,
+					DeviceSerialNo = device.SerialNo,
 					MealConsumptionId = mealConsumption.MealConsumptionId
+				
 				};
 
 				_logger.LogInformation("ManualPrintTokenOther succeeded for PersonId: {PersonId}, MealConsumptionId: {MealConsumptionId}",

@@ -18,6 +18,7 @@ namespace MealToken.Domain.Models
         public string Department { get; set; }
         public string TokenType { get; set; }
         public decimal Contribution { get; set; }
-        public int MealConsumptionId { get; set; }
+        public string? DeviceSerialNo { get; set; } = null;
+		public int MealConsumptionId { get; set; }
     }
 }

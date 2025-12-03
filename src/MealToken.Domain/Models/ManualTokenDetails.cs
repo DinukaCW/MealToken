@@ -13,6 +13,7 @@ namespace MealToken.Domain.Models
 		public List<MealTypeReturn> MealTypes { get; set; }
 		public List<SupplierD> Suppliers { get; set; }
 		public List<ShiftReturn> Shifts { get; set; }
+		public List<DeviceDto> Devices { get; set; }
 	}
 
 	public class ShiftReturn

@@ -74,5 +74,8 @@ namespace MealToken.Application.Interfaces
 		Task<Schedule> GetScheduleByNameAsync(string scheduleName);
 		Task<ManualTokenPrinted> GetManualTokenPrintedByConsumptionIdAsync(int consumptionId);
 		Task UpdateManualTokenPrintedAsync(ManualTokenPrinted manualToken);
+		Task<List<DeviceDto>> GetDevicesAsync();
+		Task<ClientDevice> GetDeviceByIdAsync(int deviceId);
+
 	}
 }

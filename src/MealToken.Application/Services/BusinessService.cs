@@ -2423,6 +2423,7 @@ namespace MealToken.Application.Services
 				var mealTypes = await _adminData.GetMealTypesAsync();
 				var suppliers = await _adminData.GetAllSupplierAsync();
 				var subMealTypes = await _adminData.GetMealSubTypesListAsync();
+				var clientDevices = await _businessData.GetDevicesAsync();			
 
 				// Build response model
 				var manualTokenDetails = new ManualTokenDetails
@@ -2461,7 +2462,8 @@ namespace MealToken.Application.Services
 							Id = (int)s,
 							Name = s.ToString()
 						})
-						.ToList()
+						.ToList(),
+					Devices = clientDevices
 				};
 			
 

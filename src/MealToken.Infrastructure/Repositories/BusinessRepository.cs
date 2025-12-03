@@ -473,13 +473,40 @@ namespace MealToken.Infrastructure.Repositories
 		public async Task<ManualTokenPrinted> GetManualTokenPrintedByConsumptionIdAsync(int consumptionId)
 		{
 			return await _tenantContext.ManualTokenPrinted
-				.Where(p => p.ManualTokenPrintedId == consumptionId)
+				.Where(p => p.MealConsumptionId == consumptionId)
+				.OrderByDescending(p => p.ManualTokenPrintedId)
 				.FirstOrDefaultAsync();
 		}
+
 		public async Task UpdateManualTokenPrintedAsync(ManualTokenPrinted manualToken)
 		{
 			_tenantContext.ManualTokenPrinted.Update(manualToken);
 			await _tenantContext.SaveChangesAsync();
+		}
+		public async Task<List<DeviceDto>> GetDevicesAsync()
+		{
+			return await _tenantContext.ClientDevice
+				.Where(s => s.IsActive)
+				.Select(DeviceDto => new DeviceDto
+				{
+					DeviceName = DeviceDto.DeviceName,
+					IpAddress = DeviceDto.IpAddress,
+					Port = DeviceDto.Port,
+					MachineNumber = DeviceDto.MachineNumber,
+					SerialNo = DeviceDto.SerialNo,
+					PrinterName = DeviceDto.PrinterName,
+					IsActive = DeviceDto.IsActive,
+					ReceiptHeightPixels = DeviceDto.ReceiptHeightPixels,
+					ReceiptWidthPixels = DeviceDto.ReceiptWidthPixels
+				})
+				.ToListAsync();
+
+		}
+		public async Task<ClientDevice> GetDeviceByIdAsync(int deviceId)
+		{
+			return await _tenantContext.ClientDevice
+				.Where(cd => cd.ClientDeviceId == deviceId)
+				.FirstOrDefaultAsync();
 		}
 	}
 }
