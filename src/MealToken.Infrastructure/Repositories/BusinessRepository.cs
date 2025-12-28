@@ -502,6 +502,12 @@ namespace MealToken.Infrastructure.Repositories
 				.ToListAsync();
 
 		}
+		public async Task<ClientDevice> GetDeviceBySerialAsync(string serialNo)
+		{
+			return await _tenantContext.ClientDevice
+				.Where(cd => cd.SerialNo == serialNo)
+				.FirstOrDefaultAsync();
+		}
 		public async Task<ClientDevice> GetDeviceByIdAsync(int deviceId)
 		{
 			return await _tenantContext.ClientDevice

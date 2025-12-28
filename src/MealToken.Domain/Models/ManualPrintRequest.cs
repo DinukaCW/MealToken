@@ -14,7 +14,7 @@ namespace MealToken.Domain.Models
 		public int MealTypeId { get; set; }
 		public int? MealSubTypeId { get; set; }
 		public int SupplierId { get; set; }
-		public int DeviceId { get; set; }
+		public string DeviceNumber { get; set; }
 		public string? Reason { get; set; }
 		public Shift Shift { get; set; }
 	}

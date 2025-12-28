@@ -157,14 +157,9 @@ namespace MealToken.Infrastructure.Repositories
 			return await _tenantContext.MealConsumption
 				.Where(m => m.Date >= startDate &&
 							m.Date <= endDate &&
-							m.TockenIssued
-							&& (
-								startTime == null || endTime == null ||
-								(
-									m.Time >= startTime.Value &&
-									m.Time <= endTime.Value
-								)
-							 ))
+							m.TockenIssued &&
+							(startTime == null || endTime == null ||
+							 (m.Time >= startTime.Value && m.Time <= endTime.Value)))
 				.GroupBy(m => new
 				{
 					m.Date,
@@ -176,13 +171,34 @@ namespace MealToken.Infrastructure.Repositories
 					Date = g.Key.Date,
 					MealType = g.Key.MealTypeName,
 					SubType = g.Key.SubTypeName,
-					EmployeeContribution = g.Average(x => x.EmployeeCost),
-					CompanyContribution = g.Average(x => x.CompanyCost),
+
+					// FIXED SYNTAX
+					EmployeeContribution =
+						g.Where(x => x.EmployeeCost != null && x.EmployeeCost != 0)
+						 .DefaultIfEmpty()
+						 .Average(x => x == null ? 0m : x.EmployeeCost),
+
+					CompanyContribution =
+						g.Where(x => x.CompanyCost != null && x.CompanyCost != 0)
+						 .DefaultIfEmpty()
+						 .Average(x => x == null ? 0m: x.CompanyCost),
+
 					SupplierContribution = g.Average(x => x.SupplierCost),
+
 					TotalMealCount = g.Count(),
+
 					PersonCount = g.Select(x => x.PersonId).Distinct().Count(),
-					MaleCount = g.Count(x => x.Gender == "Male"),
-					FemaleCount = g.Count(x => x.Gender == "Female"),
+
+					MaleCount = g.Where(x => x.Gender == "Male")
+								 .Select(x => x.PersonId)
+								 .Distinct()
+								 .Count(),
+
+					FemaleCount = g.Where(x => x.Gender == "Female")
+								   .Select(x => x.PersonId)
+								   .Distinct()
+								   .Count(),
+
 					TotalEmployeeContribution = g.Sum(x => x.EmployeeCost),
 					TotalCompanyContribution = g.Sum(x => x.CompanyCost),
 					TotalSupplierCost = g.Sum(x => x.SupplierCost)

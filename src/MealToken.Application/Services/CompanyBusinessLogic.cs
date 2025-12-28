@@ -158,7 +158,7 @@ namespace MealToken.Application.Services
 				var companyCost = mealCost.CompanyCost;
 
 				decimal empContribution = isFreeMeal ? 0 : employeeCost;
-				decimal companyContribution = isFreeMeal ? (mealCost.SupplierCost) : companyCost;
+				decimal companyContribution = isFreeMeal ?( companyCost + employeeCost ): companyCost;
 
 				// Create main meal consumption record
 				var mealConsumption = new MealConsumption
@@ -402,10 +402,10 @@ namespace MealToken.Application.Services
 					return new ServiceResult { Success = false, Message = "Meal type not found." };
 				}
 
-				var device = await _businessData.GetDeviceByIdAsync(printRequest.DeviceId);
+				var device = await _businessData.GetDeviceBySerialAsync(printRequest.DeviceNumber);
 				if (device == null)
 				{
-					_logger.LogWarning("ManualPrintTokenOther failed - Device not found. DeviceId: {DeviceId}", printRequest.DeviceId);
+					_logger.LogWarning("ManualPrintTokenOther failed - Device not found. DeviceId: {DeviceId}", printRequest.DeviceNumber);
 					return new ServiceResult { Success = false, Message = "Device not found." };
 				}
 				// Validate SubType if provided
@@ -439,7 +439,7 @@ namespace MealToken.Application.Services
 				// Calculate contribution
 				bool isFreeMeal = payStatus == PayStatus.Free;
 				decimal empContribution = isFreeMeal ? 0 : mealCost.EmployeeCost;
-				decimal companyContribution = isFreeMeal ? (mealCost.SupplierCost) : mealCost.CompanyCost;
+				decimal companyContribution = isFreeMeal ? (mealCost.CompanyCost + mealCost.EmployeeCost) : mealCost.CompanyCost;
 
 				// Build meal consumption record
 				var mealConsumption = new MealConsumption
@@ -462,7 +462,7 @@ namespace MealToken.Application.Services
 					SellingPrice = mealCost.SellingPrice,
 					CompanyCost = companyContribution,
 					EmployeeCost = empContribution,
-					DeviceId = printRequest.DeviceId,
+					DeviceId = device.ClientDeviceId,
 					DeviceSerialNo = device.SerialNo,
 					ShiftName = printRequest.Shift,
 					PayStatus = payStatus,

@@ -7,8 +7,88 @@
       "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\appsettings.production.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\appsettings.production.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\mealcost.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\mealcost.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\companybusinesslogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\companybusinesslogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\mealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\mealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\adminrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\adminrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\mealtoken.api.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\mealtoken.api.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\mealtoken.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\mealtoken.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\manualtokenprinted.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\manualtokenprinted.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\requestmealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\requestmealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\reportrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\reportrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\mealreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\mealreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\persistence\\mealtokendbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\persistence\\mealtokendbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\tenantinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\tenantinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\tenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\tenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\reports\\mealconsumptionsummarydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\reports\\mealconsumptionsummarydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\controllers\\businesscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\controllers\\businesscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\businessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\businessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\manualprintrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\manualprintrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\businessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\businessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\interfaces\\ibusinessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\interfaces\\ibusinessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\devicedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\devicedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\logs\\log-20251203.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
@@ -26,10 +106,6 @@
       "AbsoluteMoniker": "D:0:0:{4B75E431-5058-FD2F-0AE3-094351E15BB5}|..\\Authentication\\Authentication\\Authentication.csproj|c:\\dinuka\\projects\\authentication\\authentication\\helpers\\encryptionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\persistence\\mealtokendbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\persistence\\mealtokendbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -37,35 +113,11 @@
       "AbsoluteMoniker": "D:0:0:{4B75E431-5058-FD2F-0AE3-094351E15BB5}|..\\Authentication\\Authentication\\Authentication.csproj|c:\\dinuka\\projects\\authentication\\authentication\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\tenantinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\tenantinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\tenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\tenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4B75E431-5058-FD2F-0AE3-094351E15BB5}|..\\Authentication\\Authentication\\Authentication.csproj|c:\\dinuka\\projects\\authentication\\authentication\\models\\dtos\\requestlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\companybusinesslogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\companybusinesslogic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\mealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\mealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\tokenresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\tokenresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\businessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\businessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\interfaces\\ibusinessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\interfaces\\ibusinessrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\manualtokendetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -74,22 +126,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\clientdevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\clientdevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\manualprintrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\manualprintrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\controllers\\businesscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\controllers\\businesscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\businessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\businessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\devicedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\devicedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\interfaces\\ibusinessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -124,10 +160,6 @@
       "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\backgroundservices\\logcleanupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\manualtokenprinted.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\manualtokenprinted.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -138,14 +170,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\interfaces\\iadminrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\interfaces\\iadminrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\adminrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\adminrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.infrastructure\\repositories\\reportrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4DC70481-CB3C-4483-94D8-BFCF0FEA236F}|src\\MealToken.Infrastructure\\MealToken.Infrastructure.csproj|solutionrelative:src\\mealtoken.infrastructure\\repositories\\reportrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\manualtokendto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -199,10 +223,6 @@
       "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\interfaces\\itenantcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\enums\\shift.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\enums\\shift.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -219,10 +239,6 @@
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\reports\\dashboardcostanalysis.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.application\\services\\mealreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0879985F-D588-4E75-8ACD-E4DE8332F9F9}|src\\MealToken.Application\\MealToken.Application.csproj|solutionrelative:src\\mealtoken.application\\services\\mealreportservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\userdepartment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\userdepartment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -231,20 +247,12 @@
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\reports\\dashboardsupplier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.api\\mealtoken.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{27DBAB06-0896-47B1-AB18-930891D3C1E6}|src\\MealToken.API\\MealToken.API.csproj|solutionrelative:src\\mealtoken.api\\mealtoken.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\mealcostdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\mealcostdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\mealconsumptionreportdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\mealconsumptionreportdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\reports\\mealconsumptionsummarydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\reports\\mealconsumptionsummarydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\mealconsumptionwithdetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -338,10 +346,6 @@
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\reports\\mealtypedistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\requestmealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\requestmealconsumption.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\reports\\mealcostdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\reports\\mealcostdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -368,10 +372,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\models\\mealrequestdetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\models\\mealrequestdetails.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\mealcost.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|solutionrelative:src\\mealtoken.domain\\entities\\mealcost.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6BEEBCB2-8C94-483C-A75D-56A14672D60B}|src\\MealToken.Domain\\MealToken.Domain.csproj|c:\\dinuka\\projects\\mealtoken\\src\\mealtoken.domain\\entities\\schedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -501,17 +501,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 343,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 2,
               "Title": "CompanyBusinessLogic.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\CompanyBusinessLogic.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\CompanyBusinessLogic.cs",
               "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\CompanyBusinessLogic.cs",
               "RelativeToolTip": "src\\MealToken.Application\\Services\\CompanyBusinessLogic.cs",
-              "ViewState": "AgIAANgBAAAAAAAAAAAAAN4BAAA7AAAAAAAAAA==",
+              "ViewState": "AgIAAJIAAAAAAAAAAAAAAKAAAABMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-21T05:19:12.497Z",
               "IsPinned": true,
@@ -519,15 +519,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "appsettings.production.json",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\appsettings.production.json",
-              "RelativeDocumentMoniker": "src\\MealToken.API\\appsettings.production.json",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\appsettings.production.json",
-              "RelativeToolTip": "src\\MealToken.API\\appsettings.production.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-12-03T05:21:36.011Z",
+              "DocumentIndex": 5,
+              "Title": "MealToken.API.http",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.http",
+              "RelativeDocumentMoniker": "src\\MealToken.API\\MealToken.API.http",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.http",
+              "RelativeToolTip": "src\\MealToken.API\\MealToken.API.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2025-12-18T11:02:38.251Z",
               "EditorCaption": ""
             },
             {
@@ -540,52 +540,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "log-20251203.txt",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Logs\\log-20251203.txt",
-              "RelativeDocumentMoniker": "src\\MealToken.API\\Logs\\log-20251203.txt",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Logs\\log-20251203.txt",
-              "RelativeToolTip": "src\\MealToken.API\\Logs\\log-20251203.txt",
-              "ViewState": "AgIAAC0BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-12-03T05:06:21.918Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "TenantContext.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\TenantContext.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\TenantContext.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\TenantContext.cs",
-              "RelativeToolTip": "src\\MealToken.Application\\Services\\TenantContext.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAAwA4AAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:54:58.171Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "TenantInfo.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\TenantInfo.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\TenantInfo.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\TenantInfo.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\TenantInfo.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBIAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T11:12:56.336Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\appsettings.json",
               "RelativeDocumentMoniker": "src\\MealToken.API\\appsettings.json",
               "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\appsettings.json",
               "RelativeToolTip": "src\\MealToken.API\\appsettings.json",
-              "ViewState": "AgIAACsAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAADgAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-10-21T05:14:18.256Z",
               "EditorCaption": ""
@@ -593,6 +554,243 @@
             {
               "$type": "Document",
               "DocumentIndex": 4,
+              "Title": "AdminRepository.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
+              "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
+              "ViewState": "AgIAALgBAAAAAAAAAAAUwAsCAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-21T07:31:10.531Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MealConsumption.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealConsumption.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\MealConsumption.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealConsumption.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\MealConsumption.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAACkAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-21T11:04:30.197Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MealCost.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealCost.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\MealCost.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealCost.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\MealCost.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T20:46:33.534Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ManualTokenPrinted.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-10T19:18:23.552Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MealToken.API.csproj",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.csproj",
+              "RelativeDocumentMoniker": "src\\MealToken.API\\MealToken.API.csproj",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.csproj",
+              "RelativeToolTip": "src\\MealToken.API\\MealToken.API.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-11-10T04:39:06.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RequestMealConsumption.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAB0AAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-30T11:05:02.933Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ReportRepository.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
+              "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAmwLcAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T18:42:55.333Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MealTokenDbContext.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
+              "RelativeToolTip": "src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
+              "ViewState": "AgIAANgEAAAAAAAAAAAjwO8EAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T12:33:02.013Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "TenantContext.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\TenantContext.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\TenantContext.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\TenantContext.cs",
+              "RelativeToolTip": "src\\MealToken.Application\\Services\\TenantContext.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAlwA4AAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-21T05:54:58.171Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "BusinessController.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\BusinessController.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.API\\Controllers\\BusinessController.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\BusinessController.cs",
+              "RelativeToolTip": "src\\MealToken.API\\Controllers\\BusinessController.cs",
+              "ViewState": "AgIAADcBAAAAAAAAAAAAACAAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-21T05:19:12.446Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "MealReportService.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\MealReportService.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\MealReportService.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\MealReportService.cs",
+              "RelativeToolTip": "src\\MealToken.Application\\Services\\MealReportService.cs",
+              "ViewState": "AgIAAAABAAAAAAAAAAAjwBEBAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T16:32:24.355Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ReportController.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\ReportController.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.API\\Controllers\\ReportController.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\ReportController.cs",
+              "RelativeToolTip": "src\\MealToken.API\\Controllers\\ReportController.cs",
+              "ViewState": "AgIAALMAAAAAAAAAAAAAALYAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T19:27:16.885Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "TenantInfo.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\TenantInfo.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\TenantInfo.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\TenantInfo.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\TenantInfo.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAlwBIAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-21T11:12:56.336Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "MealConsumptionSummaryDto.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAgAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T16:35:12.4Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "IBusinessRepository.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
+              "RelativeToolTip": "src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAAAE0AAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T18:48:33.547Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "BusinessRepository.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
+              "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
+              "ViewState": "AgIAAOkBAAAAAAAAAAAswPgBAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-21T09:20:38.946Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "DeviceDto.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\DeviceDto.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\DeviceDto.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\DeviceDto.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Models\\DeviceDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-01T08:42:39.898Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "BusinessService.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\BusinessService.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\BusinessService.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\BusinessService.cs",
+              "RelativeToolTip": "src\\MealToken.Application\\Services\\BusinessService.cs",
+              "ViewState": "AgIAAGUJAAAAAAAAAAAAAE4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T12:33:02.209Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "ManualPrintRequest.cs",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
+              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
+              "RelativeToolTip": "src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-11T03:57:40.22Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Program.cs",
               "RelativeDocumentMoniker": "src\\MealToken.API\\Program.cs",
@@ -605,7 +803,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 22,
+              "Title": "log-20251203.txt",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Logs\\log-20251203.txt",
+              "RelativeDocumentMoniker": "src\\MealToken.API\\Logs\\log-20251203.txt",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Logs\\log-20251203.txt",
+              "RelativeToolTip": "src\\MealToken.API\\Logs\\log-20251203.txt",
+              "ViewState": "AgIAAC0BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-12-03T05:06:21.918Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
               "Title": "UserController.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "src\\MealToken.API\\Controllers\\UserController.cs",
@@ -618,20 +828,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "MealTokenDbContext.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
-              "RelativeToolTip": "src\\MealToken.Infrastructure\\Persistence\\MealTokenDbContext.cs",
-              "ViewState": "AgIAAGYBAAAAAAAAAAAAwH8BAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:33:02.013Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 26,
               "Title": "UserRepository.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\UserRepository.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\UserRepository.cs",
@@ -639,12 +836,11 @@
               "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\UserRepository.cs",
               "ViewState": "AgIAABwAAAAAAAAAAAAAwCcAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T05:21:25.525Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-30T05:21:25.525Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 25,
               "Title": "EncryptionService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Helpers\\EncryptionService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Helpers\\EncryptionService.cs",
@@ -652,12 +848,11 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Helpers\\EncryptionService.cs",
               "ViewState": "AgIAAEIAAAAAAAAAAAAAwEwAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-22T06:26:07.481Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-22T06:26:07.481Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 27,
               "Title": "UserService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Services\\UserService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Services\\UserService.cs",
@@ -665,12 +860,11 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Services\\UserService.cs",
               "ViewState": "AgIAADcAAAAAAAAAAAAAADoAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.28Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.28Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 28,
               "Title": "RequestLogin.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Models\\DTOs\\RequestLogin.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Models\\DTOs\\RequestLogin.cs",
@@ -678,25 +872,11 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Models\\DTOs\\RequestLogin.cs",
               "ViewState": "AgIAAAcAAAAAAAAAAAAAwBEAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T04:43:26.902Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T04:43:26.902Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "BusinessRepository.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
-              "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\BusinessRepository.cs",
-              "ViewState": "AgIAAOcBAAAAAAAAAAAmwPgBAABCAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T09:20:38.946Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 31,
               "Title": "ClientDevice.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\ClientDevice.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\ClientDevice.cs",
@@ -708,32 +888,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "BusinessController.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\BusinessController.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.API\\Controllers\\BusinessController.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\BusinessController.cs",
-              "RelativeToolTip": "src\\MealToken.API\\Controllers\\BusinessController.cs",
-              "ViewState": "AgIAADgAAAAAAAAAAAAAACAAAAA0AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.446Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "MealConsumption.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealConsumption.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\MealConsumption.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealConsumption.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\MealConsumption.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAsAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T11:04:30.197Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 30,
               "Title": "ManualTokenDetails.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ManualTokenDetails.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\ManualTokenDetails.cs",
@@ -745,19 +900,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "IBusinessRepository.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
-              "RelativeToolTip": "src\\MealToken.Application\\Interfaces\\IBusinessRepository.cs",
-              "ViewState": "AgIAADgAAAAAAAAAAAAAAE0AAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T18:48:33.547Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 29,
               "Title": "TokenResponse.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\TokenResponse.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\TokenResponse.cs",
@@ -769,44 +912,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "ManualPrintRequest.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Models\\ManualPrintRequest.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T03:57:40.22Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "BusinessService.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\BusinessService.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\BusinessService.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\BusinessService.cs",
-              "RelativeToolTip": "src\\MealToken.Application\\Services\\BusinessService.cs",
-              "ViewState": "AgIAAGIJAAAAAAAAAAAswJ8JAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-20T12:33:02.209Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "DeviceDto.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\DeviceDto.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\DeviceDto.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\DeviceDto.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Models\\DeviceDto.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABIAAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-01T08:42:39.898Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 32,
               "Title": "IBusinessService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IBusinessService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IBusinessService.cs",
@@ -818,7 +924,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 33,
               "Title": "TokenPrcoessService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\TokenPrcoessService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\TokenPrcoessService.cs",
@@ -830,7 +936,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 34,
               "Title": "TenantMiddleware.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Middlewear\\TenantMiddleware.cs",
               "RelativeDocumentMoniker": "src\\MealToken.API\\Middlewear\\TenantMiddleware.cs",
@@ -842,7 +948,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 35,
               "Title": "20251117054449_changeconsumptb.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Migrations\\20251117054449_changeconsumptb.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Migrations\\20251117054449_changeconsumptb.cs",
@@ -854,7 +960,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 39,
               "Title": "LogCleanupService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\BackgroundServices\\LogCleanupService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.API\\BackgroundServices\\LogCleanupService.cs",
@@ -866,7 +972,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 36,
               "Title": "20251113082447_addmanulatoken.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Migrations\\20251113082447_addmanulatoken.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Migrations\\20251113082447_addmanulatoken.cs",
@@ -878,7 +984,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 38,
               "Title": "UserContextMiddleware.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Middlewear\\UserContextMiddleware.cs",
               "RelativeDocumentMoniker": "src\\MealToken.API\\Middlewear\\UserContextMiddleware.cs",
@@ -890,7 +996,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 37,
               "Title": "AdminService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\AdminService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\AdminService.cs",
@@ -898,24 +1004,11 @@
               "RelativeToolTip": "src\\MealToken.Application\\Services\\AdminService.cs",
               "ViewState": "AgIAAOAAAAAAAAAAAAAAAEwCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T05:19:12.351Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T05:19:12.351Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
-              "Title": "ManualTokenPrinted.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-10T19:18:23.552Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 40,
               "Title": "AdminController.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "src\\MealToken.API\\Controllers\\AdminController.cs",
@@ -928,32 +1021,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
-              "Title": "ReportRepository.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
-              "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAABBwCsAAABEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T18:42:55.333Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 35,
-              "Title": "AdminRepository.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
-              "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
-              "ViewState": "AgIAAAYCAAAAAAAAAAAUwAsCAABEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T07:31:10.531Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 43,
               "Title": "ManualTokenDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ManualTokenDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\ManualTokenDto.cs",
@@ -965,7 +1033,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 41,
               "Title": "IAdminService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IAdminService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IAdminService.cs",
@@ -977,7 +1045,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 42,
               "Title": "IAdminRepository.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IAdminRepository.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IAdminRepository.cs",
@@ -989,7 +1057,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 45,
               "Title": "MealTokenResponse.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\MealTokenResponse.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\MealTokenResponse.cs",
@@ -1001,7 +1069,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 44,
               "Title": "MealAddOn.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealAddOn.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\MealAddOn.cs",
@@ -1013,7 +1081,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 46,
               "Title": "MealTokenDesignTimeDbContextFactory.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Persistence\\MealTokenDesignTimeDbContextFactory.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Persistence\\MealTokenDesignTimeDbContextFactory.cs",
@@ -1025,7 +1093,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 47,
               "Title": "ICompanyBusinessLogic.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\ICompanyBusinessLogic.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\ICompanyBusinessLogic.cs",
@@ -1037,7 +1105,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 49,
               "Title": "EmailValues.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Models\\DTOs\\EmailValues.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Models\\DTOs\\EmailValues.cs",
@@ -1049,7 +1117,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 51,
               "Title": "ValidationService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Helpers\\ValidationService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Helpers\\ValidationService.cs",
@@ -1061,7 +1129,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 50,
               "Title": "NotificationRequest.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Models\\DTOs\\NotificationRequest.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Models\\DTOs\\NotificationRequest.cs",
@@ -1073,7 +1141,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 52,
               "Title": "NotificationResult.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Models\\DTOs\\NotificationResult.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Models\\DTOs\\NotificationResult.cs",
@@ -1085,7 +1153,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 48,
               "Title": "EmailNotification.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Services\\Notification\\EmailNotification.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Services\\Notification\\EmailNotification.cs",
@@ -1093,12 +1161,11 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Services\\Notification\\EmailNotification.cs",
               "ViewState": "AgIAAEsAAAAAAAAAAAAqwFgAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T09:07:24.645Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T09:07:24.645Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 53,
               "Title": "UserRequestStatus.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Enums\\UserRequestStatus.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Enums\\UserRequestStatus.cs",
@@ -1110,7 +1177,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 55,
               "Title": "IReportRepository.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IReportRepository.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IReportRepository.cs",
@@ -1122,7 +1189,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 56,
               "Title": "ITenantContext.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\ITenantContext.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\ITenantContext.cs",
@@ -1134,7 +1201,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 54,
               "Title": "IMealReportService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Interfaces\\IMealReportService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Interfaces\\IMealReportService.cs",
@@ -1146,7 +1213,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 57,
               "Title": "Shift.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Enums\\Shift.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Enums\\Shift.cs",
@@ -1158,20 +1225,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
-              "Title": "ReportController.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\ReportController.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.API\\Controllers\\ReportController.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\Controllers\\ReportController.cs",
-              "RelativeToolTip": "src\\MealToken.API\\Controllers\\ReportController.cs",
-              "ViewState": "AgIAANUBAAAAAAAAAABBwDECAAAsAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T19:27:16.885Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 58,
               "Title": "SchedulecreationDetails.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\SchedulecreationDetails.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\SchedulecreationDetails.cs",
@@ -1183,7 +1237,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 59,
               "Title": "ScheduleDetails.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ScheduleDetails.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\ScheduleDetails.cs",
@@ -1195,7 +1249,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 60,
               "Title": "DashBoardCostAnalysis.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\DashBoardCostAnalysis.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\DashBoardCostAnalysis.cs",
@@ -1207,20 +1261,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
-              "Title": "MealReportService.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\MealReportService.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\MealReportService.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\MealReportService.cs",
-              "RelativeToolTip": "src\\MealToken.Application\\Services\\MealReportService.cs",
-              "ViewState": "AgIAAHUDAAAAAAAAAAAewDQEAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T16:32:24.355Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 61,
               "Title": "UserDepartment.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\UserDepartment.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\UserDepartment.cs",
@@ -1232,7 +1273,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 62,
               "Title": "DashboardSupplier.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\DashboardSupplier.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\DashboardSupplier.cs",
@@ -1244,31 +1285,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
-              "Title": "MealToken.API.csproj",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.csproj",
-              "RelativeDocumentMoniker": "src\\MealToken.API\\MealToken.API.csproj",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.csproj",
-              "RelativeToolTip": "src\\MealToken.API\\MealToken.API.csproj",
-              "ViewState": "AgIAAAIAAAAAAAAAAMBdwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-11-10T04:39:06.702Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 62,
-              "Title": "MealConsumptionSummaryDto.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Models\\Reports\\MealConsumptionSummaryDto.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAABBwAgAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T16:35:12.4Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 65,
               "Title": "MealConsumptionWithDetails.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\MealConsumptionWithDetails.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\MealConsumptionWithDetails.cs",
@@ -1280,7 +1297,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 64,
               "Title": "MealConsumptionReportDTO.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\MealConsumptionReportDTO.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\MealConsumptionReportDTO.cs",
@@ -1292,7 +1309,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 63,
               "Title": "MealCostDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\MealCostDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\MealCostDto.cs",
@@ -1304,7 +1321,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 66,
               "Title": "ReportDashBoard.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\ReportDashBoard.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\ReportDashBoard.cs",
@@ -1316,7 +1333,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 69,
               "Title": "MfaService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Services\\MfaService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Services\\MfaService.cs",
@@ -1324,12 +1341,11 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Services\\MfaService.cs",
               "ViewState": "AgIAAFgAAAAAAAAAAAAlwGcAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T05:24:27.267Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T05:24:27.267Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 68,
               "Title": "NotificationService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Services\\NotificationService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Services\\NotificationService.cs",
@@ -1337,12 +1353,11 @@
               "RelativeToolTip": "..\\Authentication\\Authentication\\Services\\NotificationService.cs",
               "ViewState": "AgIAABcAAAAAAAAAAAAQwDQAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T05:24:27.283Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T05:24:27.283Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 67,
               "Title": "MealMetricsDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealMetricsDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\MealMetricsDto.cs",
@@ -1354,7 +1369,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 70,
               "Title": "DashBoardDepartment.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\DashBoardDepartment.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\DashBoardDepartment.cs",
@@ -1366,7 +1381,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 71,
               "Title": "TimePeriod.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Enums\\TimePeriod.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Enums\\TimePeriod.cs",
@@ -1378,7 +1393,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 72,
               "Title": "Request.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\Request.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\Request.cs",
@@ -1390,7 +1405,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 73,
               "Title": "PersonCreateDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\PersonCreateDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\PersonCreateDto.cs",
@@ -1402,7 +1417,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 74,
               "Title": "Person.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\Person.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\Person.cs",
@@ -1414,7 +1429,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 75,
               "Title": "ApplicationSettings.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\ApplicationSettings.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\ApplicationSettings.cs",
@@ -1426,7 +1441,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 76,
               "Title": "20251104024334_changetenant.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Migrations\\20251104024334_changetenant.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Migrations\\20251104024334_changetenant.cs",
@@ -1438,7 +1453,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 75,
+              "DocumentIndex": 77,
               "Title": "PlatformDbContext.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Persistence\\PlatformDbContext.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Persistence\\PlatformDbContext.cs",
@@ -1450,7 +1465,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 76,
+              "DocumentIndex": 78,
               "Title": "SupplierPaymentReportDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\SupplierPaymentReportDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\SupplierPaymentReportDto.cs",
@@ -1462,7 +1477,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 77,
+              "DocumentIndex": 79,
               "Title": "IMessageService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Interfaces\\IMessageService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Interfaces\\IMessageService.cs",
@@ -1474,7 +1489,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 78,
+              "DocumentIndex": 80,
               "Title": "EntityCreationService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Application\\Services\\EntityCreationService.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Application\\Services\\EntityCreationService.cs",
@@ -1482,12 +1497,11 @@
               "RelativeToolTip": "src\\MealToken.Application\\Services\\EntityCreationService.cs",
               "ViewState": "AgIAAGsAAAAAAAAAAABBwNECAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-29T10:11:55.639Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-29T10:11:55.639Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 79,
+              "DocumentIndex": 81,
               "Title": "MessageService.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Helpers\\MessageService.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Helpers\\MessageService.cs",
@@ -1499,7 +1513,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 80,
+              "DocumentIndex": 82,
               "Title": "DashBoardMealRequest.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\DashBoardMealRequest.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\DashBoardMealRequest.cs",
@@ -1511,7 +1525,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 84,
+              "DocumentIndex": 86,
               "Title": "RequestDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\RequestDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\RequestDto.cs",
@@ -1523,7 +1537,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 83,
+              "DocumentIndex": 85,
               "Title": "PayStatus.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Enums\\PayStatus.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Enums\\PayStatus.cs",
@@ -1535,7 +1549,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 81,
+              "DocumentIndex": 83,
               "Title": "ServiceResult.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\Authentication\\Authentication\\Models\\DTOs\\ServiceResult.cs",
               "RelativeDocumentMoniker": "..\\Authentication\\Authentication\\Models\\DTOs\\ServiceResult.cs",
@@ -1547,7 +1561,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 82,
+              "DocumentIndex": 84,
               "Title": "PersonType.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Enums\\PersonType.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Enums\\PersonType.cs",
@@ -1559,7 +1573,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 85,
+              "DocumentIndex": 87,
               "Title": "RequestMeal.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\RequestMeal.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\RequestMeal.cs",
@@ -1571,7 +1585,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 86,
+              "DocumentIndex": 88,
               "Title": "MealTypeDistribution.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealTypeDistribution.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\MealTypeDistribution.cs",
@@ -1583,19 +1597,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 87,
-              "Title": "RequestMealConsumption.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAABBwB0AAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T11:05:02.933Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 88,
+              "DocumentIndex": 89,
               "Title": "MealCostDistribution.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealCostDistribution.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\MealCostDistribution.cs",
@@ -1607,7 +1609,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 89,
+              "DocumentIndex": 90,
               "Title": "20251101165339_addrequestconsumption.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Migrations\\20251101165339_addrequestconsumption.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Migrations\\20251101165339_addrequestconsumption.cs",
@@ -1619,7 +1621,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 90,
+              "DocumentIndex": 91,
               "Title": "20251021095206_Initial.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Infrastructure\\Migrations\\20251021095206_Initial.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Infrastructure\\Migrations\\20251021095206_Initial.cs",
@@ -1631,7 +1633,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 91,
+              "DocumentIndex": 92,
               "Title": "DashBoardMealType.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\DashBoardMealType.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\DashBoardMealType.cs",
@@ -1643,7 +1645,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 92,
+              "DocumentIndex": 93,
               "Title": "MealCostCreationDetails.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\MealCostCreationDetails.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\MealCostCreationDetails.cs",
@@ -1655,7 +1657,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 93,
+              "DocumentIndex": 94,
               "Title": "MealDashboardDto.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\Reports\\MealDashboardDto.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\Reports\\MealDashboardDto.cs",
@@ -1667,7 +1669,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 94,
+              "DocumentIndex": 95,
               "Title": "MealRequestDetails.cs",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Models\\MealRequestDetails.cs",
               "RelativeDocumentMoniker": "src\\MealToken.Domain\\Models\\MealRequestDetails.cs",
@@ -1676,18 +1678,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-01T15:06:19.209Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 95,
-              "Title": "MealCost.cs",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealCost.cs",
-              "RelativeDocumentMoniker": "src\\MealToken.Domain\\Entities\\MealCost.cs",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.Domain\\Entities\\MealCost.cs",
-              "RelativeToolTip": "src\\MealToken.Domain\\Entities\\MealCost.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAA3AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T20:46:33.534Z"
             },
             {
               "$type": "Document",

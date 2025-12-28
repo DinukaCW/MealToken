@@ -180,7 +180,7 @@ namespace MealToken.API.Controllers
         }
 
 		[HttpGet("MealConsumptionSummary")]
-		[Authorize(Roles = "Admin,DepartmentHead")]
+		//[Authorize(Roles = "Admin,DepartmentHead")]
 		[ServiceFilter(typeof(UserHistoryActionFilter))]
 		public async Task<IActionResult> MealConsumptionSummaryReport([FromQuery] string startDate, [FromQuery] string endDate,
 			[FromQuery] string? startTime = null,
