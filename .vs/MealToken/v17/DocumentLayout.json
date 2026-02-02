@@ -514,21 +514,7 @@
               "ViewState": "AgIAAJIAAAAAAAAAAAAAAKAAAABMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-21T05:19:12.497Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "MealToken.API.http",
-              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.http",
-              "RelativeDocumentMoniker": "src\\MealToken.API\\MealToken.API.http",
-              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.http",
-              "RelativeToolTip": "src\\MealToken.API\\MealToken.API.http",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
-              "WhenOpened": "2025-12-18T11:02:38.251Z",
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -540,13 +526,25 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MealToken.API.http",
+              "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.http",
+              "RelativeDocumentMoniker": "src\\MealToken.API\\MealToken.API.http",
+              "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\MealToken.API.http",
+              "RelativeToolTip": "src\\MealToken.API\\MealToken.API.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2025-12-18T11:02:38.251Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\appsettings.json",
               "RelativeDocumentMoniker": "src\\MealToken.API\\appsettings.json",
               "ToolTip": "C:\\Dinuka\\Projects\\MealToken\\src\\MealToken.API\\appsettings.json",
               "RelativeToolTip": "src\\MealToken.API\\appsettings.json",
-              "ViewState": "AgIAACcAAAAAAAAAAAAAADgAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAAC4AAACdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-10-21T05:14:18.256Z",
               "EditorCaption": ""
@@ -561,8 +559,7 @@
               "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\AdminRepository.cs",
               "ViewState": "AgIAALgBAAAAAAAAAAAUwAsCAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T07:31:10.531Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T07:31:10.531Z"
             },
             {
               "$type": "Document",
@@ -574,8 +571,7 @@
               "RelativeToolTip": "src\\MealToken.Domain\\Entities\\MealConsumption.cs",
               "ViewState": "AgIAABIAAAAAAAAAAAAAACkAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-21T11:04:30.197Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-21T11:04:30.197Z"
             },
             {
               "$type": "Document",
@@ -587,8 +583,7 @@
               "RelativeToolTip": "src\\MealToken.Domain\\Entities\\MealCost.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T20:46:33.534Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-26T20:46:33.534Z"
             },
             {
               "$type": "Document",
@@ -600,8 +595,7 @@
               "RelativeToolTip": "src\\MealToken.Domain\\Entities\\ManualTokenPrinted.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-10T19:18:23.552Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-10T19:18:23.552Z"
             },
             {
               "$type": "Document",
@@ -613,8 +607,7 @@
               "RelativeToolTip": "src\\MealToken.API\\MealToken.API.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-11-10T04:39:06.702Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-10T04:39:06.702Z"
             },
             {
               "$type": "Document",
@@ -626,8 +619,7 @@
               "RelativeToolTip": "src\\MealToken.Domain\\Entities\\RequestMealConsumption.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAB0AAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-30T11:05:02.933Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-30T11:05:02.933Z"
             },
             {
               "$type": "Document",
@@ -639,8 +631,7 @@
               "RelativeToolTip": "src\\MealToken.Infrastructure\\Repositories\\ReportRepository.cs",
               "ViewState": "AgIAAKUAAAAAAAAAAAAmwLcAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-26T18:42:55.333Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-26T18:42:55.333Z"
             },
             {
               "$type": "Document",
